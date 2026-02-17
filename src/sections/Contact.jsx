@@ -2,9 +2,9 @@ import data from '../data/contact.json';
 
 export function Contact() {
     return (
-        <section id="contact" style={{ padding: '120px 40px 80px', maxWidth: '1400px', margin: '0 auto' }}>
+        <section id="contact" className="responsive-section" style={{ paddingBottom: '80px' }}>
             {/* Section Header */}
-            <div style={{ marginBottom: '80px' }}>
+            <div className="section-header">
                 <span className="section-number">{data.sectionNumber}</span>
                 <h2 className="section-title">
                     {data.title.map((line, i) => (
@@ -15,13 +15,8 @@ export function Contact() {
             </div>
 
             {/* Contact Content — Wrapped in Glass */}
-            <div className="brutal-card" style={{ padding: '60px' }}>
-                <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1.2fr 1fr',
-                    gap: '80px',
-                    alignItems: 'start'
-                }}>
+            <div className="brutal-card contact-card-main" style={{ padding: 'clamp(24px, 5vw, 60px)' }}>
+                <div className="contact-grid">
                     {/* Left — email + CTA */}
                     <div>
                         <span className="mono" style={{
@@ -36,6 +31,7 @@ export function Contact() {
                         </span>
                         <a
                             href={`mailto:${data.email}`}
+                            className="contact-email-link"
                             style={{
                                 fontFamily: 'var(--font-sans)',
                                 fontSize: 'clamp(1.5rem, 3.5vw, 3rem)',
@@ -77,27 +73,29 @@ export function Contact() {
                             {data.socialLabel}
                         </span>
 
-                        {data.social.map((link, i) => (
-                            <a
-                                key={i}
-                                href={link.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mono brutal-tag"
-                                style={{
-                                    fontSize: '0.85rem',
-                                    padding: '12px 20px',
-                                    textDecoration: 'none',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '12px',
-                                    width: 'fit-content'
-                                }}
-                            >
-                                <span style={{ color: 'var(--accent)', fontSize: '1rem' }}>→</span>
-                                {link.path}
-                            </a>
-                        ))}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            {data.social.map((link, i) => (
+                                <a
+                                    key={i}
+                                    href={link.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="mono brutal-tag"
+                                    style={{
+                                        fontSize: '0.85rem',
+                                        padding: '12px 20px',
+                                        textDecoration: 'none',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '12px',
+                                        width: 'fit-content'
+                                    }}
+                                >
+                                    <span style={{ color: 'var(--accent)', fontSize: '1rem' }}>→</span>
+                                    {link.path}
+                                </a>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

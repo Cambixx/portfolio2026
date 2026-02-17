@@ -11,10 +11,23 @@ import './App.css';
 import Antigravity from './components/Antigravity';
 import CircularText from './components/CircularText';
 import TextPressure from './components/TextPressure';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+function useIsMobile() {
+    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+    useEffect(() => {
+        const handleResize = () => setIsMobile(window.innerWidth < 768);
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
+
+    return isMobile;
+}
 
 function App() {
-    const [bgType, setBgType] = useState('antigravity'); // 'dotgrid' or 'antigravity'
+    const isMobile = useIsMobile();
+    const [bgType, setBgType] = useState('antigravity');
 
     return (
         <main style={{ minHeight: '100vh', position: 'relative', background: 'var(--bg)', overflowX: 'hidden' }}>
@@ -34,7 +47,7 @@ function App() {
                     />
                 ) : (
                     <Antigravity
-                        count={300}
+                        count={isMobile ? 100 : 300}
                         magnetRadius={6}
                         ringRadius={7}
                         waveSpeed={0.4}
@@ -59,32 +72,34 @@ function App() {
                 top: 0,
                 left: 0,
                 width: '100%',
-                padding: '24px 40px',
+                padding: isMobile ? '16px 20px' : '24px 40px',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'center',
+                alignItems: isMobile ? 'flex-start' : 'center',
                 zIndex: 100,
                 pointerEvents: 'none',
                 background: 'linear-gradient(to bottom, rgba(5,5,5,0.9) 0%, transparent 100%)'
             }}>
                 <div style={{
                     pointerEvents: 'auto',
-                    padding: '0 10px',
-                    marginTop: '20px'
+                    padding: isMobile ? '0' : '0 10px',
+                    marginTop: isMobile ? '0' : '20px'
                 }}>
                     <CircularText
                         text="CARLOS*RÁBAGO*"
                         spinDuration={15}
                         onHover="speedUp"
-                        radius={28}
+                        radius={isMobile ? 18 : 28}
                     />
                 </div>
                 <div style={{
                     display: 'flex',
-                    gap: '8px',
+                    flexDirection: 'row',
+                    gap: isMobile ? '4px' : '8px',
+                    alignItems: 'center',
                     pointerEvents: 'auto',
                     border: '1px solid var(--border)',
-                    padding: '8px 12px',
+                    padding: isMobile ? '4px 8px' : '8px 12px',
                     background: 'rgba(255, 255, 255, 0.04)',
                     backdropFilter: 'blur(20px)',
                     WebkitBackdropFilter: 'blur(20px)'
@@ -97,17 +112,17 @@ function App() {
                                 textDecoration: 'none',
                                 color: 'var(--muted)',
                                 fontFamily: 'var(--font-mono)',
-                                fontSize: '0.75rem',
+                                fontSize: isMobile ? '0.55rem' : '0.75rem',
                                 fontWeight: 400,
-                                padding: '6px 14px',
+                                padding: isMobile ? '4px 6px' : '6px 14px',
                                 transition: 'color 0.2s',
-                                letterSpacing: '0.02em'
+                                letterSpacing: '0.02em',
                             }}
                             onMouseEnter={e => e.target.style.color = 'white'}
                             onMouseLeave={e => e.target.style.color = 'var(--muted)'}
                         >
-                            <span style={{ color: 'var(--accent)', marginRight: '6px' }}>{item.num}</span>
-                            {item.label.toUpperCase()}
+                            {!isMobile && <span style={{ color: 'var(--accent)', marginRight: '6px' }}>{item.num}</span>}
+                            {isMobile ? item.num : item.label.toUpperCase()}
                         </a>
                     ))}
                 </div>
@@ -146,42 +161,42 @@ function App() {
                         zIndex: 2,
                         textAlign: 'left',
                         pointerEvents: 'none',
-                        marginTop: '-60px',
-                        padding: '0 80px'
+                        marginTop: isMobile ? '120px' : '-60px',
+                        padding: isMobile ? '0 24px' : '0 80px'
                     }}>
                         <span className="mono" style={{
                             display: 'block',
-                            fontSize: '0.8rem',
+                            fontSize: isMobile ? '0.7rem' : '0.8rem',
                             color: 'var(--muted)',
                             letterSpacing: '0.15em',
-                            marginBottom: '40px'
+                            marginBottom: isMobile ? '24px' : '40px'
                         }}>
                             {hero.subtitle}
                         </span>
 
-                        <div style={{ marginBottom: '40px' }}>
-                            <div style={{ position: 'relative', height: '140px', width: 'fit-content', marginBottom: '10px' }}>
+                        <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
+                            <div style={{ position: 'relative', height: isMobile ? '60px' : '140px', width: 'fit-content', marginBottom: isMobile ? '0' : '10px' }}>
                                 <TextPressure
                                     text="FRONTEND"
                                     flex={false}
                                     textColor="#ffffff"
-                                    minFontSize={120}
+                                    minFontSize={isMobile ? 50 : 120}
                                 />
                             </div>
-                            <div style={{ position: 'relative', height: '140px', width: 'fit-content' }}>
+                            <div style={{ position: 'relative', height: isMobile ? '60px' : '140px', width: 'fit-content' }}>
                                 <TextPressure
                                     text="DEVELOPER"
                                     flex={false}
                                     textColor="var(--accent)"
-                                    minFontSize={120}
+                                    minFontSize={isMobile ? 50 : 120}
                                 />
                             </div>
                         </div>
 
                         <p className="mono" style={{
-                            fontSize: '0.9rem',
+                            fontSize: isMobile ? '0.8rem' : '0.9rem',
                             color: 'var(--muted)',
-                            maxWidth: '500px',
+                            maxWidth: isMobile ? '100%' : '500px',
                             lineHeight: '1.7',
                             whiteSpace: 'pre-line',
                             textAlign: 'left'
@@ -190,7 +205,7 @@ function App() {
                         </p>
 
                         <div className="mono" style={{
-                            marginTop: '60px',
+                            marginTop: isMobile ? '40px' : '60px',
                             fontSize: '0.7rem',
                             color: 'rgba(255,255,255,0.15)',
                             letterSpacing: '0.1em'
@@ -209,33 +224,36 @@ function App() {
             {/* Status Bar */}
             <div style={{
                 position: 'fixed',
-                bottom: '24px',
-                left: '24px',
+                bottom: isMobile ? '16px' : '24px',
+                left: isMobile ? '16px' : '24px',
+                right: isMobile ? '16px' : 'auto',
                 padding: '8px 16px',
                 display: 'flex',
                 alignItems: 'center',
+                justifyContent: 'space-between',
                 gap: '10px',
                 zIndex: 20,
                 border: '1px solid var(--border)',
-                background: 'rgba(255, 255, 255, 0.04)',
+                background: 'rgba(5, 5, 5, 0.8)',
                 backdropFilter: 'blur(20px)',
                 WebkitBackdropFilter: 'blur(20px)'
             }}>
-                <div style={{
-                    width: 6,
-                    height: 6,
-                    background: site.statusBar.color,
-                    boxShadow: `0 0 8px ${site.statusBar.color}`
-                }} />
-                <span className="mono" style={{
-                    fontSize: '0.65rem',
-                    fontWeight: 400,
-                    letterSpacing: '0.08em',
-                    color: 'rgba(255,255,255,0.6)',
-                    marginRight: '12px'
-                }}>
-                    {site.statusBar.text}
-                </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                        width: 6,
+                        height: 6,
+                        background: site.statusBar.color,
+                        boxShadow: `0 0 8px ${site.statusBar.color}`
+                    }} />
+                    <span className="mono" style={{
+                        fontSize: '0.6rem',
+                        fontWeight: 400,
+                        letterSpacing: '0.08em',
+                        color: 'rgba(255,255,255,0.6)',
+                    }}>
+                        {site.statusBar.text}
+                    </span>
+                </div>
 
                 <button
                     onClick={() => setBgType(prev => prev === 'dotgrid' ? 'antigravity' : 'dotgrid')}
@@ -244,7 +262,7 @@ function App() {
                         background: 'rgba(255,255,255,0.05)',
                         border: '1px solid rgba(255,255,255,0.1)',
                         color: 'white',
-                        fontSize: '0.6rem',
+                        fontSize: '0.55rem',
                         padding: '4px 8px',
                         cursor: 'pointer',
                         letterSpacing: '0.1em',
@@ -253,7 +271,7 @@ function App() {
                     onMouseEnter={e => e.target.style.background = 'var(--accent)'}
                     onMouseLeave={e => e.target.style.background = 'rgba(255,255,255,0.05)'}
                 >
-                    SWITCH BG: {bgType === 'dotgrid' ? 'ANTIGRAVITY' : 'DOTGRID'}
+                    {isMobile ? 'BG' : `SWITCH BG: ${bgType === 'dotgrid' ? 'ANTIGRAVITY' : 'DOTGRID'}`}
                 </button>
             </div>
         </main>
