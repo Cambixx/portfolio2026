@@ -1,0 +1,47 @@
+{
+    "sectionNumber": "002/",
+    "title": [
+        "Selected",
+        "Works"
+    ],
+    "description": "> A curation of digital products and immersive experiences built for the modern web.",
+    "showreel": {
+        "label": "SHOWREEL 2026",
+        "techLine": "Remotion · React · WebGL"
+    },
+    "items": [
+        {
+            "title": "Neo-Bank Dashboard",
+            "description": "A high-performance financial dashboard utilizing glassmorphic aesthetics and real-time 3D data visualizations.",
+            "tech": [
+                "React",
+                "Three.js",
+                "D3.js"
+            ],
+            "year": "2025",
+            "url": ""
+        },
+        {
+            "title": "Zenith Code Editor",
+            "description": "Next-gen browser-based IDE with collaborative features and AI-powered code completion.",
+            "tech": [
+                "Next.js",
+                "WebAssembly",
+                "Yjs"
+            ],
+            "year": "2024",
+            "url": ""
+        },
+        {
+            "title": "Nebula OS",
+            "description": "An experimental web OS exploring spatial computing interfaces in the browser.",
+            "tech": [
+                "Vue 3",
+                "WebGL",
+                "Rust"
+            ],
+            "year": "2024",
+            "url": ""
+        }
+    ]
+}

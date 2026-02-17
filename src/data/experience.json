@@ -1,0 +1,33 @@
+{
+    "sectionNumber": "003/",
+    "title": [
+        "Professional",
+        "Experience"
+    ],
+    "items": [
+        {
+            "line": "001",
+            "title": "Lead Frontend Developer",
+            "company": "Stitch Tech",
+            "period": "2024 — Present",
+            "description": "Leading the development of high-performance 3D web applications and immersive interfaces. Architecting component systems and managing cross-functional teams.",
+            "isCurrent": true
+        },
+        {
+            "line": "002",
+            "title": "Senior UI Engineer",
+            "company": "Nebula Labs",
+            "period": "2022 — 2024",
+            "description": "Specialized in micro-animations and motion design systems using Framer Motion and GSAP. Built design systems serving 50+ products.",
+            "isCurrent": false
+        },
+        {
+            "line": "003",
+            "title": "Creative Developer",
+            "company": "Porto Studio",
+            "period": "2020 — 2022",
+            "description": "Developed interactive web experiences for brands including immersive product configurators and data-driven storytelling platforms.",
+            "isCurrent": false
+        }
+    ]
+}

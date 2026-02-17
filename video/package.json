@@ -1,0 +1,25 @@
+{
+  "name": "portfolio-video",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "scripts": {
+    "start": "remotion preview src/index.ts",
+    "render": "remotion render src/index.ts Walkthrough out.mp4",
+    "build": "remotion bundle src/index.ts out/bundle.js"
+  },
+  "dependencies": {
+    "remotion": "^4.0.0",
+    "@remotion/transitions": "^4.0.0",
+    "@remotion/animated-emoji": "^4.0.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "@remotion/cli": "^4.0.0",
+    "@remotion/renderer": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "typescript": "^5.0.0"
+  }
+}

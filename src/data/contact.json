@@ -1,0 +1,28 @@
+{
+    "sectionNumber": "005/",
+    "title": [
+        "Get In",
+        "Touch"
+    ],
+    "availability": "// AVAILABLE FOR FREELANCE & CONTRACT",
+    "email": "carlos@rabago.dev",
+    "cta": "[ START A PROJECT ]",
+    "socialLabel": "// SOCIAL",
+    "social": [
+        {
+            "label": "GitHub",
+            "url": "https://github.com/carlosrabago",
+            "path": "github.com/carlosrabago"
+        },
+        {
+            "label": "LinkedIn",
+            "url": "https://linkedin.com/in/carlosrabago",
+            "path": "linkedin.com/in/carlosrabago"
+        },
+        {
+            "label": "Twitter / X",
+            "url": "https://x.com/carlosrabago",
+            "path": "x.com/carlosrabago"
+        }
+    ]
+}

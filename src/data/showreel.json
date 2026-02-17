@@ -1,0 +1,26 @@
+[
+    {
+        "id": "neobank",
+        "imageSrc": "/assets/screens/hero.png",
+        "title": "NEO-BANK DASHBOARD",
+        "description": "High-performance financial visualization engine.",
+        "duration": 180,
+        "url": "https://neobank-demo.com"
+    },
+    {
+        "id": "zenith",
+        "imageSrc": "/assets/screens/code.png",
+        "title": "ZENITH CODE EDITOR",
+        "description": "The next generation of collaborative cloud coding.",
+        "duration": 180,
+        "url": "https://zenith-editor.com"
+    },
+    {
+        "id": "nebula",
+        "imageSrc": "/assets/screens/case-study.png",
+        "title": "NEBULA SPATIAL OS",
+        "description": "Exploring the boundaries of spatial computing in the web.",
+        "duration": 180,
+        "url": "https://nebula-os.io"
+    }
+]

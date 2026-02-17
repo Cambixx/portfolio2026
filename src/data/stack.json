@@ -1,0 +1,81 @@
+{
+    "sectionNumber": "004/",
+    "title": [
+        "Technical",
+        "Arsenal"
+    ],
+    "description": "> Always evolving with the latest ecosystem standards to deliver robust solutions.",
+    "categories": [
+        {
+            "label": "// CORE",
+            "skills": [
+                {
+                    "name": "React 19",
+                    "highlighted": true
+                },
+                {
+                    "name": "Next.js 15",
+                    "highlighted": false
+                },
+                {
+                    "name": "TypeScript",
+                    "highlighted": false
+                },
+                {
+                    "name": "Tailwind CSS",
+                    "highlighted": false
+                }
+            ]
+        },
+        {
+            "label": "// CREATIVE",
+            "skills": [
+                {
+                    "name": "Three.js",
+                    "highlighted": true
+                },
+                {
+                    "name": "Spline",
+                    "highlighted": false
+                },
+                {
+                    "name": "GSAP",
+                    "highlighted": true
+                },
+                {
+                    "name": "Remotion",
+                    "highlighted": false
+                },
+                {
+                    "name": "Framer Motion",
+                    "highlighted": false
+                }
+            ]
+        },
+        {
+            "label": "// INFRASTRUCTURE",
+            "skills": [
+                {
+                    "name": "Node.js",
+                    "highlighted": false
+                },
+                {
+                    "name": "Supabase",
+                    "highlighted": false
+                },
+                {
+                    "name": "Docker",
+                    "highlighted": false
+                },
+                {
+                    "name": "AWS",
+                    "highlighted": false
+                },
+                {
+                    "name": "Vercel",
+                    "highlighted": false
+                }
+            ]
+        }
+    ]
+}
