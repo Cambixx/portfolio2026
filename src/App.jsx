@@ -30,9 +30,15 @@ function useIsMobile() {
 function App() {
     const isMobile = useIsMobile();
     const [bgType, setBgType] = useState('antigravity');
-    const [introDone, setIntroDone] = useState(false);
-    const [introStartsAtEnd, setIntroStartsAtEnd] = useState(false);
+    const [introDone, setIntroDone] = useState(() => window.innerWidth < 768);
+    const [lanyardRun, setLanyardRun] = useState(0);
     const lenisRef = useRef(null);
+
+    useEffect(() => {
+        if (isMobile && !introDone) {
+            setIntroDone(true);
+        }
+    }, [isMobile, introDone]);
 
     useEffect(() => {
         const lenis = new Lenis({
@@ -76,54 +82,6 @@ function App() {
         window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
         lenis.scrollTo(0, { immediate: true });
         lenis.stop();
-    }, [introDone]);
-
-    useEffect(() => {
-        if (!introDone) {
-            return;
-        }
-
-        let touchStartY = 0;
-
-        const reopenIntro = () => {
-            setIntroStartsAtEnd(true);
-            setIntroDone(false);
-        };
-
-        const onWheel = (event) => {
-            if (window.scrollY > 0 || event.deltaY >= 0) {
-                return;
-            }
-
-            event.preventDefault();
-            reopenIntro();
-        };
-
-        const onTouchStart = (event) => {
-            touchStartY = event.touches[0].clientY;
-        };
-
-        const onTouchMove = (event) => {
-            const touchY = event.touches[0].clientY;
-            const pullDownDelta = touchY - touchStartY;
-
-            if (window.scrollY > 0 || pullDownDelta <= 6) {
-                return;
-            }
-
-            event.preventDefault();
-            reopenIntro();
-        };
-
-        window.addEventListener('wheel', onWheel, { passive: false });
-        window.addEventListener('touchstart', onTouchStart, { passive: true });
-        window.addEventListener('touchmove', onTouchMove, { passive: false });
-
-        return () => {
-            window.removeEventListener('wheel', onWheel);
-            window.removeEventListener('touchstart', onTouchStart);
-            window.removeEventListener('touchmove', onTouchMove);
-        };
     }, [introDone]);
 
     return (
@@ -248,7 +206,13 @@ function App() {
                         pointerEvents: 'none'
                     }}>
                         <div style={{ pointerEvents: 'auto', width: '100%', height: '100%' }}>
-                            <Lanyard position={[0, 0, 24]} gravity={[0, -40, 0]} />
+                            {introDone && (
+                                <Lanyard
+                                    key={lanyardRun}
+                                    position={[0, 0, 24]}
+                                    gravity={[0, -40, 0]}
+                                />
+                            )}
                         </div>
                     </div>
 
@@ -374,9 +338,8 @@ function App() {
 
             {!introDone && (
                 <IntroSequence
-                    startAtEnd={introStartsAtEnd}
                     onComplete={() => {
-                        setIntroStartsAtEnd(false);
+                        setLanyardRun((prev) => prev + 1);
                         setIntroDone(true);
                     }}
                 />

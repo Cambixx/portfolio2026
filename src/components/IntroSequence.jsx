@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useMotionValue, useMotionValueEvent, useSpring } from 'motion/react';
 import WindowFrame from './WindowFrame';
 
@@ -45,14 +45,13 @@ function sortFrames(a, b) {
     return fileA.localeCompare(fileB, undefined, { numeric: true, sensitivity: 'base' });
 }
 
-export default function IntroSequence({ onComplete, startAtEnd = false }) {
-    const initialLastFrame = Math.max(0, Object.keys(FRAME_GLOB).length - 1);
-    const [frameIndex, setFrameIndex] = useState(() => (startAtEnd ? initialLastFrame : 0));
-    const [fadeOpacity, setFadeOpacity] = useState(() => (startAtEnd ? 1 : 0));
+export default function IntroSequence({ onComplete }) {
+    const [frameIndex, setFrameIndex] = useState(0);
+    const [fadeOpacity, setFadeOpacity] = useState(0);
     const completedRef = useRef(false);
     const completeTimeoutRef = useRef(null);
-    const allowCompleteRef = useRef(true);
-    const progress = useMotionValue(startAtEnd ? 1 : 0);
+    const touchStartYRef = useRef(0);
+    const progress = useMotionValue(0);
     const smoothProgress = useSpring(progress, {
         stiffness: 120,
         damping: 28,
@@ -64,60 +63,45 @@ export default function IntroSequence({ onComplete, startAtEnd = false }) {
         []
     );
 
-    useLayoutEffect(() => {
-        const lastFrame = Math.max(0, frames.length - 1);
-        const initialProgress = startAtEnd ? 1 : 0;
-
-        progress.set(initialProgress);
-        setFrameIndex(startAtEnd ? lastFrame : 0);
-        setFadeOpacity(startAtEnd ? 1 : 0);
-        completedRef.current = false;
-        allowCompleteRef.current = !startAtEnd;
-
-        if (completeTimeoutRef.current) {
-            window.clearTimeout(completeTimeoutRef.current);
-            completeTimeoutRef.current = null;
-        }
-    }, [frames.length, progress, startAtEnd]);
-
     useEffect(() => {
-        const clamp = (value) => Math.max(0, Math.min(1, value));
-        const wheelSensitivity = 0.0006;
-        const touchSensitivity = 0.003;
-        let touchStartY = 0;
-
-        const onWheel = (event) => {
-            event.preventDefault();
-            progress.set(clamp(progress.get() + event.deltaY * wheelSensitivity));
-        };
-
-        const onTouchStart = (event) => {
-            touchStartY = event.touches[0].clientY;
-        };
-
-        const onTouchMove = (event) => {
-            event.preventDefault();
-            const touchY = event.touches[0].clientY;
-            const delta = touchStartY - touchY;
-            touchStartY = touchY;
-            progress.set(clamp(progress.get() + delta * touchSensitivity));
-        };
-
-        window.addEventListener('wheel', onWheel, { passive: false });
-        window.addEventListener('touchstart', onTouchStart, { passive: true });
-        window.addEventListener('touchmove', onTouchMove, { passive: false });
-
         return () => {
             if (completeTimeoutRef.current) {
                 window.clearTimeout(completeTimeoutRef.current);
                 completeTimeoutRef.current = null;
             }
-
-            window.removeEventListener('wheel', onWheel);
-            window.removeEventListener('touchstart', onTouchStart);
-            window.removeEventListener('touchmove', onTouchMove);
         };
-    }, [progress]);
+    }, []);
+
+    const clamp = (value) => Math.max(0, Math.min(1, value));
+    const wheelSensitivity = 0.0006;
+    const touchSensitivity = 0.003;
+
+    const applyProgressDelta = (delta) => {
+        progress.set(clamp(progress.get() + delta));
+    };
+
+    const safePreventDefault = (event) => {
+        if (event.cancelable) {
+            event.preventDefault();
+        }
+    };
+
+    const handleWheel = (event) => {
+        safePreventDefault(event);
+        applyProgressDelta(event.deltaY * wheelSensitivity);
+    };
+
+    const handleTouchStart = (event) => {
+        touchStartYRef.current = event.touches[0].clientY;
+    };
+
+    const handleTouchMove = (event) => {
+        safePreventDefault(event);
+        const touchY = event.touches[0].clientY;
+        const delta = touchStartYRef.current - touchY;
+        touchStartYRef.current = touchY;
+        applyProgressDelta(delta * touchSensitivity);
+    };
 
     useMotionValueEvent(smoothProgress, 'change', (latest) => {
         if (!frames.length) {
@@ -142,7 +126,6 @@ export default function IntroSequence({ onComplete, startAtEnd = false }) {
 
         if (nextFadeOpacity < 1) {
             setFadeOpacity(nextFadeOpacity);
-            allowCompleteRef.current = true;
 
             if (completeTimeoutRef.current) {
                 window.clearTimeout(completeTimeoutRef.current);
@@ -155,10 +138,6 @@ export default function IntroSequence({ onComplete, startAtEnd = false }) {
 
         setFadeOpacity(1);
 
-        if (!allowCompleteRef.current) {
-            return;
-        }
-
         if (!completedRef.current && !completeTimeoutRef.current) {
             completeTimeoutRef.current = window.setTimeout(() => {
                 completedRef.current = true;
@@ -169,7 +148,13 @@ export default function IntroSequence({ onComplete, startAtEnd = false }) {
     });
 
     return (
-        <div className="intro-sequence-overlay" aria-label="Portfolio introduction sequence">
+        <div
+            className="intro-sequence-overlay"
+            aria-label="Portfolio introduction sequence"
+            onWheel={handleWheel}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+        >
             <WindowFrame>
                 {frames.length > 0 && (
                     <img
