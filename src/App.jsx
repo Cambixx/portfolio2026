@@ -11,7 +11,9 @@ import './App.css';
 import Antigravity from './components/Antigravity';
 import CircularText from './components/CircularText';
 import TextPressure from './components/TextPressure';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import Lenis from 'lenis';
+import IntroSequence from './components/IntroSequence';
 
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -28,6 +30,101 @@ function useIsMobile() {
 function App() {
     const isMobile = useIsMobile();
     const [bgType, setBgType] = useState('antigravity');
+    const [introDone, setIntroDone] = useState(false);
+    const [introStartsAtEnd, setIntroStartsAtEnd] = useState(false);
+    const lenisRef = useRef(null);
+
+    useEffect(() => {
+        const lenis = new Lenis({
+            autoRaf: false,
+            smoothWheel: true,
+            wheelMultiplier: 1,
+            touchMultiplier: 1.1,
+            lerp: 0.1,
+        });
+
+        lenisRef.current = lenis;
+
+        let rafId = 0;
+
+        const raf = (time) => {
+            lenis.raf(time);
+            rafId = requestAnimationFrame(raf);
+        };
+
+        rafId = requestAnimationFrame(raf);
+
+        return () => {
+            cancelAnimationFrame(rafId);
+            lenis.destroy();
+            lenisRef.current = null;
+        };
+    }, []);
+
+    useEffect(() => {
+        const lenis = lenisRef.current;
+
+        if (!lenis) {
+            return;
+        }
+
+        if (introDone) {
+            lenis.start();
+            return;
+        }
+
+        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+        lenis.scrollTo(0, { immediate: true });
+        lenis.stop();
+    }, [introDone]);
+
+    useEffect(() => {
+        if (!introDone) {
+            return;
+        }
+
+        let touchStartY = 0;
+
+        const reopenIntro = () => {
+            setIntroStartsAtEnd(true);
+            setIntroDone(false);
+        };
+
+        const onWheel = (event) => {
+            if (window.scrollY > 0 || event.deltaY >= 0) {
+                return;
+            }
+
+            event.preventDefault();
+            reopenIntro();
+        };
+
+        const onTouchStart = (event) => {
+            touchStartY = event.touches[0].clientY;
+        };
+
+        const onTouchMove = (event) => {
+            const touchY = event.touches[0].clientY;
+            const pullDownDelta = touchY - touchStartY;
+
+            if (window.scrollY > 0 || pullDownDelta <= 6) {
+                return;
+            }
+
+            event.preventDefault();
+            reopenIntro();
+        };
+
+        window.addEventListener('wheel', onWheel, { passive: false });
+        window.addEventListener('touchstart', onTouchStart, { passive: true });
+        window.addEventListener('touchmove', onTouchMove, { passive: false });
+
+        return () => {
+            window.removeEventListener('wheel', onWheel);
+            window.removeEventListener('touchstart', onTouchStart);
+            window.removeEventListener('touchmove', onTouchMove);
+        };
+    }, [introDone]);
 
     return (
         <main style={{ minHeight: '100vh', position: 'relative', background: 'var(--bg)', overflowX: 'hidden' }}>
@@ -274,6 +371,16 @@ function App() {
                     {isMobile ? 'BG' : `SWITCH BG: ${bgType === 'dotgrid' ? 'ANTIGRAVITY' : 'DOTGRID'}`}
                 </button>
             </div>
+
+            {!introDone && (
+                <IntroSequence
+                    startAtEnd={introStartsAtEnd}
+                    onComplete={() => {
+                        setIntroStartsAtEnd(false);
+                        setIntroDone(true);
+                    }}
+                />
+            )}
         </main>
     );
 }
