@@ -11,9 +11,8 @@ import './App.css';
 import Antigravity from './components/Antigravity';
 import CircularText from './components/CircularText';
 import TextPressure from './components/TextPressure';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import Lenis from 'lenis';
-import IntroSequence from './components/IntroSequence';
 
 function useIsMobile() {
     const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
@@ -30,15 +29,6 @@ function useIsMobile() {
 function App() {
     const isMobile = useIsMobile();
     const [bgType, setBgType] = useState('antigravity');
-    const [introDone, setIntroDone] = useState(() => window.innerWidth < 768);
-    const [lanyardRun, setLanyardRun] = useState(0);
-    const lenisRef = useRef(null);
-
-    useEffect(() => {
-        if (isMobile && !introDone) {
-            setIntroDone(true);
-        }
-    }, [isMobile, introDone]);
 
     useEffect(() => {
         const lenis = new Lenis({
@@ -48,8 +38,6 @@ function App() {
             touchMultiplier: 1.1,
             lerp: 0.1,
         });
-
-        lenisRef.current = lenis;
 
         let rafId = 0;
 
@@ -63,26 +51,8 @@ function App() {
         return () => {
             cancelAnimationFrame(rafId);
             lenis.destroy();
-            lenisRef.current = null;
         };
     }, []);
-
-    useEffect(() => {
-        const lenis = lenisRef.current;
-
-        if (!lenis) {
-            return;
-        }
-
-        if (introDone) {
-            lenis.start();
-            return;
-        }
-
-        window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-        lenis.scrollTo(0, { immediate: true });
-        lenis.stop();
-    }, [introDone]);
 
     return (
         <main style={{ minHeight: '100vh', position: 'relative', background: 'var(--bg)', overflowX: 'hidden' }}>
@@ -206,13 +176,10 @@ function App() {
                         pointerEvents: 'none'
                     }}>
                         <div style={{ pointerEvents: 'auto', width: '100%', height: '100%' }}>
-                            {introDone && (
-                                <Lanyard
-                                    key={lanyardRun}
-                                    position={[0, 0, 24]}
-                                    gravity={[0, -40, 0]}
-                                />
-                            )}
+                            <Lanyard
+                                position={[0, 0, 24]}
+                                gravity={[0, -40, 0]}
+                            />
                         </div>
                     </div>
 
@@ -336,14 +303,6 @@ function App() {
                 </button>
             </div>
 
-            {!introDone && (
-                <IntroSequence
-                    onComplete={() => {
-                        setLanyardRun((prev) => prev + 1);
-                        setIntroDone(true);
-                    }}
-                />
-            )}
         </main>
     );
 }
