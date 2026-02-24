@@ -1,11 +1,14 @@
 {
     "subtitle": "// Creative Developer Portfolio 2026",
     "title": [
-        "INTER",
-        "ACTIVE",
-        "REALITY"
+        "FRONTEND",
+        "DEVELOPER"
     ],
     "titleSeparator": "—",
     "description": "Crafting digital experiences where code\nmeets creative chaos.",
-    "coordinates": "X:000 Y:000 — v2.6"
+    "coordinates": "X:000 Y:000 — v2.6",
+    "lanyard": {
+        "cardImage": "/assets/carlos.PNG",
+        "lanyardImage": "/assets/logo.jpeg"
+    }
 }

@@ -14,7 +14,14 @@ import './Lanyard.css';
 
 extend({ MeshLineGeometry, MeshLineMaterial });
 
-export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], fov = 20, transparent = true }) {
+export default function Lanyard({
+    position = [0, 0, 30],
+    gravity = [0, -40, 0],
+    fov = 20,
+    transparent = true,
+    cardImage,
+    lanyardImage
+}) {
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
 
     useEffect(() => {
@@ -33,7 +40,7 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
             >
                 <ambientLight intensity={Math.PI} />
                 <Physics gravity={gravity} timeStep={isMobile ? 1 / 30 : 1 / 60}>
-                    <Band isMobile={isMobile} />
+                    <Band isMobile={isMobile} cardImage={cardImage} lanyardImage={lanyardImage} />
                 </Physics>
                 <Environment blur={0.75}>
                     <Lightformer
@@ -70,7 +77,7 @@ export default function Lanyard({ position = [0, 0, 30], gravity = [0, -40, 0], 
     );
 }
 
-function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
+function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyardImage }) {
     const band = useRef(),
         fixed = useRef(),
         j1 = useRef(),
@@ -85,7 +92,25 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
 
     // Use pre-loaded assets
     const { nodes, materials } = useGLTF(cardGLB);
-    const texture = useTexture(lanyardTexture);
+
+    // Default textures
+    const defaultLanyardTexture = useTexture(lanyardTexture);
+
+    // Optional override textures
+    const cardOverrideTexture = cardImage ? useTexture(cardImage) : null;
+    const lanyardOverrideTexture = lanyardImage ? useTexture(lanyardImage) : null;
+
+    // Fix rotation for override textures (upside down fix)
+    useEffect(() => {
+        if (cardOverrideTexture) {
+            cardOverrideTexture.center.set(0.5, 0.5);
+            cardOverrideTexture.rotation = Math.PI;
+        }
+    }, [cardOverrideTexture]);
+
+    // Final textures to use
+    const finalCardTexture = cardOverrideTexture || materials.base.map;
+    const finalLanyardTexture = lanyardOverrideTexture || defaultLanyardTexture;
 
     const [curve] = useState(
         () =>
@@ -153,7 +178,9 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
     });
 
     curve.curveType = 'chordal';
-    texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+    if (finalLanyardTexture) {
+        finalLanyardTexture.wrapS = finalLanyardTexture.wrapT = THREE.RepeatWrapping;
+    }
 
     return (
         <>
@@ -183,7 +210,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                     >
                         <mesh geometry={nodes.card.geometry}>
                             <meshPhysicalMaterial
-                                map={materials.base.map}
+                                map={finalCardTexture}
                                 map-anisotropy={16}
                                 clearcoat={isMobile ? 0 : 1}
                                 clearcoatRoughness={0.15}
@@ -203,7 +230,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false }) {
                     depthTest={false}
                     resolution={isMobile ? [1000, 2000] : [1000, 1000]}
                     useMap
-                    map={texture}
+                    map={finalLanyardTexture}
                     repeat={[-4, 1]}
                     lineWidth={1}
                 />

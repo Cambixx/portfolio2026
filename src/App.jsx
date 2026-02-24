@@ -179,6 +179,8 @@ function App() {
                             <Lanyard
                                 position={[0, 0, 24]}
                                 gravity={[0, -40, 0]}
+                                cardImage={hero.lanyard.cardImage}
+                                lanyardImage={hero.lanyard.lanyardImage}
                             />
                         </div>
                     </div>
@@ -203,22 +205,24 @@ function App() {
                         </span>
 
                         <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
-                            <div style={{ position: 'relative', height: isMobile ? '60px' : '140px', width: 'fit-content', marginBottom: isMobile ? '0' : '10px' }}>
-                                <TextPressure
-                                    text="FRONTEND"
-                                    flex={false}
-                                    textColor="#ffffff"
-                                    minFontSize={isMobile ? 50 : 120}
-                                />
-                            </div>
-                            <div style={{ position: 'relative', height: isMobile ? '60px' : '140px', width: 'fit-content' }}>
-                                <TextPressure
-                                    text="DEVELOPER"
-                                    flex={false}
-                                    textColor="var(--accent)"
-                                    minFontSize={isMobile ? 50 : 120}
-                                />
-                            </div>
+                            {hero.title.map((line, index) => (
+                                <div
+                                    key={index}
+                                    style={{
+                                        position: 'relative',
+                                        height: isMobile ? '60px' : '140px',
+                                        width: 'fit-content',
+                                        marginBottom: (index < hero.title.length - 1 && !isMobile) ? '10px' : '0'
+                                    }}
+                                >
+                                    <TextPressure
+                                        text={line}
+                                        flex={false}
+                                        textColor={index === 0 ? "#ffffff" : "var(--accent)"}
+                                        minFontSize={isMobile ? 50 : 120}
+                                    />
+                                </div>
+                            ))}
                         </div>
 
                         <p className="mono" style={{
