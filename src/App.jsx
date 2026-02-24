@@ -11,6 +11,7 @@ import './App.css';
 import Antigravity from './components/Antigravity';
 import CircularText from './components/CircularText';
 import TextPressure from './components/TextPressure';
+import ScrollIntro from './components/ScrollIntro';
 import { useState, useEffect } from 'react';
 import Lenis from 'lenis';
 
@@ -46,10 +47,26 @@ function App() {
             rafId = requestAnimationFrame(raf);
         };
 
+        const lockByIntro = () => {
+            lenis.stop();
+            lenis.scrollTo(0, { immediate: true, force: true });
+            window.scrollTo(0, 0);
+        };
+
+        const unlockByIntro = () => {
+            lenis.start();
+        };
+
+        window.addEventListener('intro-scroll-lock', lockByIntro);
+        window.addEventListener('intro-scroll-unlock', unlockByIntro);
+
         rafId = requestAnimationFrame(raf);
+        lockByIntro();
 
         return () => {
             cancelAnimationFrame(rafId);
+            window.removeEventListener('intro-scroll-lock', lockByIntro);
+            window.removeEventListener('intro-scroll-unlock', unlockByIntro);
             lenis.destroy();
         };
     }, []);
@@ -155,6 +172,8 @@ function App() {
 
             {/* All scrollable content */}
             <div style={{ position: 'relative', zIndex: 1 }}>
+                <ScrollIntro src="/assets/intro.webp" frameCount={192} />
+
                 {/* ══════ HERO ══════ */}
                 <div style={{
                     position: 'relative',

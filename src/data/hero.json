@@ -8,7 +8,7 @@
     "description": "Crafting digital experiences where code\nmeets creative chaos.",
     "coordinates": "X:000 Y:000 — v2.6",
     "lanyard": {
-        "cardImage": "/assets/carlos.PNG",
+        "cardImage": "/assets/carlos.png",
         "lanyardImage": "/assets/logo.jpeg"
     }
 }
