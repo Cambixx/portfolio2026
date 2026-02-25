@@ -1,0 +1,86 @@
+.svg-intro {
+    position: fixed;
+    inset: 0;
+    background: #050505;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    transform-origin: center;
+}
+
+.svg-intro::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom,
+            transparent 50%,
+            rgba(82, 39, 255, 0.05) 50%);
+    background-size: 100% 4px;
+    z-index: 20;
+    pointer-events: none;
+    animation: scanline 10s linear infinite;
+}
+
+@keyframes scanline {
+    0% {
+        background-position: 0 0;
+    }
+
+    100% {
+        background-position: 0 100%;
+    }
+}
+
+
+.svg-intro__content {
+    position: relative;
+    z-index: 10;
+    width: 90%;
+    max-width: 800px;
+    text-align: center;
+}
+
+.svg-intro__main {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+}
+
+.svg-intro__text {
+    font-family: var(--font-mono);
+    font-size: 48px;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    fill: white;
+    text-transform: uppercase;
+}
+
+.svg-intro__status {
+    margin-top: 40px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+}
+
+
+
+.blink {
+    animation: intro-blink 1s steps(2, start) infinite;
+    margin-right: 8px;
+}
+
+@keyframes intro-blink {
+    to {
+        visibility: hidden;
+    }
+}
+
+@media (max-width: 768px) {
+    .svg-intro__text {
+        font-size: 32px;
+        letter-spacing: 0.15em;
+    }
+}

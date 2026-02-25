@@ -11,8 +11,9 @@ import './App.css';
 import Antigravity from './components/Antigravity';
 import CircularText from './components/CircularText';
 import TextPressure from './components/TextPressure';
-import ScrollIntro from './components/ScrollIntro';
-import { useState, useEffect } from 'react';
+import SvgIntro from './components/SvgIntro';
+import { useState, useEffect, useRef } from 'react';
+import { AnimatePresence } from 'motion/react';
 import Lenis from 'lenis';
 
 function useIsMobile() {
@@ -30,6 +31,8 @@ function useIsMobile() {
 function App() {
     const isMobile = useIsMobile();
     const [bgType, setBgType] = useState('antigravity');
+    const [showIntro, setShowIntro] = useState(true);
+    const lenisRef = useRef(null);
 
     useEffect(() => {
         const lenis = new Lenis({
@@ -39,40 +42,37 @@ function App() {
             touchMultiplier: 1.1,
             lerp: 0.1,
         });
+        lenisRef.current = lenis;
 
         let rafId = 0;
-
         const raf = (time) => {
             lenis.raf(time);
             rafId = requestAnimationFrame(raf);
         };
-
-        const lockByIntro = () => {
-            lenis.stop();
-            lenis.scrollTo(0, { immediate: true, force: true });
-            window.scrollTo(0, 0);
-        };
-
-        const unlockByIntro = () => {
-            lenis.start();
-        };
-
-        window.addEventListener('intro-scroll-lock', lockByIntro);
-        window.addEventListener('intro-scroll-unlock', unlockByIntro);
-
         rafId = requestAnimationFrame(raf);
-        lockByIntro();
+
+        if (showIntro) {
+            lenis.stop();
+        } else {
+            lenis.start();
+        }
 
         return () => {
             cancelAnimationFrame(rafId);
-            window.removeEventListener('intro-scroll-lock', lockByIntro);
-            window.removeEventListener('intro-scroll-unlock', unlockByIntro);
             lenis.destroy();
         };
-    }, []);
+    }, [showIntro]);
+
+    const handleIntroComplete = () => {
+        setShowIntro(false);
+    };
 
     return (
         <main style={{ minHeight: '100vh', position: 'relative', background: 'var(--bg)', overflowX: 'hidden' }}>
+            <AnimatePresence>
+                {showIntro && <SvgIntro onComplete={handleIntroComplete} />}
+            </AnimatePresence>
+
             {/* Background Layer */}
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 0 }}>
                 {bgType === 'dotgrid' ? (
@@ -172,8 +172,6 @@ function App() {
 
             {/* All scrollable content */}
             <div style={{ position: 'relative', zIndex: 1 }}>
-                <ScrollIntro src="/assets/intro.webp" frameCount={192} />
-
                 {/* ══════ HERO ══════ */}
                 <div style={{
                     position: 'relative',
