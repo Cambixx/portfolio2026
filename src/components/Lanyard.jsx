@@ -119,6 +119,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
     const [dragged, drag] = useState(false);
     const [hovered, hover] = useState(false);
 
+    useEffect(() => {
+        if (isMobile) drag(false);
+    }, [isMobile]);
+
     useRopeJoint(fixed, j1, [[0, 0, 0], [0, 0, 0], 1]);
     useRopeJoint(j1, j2, [[0, 0, 0], [0, 0, 0], 1]);
     useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
@@ -128,14 +132,15 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
     ]);
 
     useEffect(() => {
+        if (isMobile) return;
         if (hovered) {
             document.body.style.cursor = dragged ? 'grabbing' : 'grab';
             return () => void (document.body.style.cursor = 'auto');
         }
-    }, [hovered, dragged]);
+    }, [hovered, dragged, isMobile]);
 
     useFrame((state, delta) => {
-        if (dragged) {
+        if (dragged && !isMobile) {
             vec.set(state.pointer.x, state.pointer.y, 0.5).unproject(state.camera);
             dir.copy(vec).sub(state.camera.position).normalize();
             vec.add(dir.multiplyScalar(state.camera.position.length()));
@@ -195,18 +200,29 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
                 <RigidBody position={[1.5, 0, 0]} ref={j3} {...segmentProps}>
                     <BallCollider args={[0.1]} />
                 </RigidBody>
-                <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged ? 'kinematicPosition' : 'dynamic'}>
+                <RigidBody position={[2, 0, 0]} ref={card} {...segmentProps} type={dragged && !isMobile ? 'kinematicPosition' : 'dynamic'}>
                     <CuboidCollider args={[0.8, 1.125, 0.01]} />
                     <group
                         scale={2.25}
                         position={[0, -1.2, -0.05]}
-                        onPointerOver={() => hover(true)}
-                        onPointerOut={() => hover(false)}
-                        onPointerUp={e => (e.target.releasePointerCapture(e.pointerId), drag(false))}
-                        onPointerDown={e => (
-                            e.target.setPointerCapture(e.pointerId),
-                            drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())))
-                        )}
+                        onPointerOver={isMobile ? undefined : () => hover(true)}
+                        onPointerOut={isMobile ? undefined : () => hover(false)}
+                        onPointerUp={
+                            isMobile
+                                ? undefined
+                                : e => {
+                                      e.target.releasePointerCapture(e.pointerId);
+                                      drag(false);
+                                  }
+                        }
+                        onPointerDown={
+                            isMobile
+                                ? undefined
+                                : e => {
+                                      e.target.setPointerCapture(e.pointerId);
+                                      drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
+                                  }
+                        }
                     >
                         <mesh geometry={nodes.card.geometry}>
                             <meshPhysicalMaterial
