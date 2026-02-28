@@ -79,29 +79,40 @@ function App() {
         };
 
         // Touch swipe logic
-        let touchStart = 0;
+        let touchStart = null;
+
         const handleTouchStart = (e) => {
             touchStart = e.touches[0].clientY;
         };
+
         const handleTouchMove = (e) => {
+            if (touchStart === null) return; // Prevent firing if we caught a move without a start (like mid-swipe from the intro)
+
             if (window.scrollY <= 0) {
                 const currentY = e.touches[0].clientY;
-                if (currentY > touchStart + 30) {
-                    // Swiped down (scrolled up) significantly
+                if (currentY > touchStart + 40) {
+                    // Swiped down significantly (scrolling up against the top boundary)
                     setIntroProgress(0.99);
                     setShowIntro(true);
+                    touchStart = null; // Reset so it doesn't fire repeatedly
                 }
             }
+        };
+
+        const handleTouchEnd = () => {
+            touchStart = null;
         };
 
         window.addEventListener('wheel', handleWheel, { passive: true });
         window.addEventListener('touchstart', handleTouchStart, { passive: true });
         window.addEventListener('touchmove', handleTouchMove, { passive: true });
+        window.addEventListener('touchend', handleTouchEnd, { passive: true });
 
         return () => {
             window.removeEventListener('wheel', handleWheel);
             window.removeEventListener('touchstart', handleTouchStart);
             window.removeEventListener('touchmove', handleTouchMove);
+            window.removeEventListener('touchend', handleTouchEnd);
         };
     }, [showIntro]);
 
