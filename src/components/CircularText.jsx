@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+// eslint-disable-next-line no-unused-vars
 import { motion, useAnimation, useMotionValue } from 'motion/react';
 
 import './CircularText.css';

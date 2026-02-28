@@ -1,9 +1,9 @@
-/* eslint-disable react/no-unknown-property */
 import { useEffect, useRef, useState } from 'react';
 import { Canvas, extend, useFrame } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
+import { useInView } from 'motion/react';
 
 // Import assets directly using Vite's path resolution
 import cardGLB from '../assets/lanyard/card.glb';
@@ -23,6 +23,8 @@ export default function Lanyard({
     lanyardImage
 }) {
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
+    const containerRef = useRef(null);
+    const inView = useInView(containerRef);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -31,8 +33,9 @@ export default function Lanyard({
     }, []);
 
     return (
-        <div className="lanyard-wrapper">
+        <div className="lanyard-wrapper" ref={containerRef}>
             <Canvas
+                frameloop={inView ? 'always' : 'never'}
                 camera={{ position: position, fov: fov }}
                 dpr={[1, isMobile ? 1.5 : 2]}
                 gl={{ alpha: transparent }}
@@ -96,17 +99,28 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
     // Default textures
     const defaultLanyardTexture = useTexture(lanyardTexture);
 
-    // Optional override textures
-    const cardOverrideTexture = cardImage ? useTexture(cardImage) : null;
-    const lanyardOverrideTexture = lanyardImage ? useTexture(lanyardImage) : null;
+    // Optional override textures (loaded without conditional hooks to fix lint errors)
+    const [cardOverrideTexture, setCardOverrideTexture] = useState(null);
+    const [lanyardOverrideTexture, setLanyardOverrideTexture] = useState(null);
 
-    // Fix rotation for override textures (upside down fix)
     useEffect(() => {
-        if (cardOverrideTexture) {
-            cardOverrideTexture.center.set(0.5, 0.5);
-            cardOverrideTexture.rotation = Math.PI;
+        const loader = new THREE.TextureLoader();
+        loader.setCrossOrigin('anonymous');
+        if (cardImage) {
+            loader.load(cardImage, (t) => {
+                t.center.set(0.5, 0.5);
+                t.rotation = Math.PI; // Fix rotation for upside down override textures
+                t.colorSpace = THREE.SRGBColorSpace;
+                setCardOverrideTexture(t);
+            });
         }
-    }, [cardOverrideTexture]);
+        if (lanyardImage) {
+            loader.load(lanyardImage, (t) => {
+                t.colorSpace = THREE.SRGBColorSpace;
+                setLanyardOverrideTexture(t);
+            });
+        }
+    }, [cardImage, lanyardImage]);
 
     // Final textures to use
     const finalCardTexture = cardOverrideTexture || materials.base.map;
@@ -182,8 +196,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
         }
     });
 
+    // eslint-disable-next-line react-hooks/immutability
     curve.curveType = 'chordal';
     if (finalLanyardTexture) {
+        // eslint-disable-next-line react-hooks/immutability
         finalLanyardTexture.wrapS = finalLanyardTexture.wrapT = THREE.RepeatWrapping;
     }
 
@@ -211,17 +227,17 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
                             isMobile
                                 ? undefined
                                 : e => {
-                                      e.target.releasePointerCapture(e.pointerId);
-                                      drag(false);
-                                  }
+                                    e.target.releasePointerCapture(e.pointerId);
+                                    drag(false);
+                                }
                         }
                         onPointerDown={
                             isMobile
                                 ? undefined
                                 : e => {
-                                      e.target.setPointerCapture(e.pointerId);
-                                      drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
-                                  }
+                                    e.target.setPointerCapture(e.pointerId);
+                                    drag(new THREE.Vector3().copy(e.point).sub(vec.copy(card.current.translation())));
+                                }
                         }
                     >
                         <mesh geometry={nodes.card.geometry}>

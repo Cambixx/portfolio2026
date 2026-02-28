@@ -1,6 +1,6 @@
-/* eslint-disable react/no-unknown-property */
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useMemo, useRef } from 'react';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { useMemo, useRef, useState } from 'react';
+import { useInView } from 'motion/react';
 import * as THREE from 'three';
 
 const AntigravityInner = ({
@@ -16,12 +16,10 @@ const AntigravityInner = ({
     rotationSpeed = 0.05,
     depthFactor = 1.5,
     pulseSpeed = 2,
-    particleShape = 'capsule',
     fieldStrength = 8
 }) => {
     const meshRef = useRef(null);
     const colorArray = useMemo(() => new Float32Array(count * 3), [count]);
-    const { viewport } = useThree();
     const dummy = useMemo(() => new THREE.Object3D(), []);
 
     // Google Antigravity Palette
@@ -37,10 +35,10 @@ const AntigravityInner = ({
     const lastMouseMoveTime = useRef(0);
     const virtualMouse = useRef({ x: 0, y: 0 });
 
-    const particles = useMemo(() => {
+    const [particles] = useState(() => {
         const temp = [];
-        const width = viewport.width || 100;
-        const height = viewport.height || 100;
+        const width = 40; // Units in R3F view space (0..50)
+        const height = 40;
 
         for (let i = 0; i < count; i++) {
             const t = Math.random() * 100;
@@ -69,7 +67,7 @@ const AntigravityInner = ({
             });
         }
         return temp;
-    }, [count, viewport.width, viewport.height, palette, colorArray]);
+    }); // initialized once via useState
 
     useFrame(state => {
         const mesh = meshRef.current;
@@ -165,15 +163,22 @@ const AntigravityInner = ({
 };
 
 const Antigravity = props => {
+    const containerRef = useRef(null);
+    const inView = useInView(containerRef, { amount: 0.1 });
+
     return (
-        <Canvas
-            camera={{ position: [0, 0, 50], fov: 35 }}
-            style={{ pointerEvents: 'none' }}
-            eventSource={typeof document !== 'undefined' ? document.getElementById('root') : undefined}
-            eventPrefix="client"
-        >
-            <AntigravityInner {...props} />
-        </Canvas>
+        <div ref={containerRef} style={{ width: '100%', height: '100%' }}>
+            <Canvas
+                frameloop={inView ? 'always' : 'demand'}
+                dpr={[1, 1.5]}
+                camera={{ position: [0, 0, 50], fov: 35 }}
+                style={{ pointerEvents: 'none' }}
+                eventSource={typeof document !== 'undefined' ? document.getElementById('root') : undefined}
+                eventPrefix="client"
+            >
+                <AntigravityInner {...props} />
+            </Canvas>
+        </div>
     );
 };
 

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 // eslint-disable-next-line no-unused-vars
 import { motion } from 'motion/react';
 import './SvgIntro.css';
@@ -28,7 +28,7 @@ const RenderShape = ({ type, radius, fill, animate, ...props }) => {
         return <motion.path d={`M${-w},${-radius} L${w},${-radius} L${w},${-w} L${radius},${-w} L${radius},${w} L${w},${w} L${w},${radius} L${-w},${radius} L${-w},${w} L${-radius},${w} L${-radius},${-w} L${-w},${-w} Z`} fill={fill} animate={animate} {...props} />;
     }
     // Default circle
-    return <motion.circle r={radius} fill={fill} animate={animate} {...props} />;
+    return <motion.circle cx={0} cy={0} r={radius} fill={fill} animate={animate} {...props} />;
 };
 
 export default function SvgIntro({ onComplete, initialProgress = 0 }) {
@@ -53,17 +53,15 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
     const advanceProgress = (delta) => {
         if (isCompleted.current) return;
 
-        setProgress((prev) => {
-            const next = clamp(prev + delta, 0, 1);
-
-            if (next >= 1 && !isCompleted.current) {
-                isCompleted.current = true;
-                if (onComplete) onComplete();
-            }
-
-            return next;
-        });
+        setProgress((prev) => clamp(prev + delta, 0, 1));
     };
+
+    useEffect(() => {
+        if (progress >= 1 && !isCompleted.current) {
+            isCompleted.current = true;
+            if (onComplete) onComplete();
+        }
+    }, [progress, onComplete]);
 
     const handleWheel = (event) => {
         advanceProgress(event.deltaY * SCROLL_SPEED_MOUSE);
@@ -167,6 +165,8 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                             {ambientRings.map(ring => (
                                 <motion.circle
                                     key={`ring-${ring.id}`}
+                                    cx={0}
+                                    cy={0}
                                     r={ring.radius}
                                     fill="none"
                                     stroke="rgba(255,255,255,0.03)"
@@ -182,6 +182,8 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
 
                             {/* Central Receiver Drop */}
                             <motion.circle
+                                cx={0}
+                                cy={0}
                                 r="55"
                                 fill={colors.primary}
                                 animate={{
@@ -231,6 +233,8 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
 
                         {/* PHASE 2.5: Collission Shockwaves (Ripples) */}
                         <motion.circle
+                            cx={0}
+                            cy={0}
                             r="120"
                             fill="none"
                             stroke={colors.primary}
@@ -242,6 +246,8 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                             }}
                         />
                         <motion.circle
+                            cx={0}
+                            cy={0}
                             r="150"
                             fill="none"
                             stroke={colors.cyan}

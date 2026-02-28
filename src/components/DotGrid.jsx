@@ -1,6 +1,6 @@
-/* eslint-disable react/no-unknown-property */
 'use client';
 import { useRef, useEffect, useCallback, useMemo } from 'react';
+import { useInView } from 'motion/react';
 import { gsap } from 'gsap';
 import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
@@ -58,6 +58,8 @@ const DotGrid = ({
         lastY: 0
     });
 
+    const inView = useInView(wrapperRef);
+
     const baseRgb = useMemo(() => hexToRgb(baseColor), [baseColor]);
     const activeRgb = useMemo(() => hexToRgb(activeColor), [activeColor]);
 
@@ -109,7 +111,7 @@ const DotGrid = ({
     }, [dotSize, gap]);
 
     useEffect(() => {
-        if (!circlePath) return;
+        if (!circlePath || !inView) return;
 
         let rafId;
         const proxSq = proximity * proximity;
@@ -152,7 +154,7 @@ const DotGrid = ({
 
         draw();
         return () => cancelAnimationFrame(rafId);
-    }, [proximity, baseColor, activeRgb, baseRgb, circlePath]);
+    }, [proximity, baseColor, activeRgb, baseRgb, circlePath, inView]);
 
     useEffect(() => {
         buildGrid();

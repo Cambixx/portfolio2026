@@ -93,6 +93,8 @@ export function RemotionHero() {
                 controls={false}
                 autoPlay
                 loop
+                muted
+                acknowledgeRemotionLicense={true}
             />
 
             {/* Top Info Bar */}

@@ -6,7 +6,7 @@ export const ScreenSlide = ({
     description,
 }) => {
     const frame = useCurrentFrame();
-    const { fps, width, height } = useVideoConfig();
+    const { fps } = useVideoConfig();
 
     // Entradas suaves
     const entrance = spring({
