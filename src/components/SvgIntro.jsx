@@ -16,6 +16,21 @@ const colors = {
 
 const palette = [colors.cyan, colors.yellow, colors.red, colors.green];
 
+const RenderShape = ({ type, radius, fill, animate, ...props }) => {
+    if (type === 'square') {
+        return <motion.rect x={-radius} y={-radius} width={radius * 2} height={radius * 2} rx={radius / 3} fill={fill} animate={animate} {...props} />;
+    }
+    if (type === 'triangle') {
+        return <motion.polygon points={`0,${-radius * 1.2} ${radius * 1.1},${radius * 0.8} ${-radius * 1.1},${radius * 0.8}`} fill={fill} animate={animate} {...props} />;
+    }
+    if (type === 'cross') {
+        const w = radius * 0.4;
+        return <motion.path d={`M${-w},${-radius} L${w},${-radius} L${w},${-w} L${radius},${-w} L${radius},${w} L${w},${w} L${w},${radius} L${-w},${radius} L${-w},${w} L${-radius},${w} L${-radius},${-w} L${-w},${-w} Z`} fill={fill} animate={animate} {...props} />;
+    }
+    // Default circle
+    return <motion.circle r={radius} fill={fill} animate={animate} {...props} />;
+};
+
 export default function SvgIntro({ onComplete, initialProgress = 0 }) {
     // Scroll speed significantly reduced to lengthen the experience
     const SCROLL_SPEED_MOUSE = 0.0006;
@@ -93,6 +108,7 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
 
     // Data-driven complex background elements (Orbiting satellites)
     const smallBlobs = useMemo(() => {
+        const types = ['circle', 'square', 'triangle', 'cross'];
         return Array.from({ length: 16 }).map((_, i) => ({
             id: i,
             color: palette[i % 4],
@@ -100,7 +116,8 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
             angleOffset: (i / 16) * Math.PI * 2,
             distance: 250 + (i % 3) * 60,
             rotationSpeed: 6 + (i % 5),
-            entryDelay: (i % 4) * 0.05
+            entryDelay: (i % 4) * 0.05,
+            shapeType: types[i % 4]
         }));
     }, []);
 
@@ -177,16 +194,19 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                             {/* 4 Main Core Dots Spiraling In */}
                             {palette.map((color, i) => {
                                 const angle = (i * Math.PI) / 2;
+                                const types = ['circle', 'square', 'triangle', 'cross'];
+                                const radius = 30 + (i % 2) * 12;
                                 return (
-                                    <motion.circle
+                                    <RenderShape
                                         key={`main-${i}`}
-                                        r={30 + (i % 2) * 12}
+                                        type={types[i]}
+                                        radius={radius}
                                         fill={color}
                                         animate={{
-                                            // Trigonometry creates a spiral path towards (0,0)
-                                            cx: Math.cos(angle + progress * 5) * (200 * (1 - curve(progress, 0.2, 0.6))),
-                                            cy: Math.sin(angle + progress * 5) * (200 * (1 - curve(progress, 0.2, 0.6))),
+                                            x: Math.cos(angle + progress * 5) * (200 * (1 - curve(progress, 0.2, 0.6))),
+                                            y: Math.sin(angle + progress * 5) * (200 * (1 - curve(progress, 0.2, 0.6))),
                                             scale: elasticCurve(progress, i * 0.05, i * 0.05 + 0.2) * (1 - curve(progress, 0.5, 0.65)),
+                                            rotate: progress * (i % 2 === 0 ? 180 : -180)
                                         }}
                                     />
                                 );
@@ -194,14 +214,16 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
 
                             {/* 16 Small Satellites Spiraling In */}
                             {smallBlobs.map((blob) => (
-                                <motion.circle
+                                <RenderShape
                                     key={`blob-${blob.id}`}
-                                    r={blob.radius}
+                                    type={blob.shapeType}
+                                    radius={blob.radius}
                                     fill={blob.color}
                                     animate={{
-                                        cx: Math.cos(blob.angleOffset + progress * blob.rotationSpeed) * (blob.distance * (1 - curve(progress, 0.2, 0.6))),
-                                        cy: Math.sin(blob.angleOffset + progress * blob.rotationSpeed) * (blob.distance * (1 - curve(progress, 0.2, 0.6))),
+                                        x: Math.cos(blob.angleOffset + progress * blob.rotationSpeed) * (blob.distance * (1 - curve(progress, 0.2, 0.6))),
+                                        y: Math.sin(blob.angleOffset + progress * blob.rotationSpeed) * (blob.distance * (1 - curve(progress, 0.2, 0.6))),
                                         scale: elasticCurve(progress, blob.entryDelay, blob.entryDelay + 0.2) * (1 - curve(progress, 0.5, 0.65)),
+                                        rotate: progress * 360 * (blob.id % 2 === 0 ? 1 : -1)
                                     }}
                                 />
                             ))}
