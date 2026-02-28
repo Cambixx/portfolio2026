@@ -1,7 +1,8 @@
-.svg-intro {
+.svg-intro-playful {
     position: fixed;
     inset: 0;
-    background: #000;
+    background: #0B0A10;
+    /* Very dark rich background to make colors pop */
     z-index: 9999;
     display: flex;
     align-items: center;
@@ -9,66 +10,15 @@
     overflow: hidden;
     transform-origin: center;
     touch-action: none;
-    overscroll-behavior: contain;
+    /* Block default scroll */
+    overscroll-behavior: none;
 }
 
-.svg-intro__noise {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    pointer-events: none;
-    opacity: 0.03;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    transition: opacity 0.5s ease;
-}
-
-.svg-intro__noise.heavy-noise {
-    opacity: 0.08;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='1.2' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-}
-
-.svg-intro__glitch-overlay {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    background: repeating-linear-gradient(0deg,
-            transparent,
-            transparent 2px,
-            rgba(82, 39, 255, 0.2) 2px,
-            rgba(82, 39, 255, 0.2) 4px);
-    pointer-events: none;
-}
-
-.svg-intro::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(to bottom,
-            transparent 50%,
-            rgba(82, 39, 255, 0.08) 50%);
-    background-size: 100% 4px;
-    z-index: 20;
-    pointer-events: none;
-    animation: scanline 10s linear infinite;
-}
-
-@keyframes scanline {
-    0% {
-        background-position: 0 0;
-    }
-
-    100% {
-        background-position: 0 100%;
-    }
-}
-
-
-.svg-intro__content {
+.svg-intro-playful__content {
     position: relative;
     z-index: 10;
     width: 95%;
     max-width: 1400px;
-    /* Much wider for complex scene */
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -76,123 +26,97 @@
     justify-content: center;
 }
 
-.svg-intro__main {
+.svg-intro-playful__main {
     width: 100%;
     height: auto;
     max-height: 80vh;
     overflow: visible;
 }
 
-.svg-intro__text {
+.svg-intro-playful__text-main {
     font-family: var(--font-sans);
-    /* Switched to grotest for cleaner massive impact */
     font-size: 80px;
-    font-weight: 700;
-    fill: white;
+    font-weight: 800;
+    fill: #ffffff;
+    letter-spacing: -0.02em;
+    /* Tighter spacing for friendly, modern look */
 }
 
-/* Control Panel Area */
-.svg-intro__control-panel {
+.svg-intro-playful__text-sub {
+    font-family: var(--font-mono);
+    /* Keep some tech roots but softer */
+    font-size: 16px;
+    font-weight: 500;
+    fill: var(--accent);
+    /* #5227FF */
+    letter-spacing: 0.2em;
+}
+
+/* Playful Status Panel */
+.svg-intro-playful__panel {
     margin-top: 40px;
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
-    max-width: 600px;
+    max-width: 300px;
 }
 
-.svg-intro__status {
-    font-size: 13px;
-    letter-spacing: 0.2em;
-    color: var(--accent);
-    text-transform: uppercase;
+.status-indicator {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    width: 100%;
+    justify-content: center;
+    gap: 12px;
+    font-family: var(--font-sans);
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
     margin-bottom: 20px;
 }
 
-.status-percent {
-    color: rgba(255, 255, 255, 0.7);
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    /* Background color will be animated via Framer Motion */
 }
 
-.svg-intro__progress-container.complex {
+/* Smooth continuous progress track */
+.progress-track {
     width: 100%;
-    height: 4px;
-    background: transparent;
-    margin-top: 0;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    overflow: hidden;
     position: relative;
-    overflow: visible;
-    /* To allow ticks to bleed out */
 }
 
-.progress-bg {
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.1);
-}
-
-.svg-intro__progress-bar {
+.progress-fill {
     position: absolute;
     top: 0;
     left: 0;
     bottom: 0;
     width: 100%;
-    background: var(--accent);
     transform-origin: left;
-    box-shadow: 0 0 15px var(--accent);
-}
-
-.progress-tick {
-    position: absolute;
-    top: -4px;
-    bottom: -4px;
-    width: 2px;
-    background: rgba(255, 255, 255, 0.3);
-    z-index: 2;
-    transition: background 0.2s;
-}
-
-.progress-tick.active {
-    background: #fff;
-    box-shadow: 0 0 5px #fff;
-}
-
-
-.blink {
-    animation: intro-blink 1s steps(2, start) infinite;
-    display: inline-block;
-    margin-right: 8px;
-    color: #fff;
-}
-
-@keyframes intro-blink {
-    to {
-        visibility: hidden;
-    }
+    border-radius: 4px;
 }
 
 @media (max-width: 1024px) {
-    .svg-intro__text {
-        font-size: 50px;
+    .svg-intro-playful__text-main {
+        font-size: 60px;
     }
 }
 
 @media (max-width: 768px) {
-    .svg-intro__text {
-        font-size: 30px;
+    .svg-intro-playful__text-main {
+        font-size: 36px;
     }
 
-    .svg-details,
-    .data-stream,
-    .hex-cluster,
-    .svg-grid-perspective {
-        display: none;
-        /* Hide extreme complexity elements on mobile to keep performance and clean look */
+    .svg-intro-playful__text-sub {
+        font-size: 11px;
     }
 
-    .status-percent {
-        display: none;
+    .svg-intro-playful__panel {
+        margin-top: 20px;
     }
 }

@@ -32,9 +32,11 @@ function App() {
     const isMobile = useIsMobile();
     const [bgType, setBgType] = useState('antigravity');
     const [showIntro, setShowIntro] = useState(true);
+    const [introProgress, setIntroProgress] = useState(0); // Para saber si empezamos de 0 o de 0.99
     const lenisRef = useRef(null);
 
     useEffect(() => {
+        // ... (lenis functionality)
         const lenis = new Lenis({
             autoRaf: false,
             smoothWheel: true,
@@ -63,6 +65,46 @@ function App() {
         };
     }, [showIntro]);
 
+    // Re-enable intro when scrolling up from the top
+    useEffect(() => {
+        if (showIntro) return; // Only listen when intro is hidden
+
+        // Mouse Wheel logic
+        const handleWheel = (e) => {
+            if (window.scrollY <= 0 && e.deltaY < 0) {
+                // User is trying to scroll up past the top
+                setIntroProgress(0.99); // Start near the end to reverse
+                setShowIntro(true);
+            }
+        };
+
+        // Touch swipe logic
+        let touchStart = 0;
+        const handleTouchStart = (e) => {
+            touchStart = e.touches[0].clientY;
+        };
+        const handleTouchMove = (e) => {
+            if (window.scrollY <= 0) {
+                const currentY = e.touches[0].clientY;
+                if (currentY > touchStart + 30) {
+                    // Swiped down (scrolled up) significantly
+                    setIntroProgress(0.99);
+                    setShowIntro(true);
+                }
+            }
+        };
+
+        window.addEventListener('wheel', handleWheel, { passive: true });
+        window.addEventListener('touchstart', handleTouchStart, { passive: true });
+        window.addEventListener('touchmove', handleTouchMove, { passive: true });
+
+        return () => {
+            window.removeEventListener('wheel', handleWheel);
+            window.removeEventListener('touchstart', handleTouchStart);
+            window.removeEventListener('touchmove', handleTouchMove);
+        };
+    }, [showIntro]);
+
     const handleIntroComplete = () => {
         setShowIntro(false);
     };
@@ -70,7 +112,7 @@ function App() {
     return (
         <main style={{ minHeight: '100vh', position: 'relative', background: 'var(--bg)', overflowX: 'hidden' }}>
             <AnimatePresence>
-                {showIntro && <SvgIntro onComplete={handleIntroComplete} />}
+                {showIntro && <SvgIntro onComplete={handleIntroComplete} initialProgress={introProgress} />}
             </AnimatePresence>
 
             {/* Background Layer */}
