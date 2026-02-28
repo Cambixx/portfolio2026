@@ -336,6 +336,23 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                     </div>
                 </motion.div>
             </div>
+
+            {/* Subtle Scroll Indicator */}
+            <motion.div
+                className="scroll-indicator"
+                initial={{ opacity: 0, x: "-50%", y: "-40%" }}
+                animate={{
+                    opacity: progress > 0.05 ? 0 : 1,
+                    x: "-50%",
+                    y: progress > 0.05 ? "-40%" : "-50%"
+                }}
+                transition={{ duration: 0.6 }}
+            >
+                <div className="scroll-indicator__text">SCROLL TO BEGIN</div>
+                <div className="scroll-indicator__mouse">
+                    <div className="scroll-indicator__wheel" />
+                </div>
+            </motion.div>
         </motion.div>
     );
 }
