@@ -32,14 +32,32 @@ const RenderShape = ({ type, radius, fill, animate, ...props }) => {
 };
 
 export default function SvgIntro({ onComplete, initialProgress = 0 }) {
-    // Scroll speed significantly reduced to lengthen the experience
-    const SCROLL_SPEED_MOUSE = 0.0006;
-    const SCROLL_SPEED_TOUCH = 0.0012;
+    // Scroll speed significantly reduced further for a premium feel
+    const SCROLL_SPEED_MOUSE = 0.00045;
+    const SCROLL_SPEED_TOUCH = 0.0009;
 
-    // Start progress based on property (so we can reverse back into it)
+    // targetProgress stores the raw scroll value, progress will lerp towards it
+    const targetProgress = useRef(initialProgress);
     const [progress, setProgress] = useState(initialProgress);
+
     const touchStartY = useRef(0);
     const isCompleted = useRef(false);
+
+    // Smoothing loop: creates a premium "heavy" scroll feel
+    useEffect(() => {
+        let raf;
+        const tick = () => {
+            setProgress(prev => {
+                const diff = targetProgress.current - prev;
+                // Basic lerp: new_val = old_val + (target - old_val) * factor
+                if (Math.abs(diff) < 0.0001) return targetProgress.current;
+                return prev + diff * 0.12;
+            });
+            raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        return () => cancelAnimationFrame(raf);
+    }, []);
 
     // More complex, phased friendly messages
     const phase = useMemo(() => {
@@ -52,12 +70,11 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
 
     const advanceProgress = (delta) => {
         if (isCompleted.current) return;
-
-        setProgress((prev) => clamp(prev + delta, 0, 1));
+        targetProgress.current = clamp(targetProgress.current + delta, 0, 1);
     };
 
     useEffect(() => {
-        if (progress >= 1 && !isCompleted.current) {
+        if (progress >= 0.999 && !isCompleted.current) {
             isCompleted.current = true;
             if (onComplete) onComplete();
         }
