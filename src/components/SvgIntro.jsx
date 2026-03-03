@@ -32,31 +32,21 @@ const RenderShape = ({ type, radius, fill, animate, ...props }) => {
 };
 
 export default function SvgIntro({ onComplete, initialProgress = 0 }) {
-    // Scroll speed significantly reduced further for a premium feel
+    // Scroll speed significantly reduced to lengthen the experience
     const SCROLL_SPEED_MOUSE = 0.00045;
-    const SCROLL_SPEED_TOUCH = 0.0009;
+    const SCROLL_SPEED_TOUCH = 0.0012;
 
-    // targetProgress stores the raw scroll value, progress will lerp towards it
-    const targetProgress = useRef(initialProgress);
+    // Start progress based on property (so we can reverse back into it)
     const [progress, setProgress] = useState(initialProgress);
-
+    const [isMobile, setIsMobile] = useState(false);
     const touchStartY = useRef(0);
     const isCompleted = useRef(false);
 
-    // Smoothing loop: creates a premium "heavy" scroll feel
     useEffect(() => {
-        let raf;
-        const tick = () => {
-            setProgress(prev => {
-                const diff = targetProgress.current - prev;
-                // Basic lerp: new_val = old_val + (target - old_val) * factor
-                if (Math.abs(diff) < 0.0001) return targetProgress.current;
-                return prev + diff * 0.12;
-            });
-            raf = requestAnimationFrame(tick);
-        };
-        raf = requestAnimationFrame(tick);
-        return () => cancelAnimationFrame(raf);
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+        window.addEventListener('resize', checkMobile);
+        return () => window.removeEventListener('resize', checkMobile);
     }, []);
 
     // More complex, phased friendly messages
@@ -70,11 +60,12 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
 
     const advanceProgress = (delta) => {
         if (isCompleted.current) return;
-        targetProgress.current = clamp(targetProgress.current + delta, 0, 1);
+
+        setProgress((prev) => clamp(prev + delta, 0, 1));
     };
 
     useEffect(() => {
-        if (progress >= 0.999 && !isCompleted.current) {
+        if (progress >= 1 && !isCompleted.current) {
             isCompleted.current = true;
             if (onComplete) onComplete();
         }
@@ -142,6 +133,16 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
             radius: 50 + i * 100,
             dash: 10 + i * 15,
             speed: i % 2 === 0 ? 1 : -1
+        }));
+    }, []);
+
+    const scrambledData = useMemo(() => {
+        const name = "CARLOS RÁBAGO";
+        return name.split("").map(() => ({
+            offsetX: (Math.random() - 0.5) * 80, // Reduced spread
+            offsetY: (Math.random() - 0.5) * 50,
+            rotation: (Math.random() - 0.5) * 90, // Keep the twist
+            delayFactor: Math.random()
         }));
     }, []);
 
@@ -291,35 +292,103 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
 
                         {/* PHASE 4: JOYFUL TEXT REVEAL */}
                         <motion.g
-                            initial={{ scale: 0, opacity: 0 }}
+                            initial={{ opacity: 0 }}
                             animate={{
-                                scale: elasticCurve(progress, 0.75, 0.95),
                                 opacity: progress > 0.70 ? 1 : 0
                             }}
                         >
-                            <text
-                                x="0"
-                                y="-15"
-                                textAnchor="middle"
-                                dominantBaseline="central"
-                                className="svg-intro-playful__text-main"
-                            >
-                                CARLOS RÁBAGO
-                            </text>
+                            {(() => {
+                                const name = "CARLOS RÁBAGO";
+                                const letters = name.split("");
+                                return (
+                                    <g transform="translate(0, -15)">
+                                        {isMobile ? (
+                                            /* Simple Reverted Animation for Mobile */
+                                            <motion.text
+                                                x="0"
+                                                y="0"
+                                                dy="0.35em"
+                                                textAnchor="middle"
+                                                className="svg-intro-playful__text-main"
+                                                fontSize="70"
+                                                animate={{
+                                                    // Simple fadeIn (0.7-0.85) and fadeOut (0.96-1.0)
+                                                    opacity: curve(progress, 0.70, 0.85) * (1 - curve(progress, 0.96, 1.0))
+                                                }}
+                                            >
+                                                CARLOS RÁBAGO
+                                            </motion.text>
+                                        ) : (
+                                            /* Fun Scrambled-to-Ordered Animation for Desktop */
+                                            letters.map((char, i) => {
+                                                const data = scrambledData[i];
+
+                                                // Phase 1: Entry timing (Scrambled appearance)
+                                                // Each letter appears between 0.72 and 0.88 in random order
+                                                const entryStart = 0.72 + (data.delayFactor * 0.12);
+                                                const entryEnd = entryStart + 0.08;
+                                                const entryProg = curve(progress, entryStart, entryEnd);
+
+                                                // Phase 2: Convergence (Ordering & Straightening)
+                                                // All letters move to their spot between 0.91 and 0.98
+                                                const convProg = curve(progress, 0.91, 0.98);
+
+                                                // Calculate dynamic positions - Tighter spacing
+                                                const spacing = 30;
+                                                const targetX = (i - 6) * spacing;
+                                                const scrambledX = targetX + data.offsetX;
+                                                const x = scrambledX + (targetX - scrambledX) * convProg;
+
+                                                const scrambledY = data.offsetY;
+                                                const y = (1 - entryProg) * 50 + (scrambledY * (1 - convProg));
+
+                                                const rotate = data.rotation * (1 - convProg);
+                                                const scale = elasticCurve(progress, entryStart, entryEnd);
+
+                                                return (
+                                                    <motion.text
+                                                        key={`char-${i}`}
+                                                        x={x}
+                                                        y={y}
+                                                        dy="0.35em"
+                                                        textAnchor="middle"
+                                                        className="svg-intro-playful__text-main"
+                                                        fontSize="75"
+                                                        animate={{
+                                                            opacity: progress > entryStart ? 1 : 0,
+                                                            scale: scale,
+                                                            x: x,
+                                                            y: y,
+                                                            rotate: rotate
+                                                        }}
+                                                        transition={{ duration: 0.1, ease: "easeOut" }}
+                                                    >
+                                                        {char}
+                                                    </motion.text>
+                                                );
+                                            })
+                                        )}
+                                    </g>
+                                );
+                            })()}
                             <motion.text
                                 x="0"
-                                y="45"
+                                y="55"
+                                dy="0.35em"
                                 textAnchor="middle"
-                                dominantBaseline="central"
                                 className="svg-intro-playful__text-sub"
+                                fontSize="18"
                                 animate={{
-                                    y: 45 + (1 - curve(progress, 0.85, 0.95)) * 30, // Elastic lower text slide
-                                    opacity: curve(progress, 0.85, 0.95)
+                                    y: isMobile ? 55 : 55 + (1 - curve(progress, 0.85, 0.95)) * 25,
+                                    opacity: isMobile
+                                        ? curve(progress, 0.85, 0.95) * (1 - curve(progress, 0.96, 1.0))
+                                        : curve(progress, 0.85, 0.95)
                                 }}
                             >
                                 CREATIVE ENGINEER
                             </motion.text>
                         </motion.g>
+
 
                     </g>
                 </svg>
@@ -370,6 +439,6 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                     <div className="scroll-indicator__wheel" />
                 </div>
             </motion.div>
-        </motion.div>
+        </motion.div >
     );
 }

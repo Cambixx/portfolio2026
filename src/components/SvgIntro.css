@@ -35,11 +35,10 @@
 
 .svg-intro-playful__text-main {
     font-family: var(--font-sans);
-    font-size: 80px;
-    font-weight: 800;
+    font-weight: 200;
     fill: #ffffff;
-    letter-spacing: -0.02em;
-    /* Tighter spacing for friendly, modern look */
+    letter-spacing: 0.1em;
+    will-change: transform, opacity;
 }
 
 .svg-intro-playful__text-sub {
@@ -101,21 +100,7 @@
     border-radius: 4px;
 }
 
-@media (max-width: 1024px) {
-    .svg-intro-playful__text-main {
-        font-size: 60px;
-    }
-}
-
 @media (max-width: 768px) {
-    .svg-intro-playful__text-main {
-        font-size: 36px;
-    }
-
-    .svg-intro-playful__text-sub {
-        font-size: 11px;
-    }
-
     .svg-intro-playful__panel {
         margin-top: 20px;
     }
