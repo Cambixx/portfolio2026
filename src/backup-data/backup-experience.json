@@ -1,0 +1,86 @@
+[
+  {
+    "id": "exp-01",
+    "title": "Desarrollador Web Full-Stack",
+    "company": "DOERS DF",
+    "period": "2023 - Actualidad",
+    "description": "Desarrollo soluciones web innovadoras adaptadas a procesos empresariales específicos. Creo interfaces interactivas modernas y colaboro en la integración completa entre frontend y backend para ofrecer experiencias digitales óptimas.",
+    "technologies": ["React", "JavaScript", "HTML5", "CSS3", "WordPress", "PHP", "MySQL"],
+    "achievements": [
+      "Desarrollo de soluciones web personalizadas para múltiples clientes empresariales",
+      "Creación de interfaces interactivas con WordPress y tecnologías modernas",
+      "Colaboración exitosa en proyectos de integración frontend-backend",
+      "Adaptación ágil de proyectos según necesidades específicas del cliente"
+    ]
+  },
+  {
+    "id": "exp-02",
+    "title": "Desarrollador de Aplicaciones Web",
+    "company": "EDIX",
+    "period": "2021 - 2023",
+    "description": "Desarrollé aplicaciones web modernas enfocándome en el diseño y optimización de interfaces de usuario. Adquirí experiencia sólida en tecnologías frontend y metodologías de desarrollo ágil.",
+    "technologies": ["JavaScript", "HTML5", "CSS3", "React", "Git", "Responsive Design"],
+    "achievements": [
+      "Desarrollo de múltiples aplicaciones web con interfaces optimizadas",
+      "Especialización en diseño responsivo y experiencia de usuario",
+      "Implementación de mejores prácticas en desarrollo frontend",
+      "Colaboración en proyectos utilizando metodologías ágiles"
+    ]
+  },
+  {
+    "id": "exp-03",
+    "title": "Analista de Operaciones y Logística",
+    "company": "Mercadona",
+    "period": "2016 - 2021",
+    "description": "Gestioné operaciones logísticas complejas, incluyendo planificación de entregas, control de stock y análisis de datos. Desarrollé habilidades analíticas y de resolución de problemas que aplico en el desarrollo de software.",
+    "technologies": ["Excel Avanzado", "Sistemas de Gestión", "Análisis de Datos", "ERP"],
+    "achievements": [
+      "Optimización de rutas de transporte mejorando la eficiencia operativa",
+      "Análisis detallado de reportes de ventas para toma de decisiones estratégicas",
+      "Gestión eficiente de inventarios y control de stock",
+      "Supervisión de procesos y productos garantizando altos estándares de calidad"
+    ]
+  },
+  {
+    "id": "exp-04",
+    "title": "Responsable de Tienda",
+    "company": "Drex Telecom",
+    "period": "2014 - 2016",
+    "description": "Lideré la gestión integral de tiendas de servicios de telecomunicaciones, desarrollando habilidades de liderazgo, atención al cliente y gestión comercial que me han servido para entender mejor las necesidades del usuario final.",
+    "technologies": ["Sistemas POS", "CRM", "Gestión Comercial"],
+    "achievements": [
+      "Gestión exitosa de múltiples puntos de venta",
+      "Excelencia en atención al cliente y resolución de incidencias",
+      "Desarrollo de estrategias comerciales efectivas",
+      "Formación y supervisión de equipos de trabajo"
+    ]
+  },
+  {
+    "id": "exp-05",
+    "title": "Supervisor Comercial",
+    "company": "Iberia",
+    "period": "2007 - 2013",
+    "description": "Supervisé operaciones comerciales en el sector aeronáutico, desarrollando competencias en gestión de equipos, procesos operativos y atención al cliente en un entorno de alta exigencia y precisión.",
+    "technologies": ["Sistemas Aeroportuarios", "Gestión Comercial", "Amadeus"],
+    "achievements": [
+      "Supervisión eficiente de operaciones comerciales aeroportuarias",
+      "Gestión de equipos multidisciplinarios en entorno de alta presión",
+      "Mantenimiento de estándares de calidad y seguridad",
+      "Experiencia en procesos críticos y gestión de incidencias"
+    ]
+  },
+  {
+    "id": "exp-06",
+    "title": "Técnico de Control de Calidad",
+    "company": "CAVIM",
+    "period": "2005 - 2007",
+    "description": "Inicié mi carrera profesional en control de calidad, desarrollando una mentalidad analítica y orientada al detalle que aplico constantemente en mi trabajo como desarrollador para garantizar código limpio y funcional.",
+    "technologies": ["Sistemas de Control", "Análisis Técnico", "Documentación"],
+    "achievements": [
+      "Implementación de procesos de control de calidad eficientes",
+      "Desarrollo de atención al detalle y pensamiento analítico",
+      "Experiencia en documentación técnica y seguimiento de procesos",
+      "Base sólida en metodologías de trabajo sistemático"
+    ]
+  }
+] 

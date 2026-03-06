@@ -204,6 +204,7 @@ body {
     background: var(--accent);
     color: white;
 }
+
 /* ═══════════════════════════════════════
    RESPONSIVE DESIGN SYSTEM
    ═══════════════════════════════════════ */
@@ -271,6 +272,42 @@ body {
     gap: 8px;
     justify-content: flex-end;
     flex-wrap: wrap;
+}
+
+.project-filters {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 60px;
+    flex-wrap: wrap;
+}
+
+.filter-btn {
+    padding: 10px 20px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.1em;
+}
+
+.filter-btn:hover {
+    color: white;
+    border-color: var(--border-strong);
+}
+
+.filter-btn.active {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+}
+
+.project-desc {
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 500px;
 }
 
 .showreel-container {
@@ -399,7 +436,10 @@ body {
 }
 
 @media (max-width: 768px) {
-    .experience-grid, .stack-grid, .contact-grid {
+
+    .experience-grid,
+    .stack-grid,
+    .contact-grid {
         grid-template-columns: 1fr !important;
         gap: 32px;
     }

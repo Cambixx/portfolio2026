@@ -1,0 +1,68 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "title": "Nexho",
+      "description": "Plataforma de servicios para clientes de hostelería de prroductos Mahou",
+      "image": "/imgs/projects/nexho.webp",
+      "technologies": ["PHP", "HTML", "CSS", "JavaScript", "MySQL"],
+      "link": "https://www.somosnexho.com/"
+    },
+    {
+      "id": 2,
+      "title": "Tejiendo derechos",
+      "description": "Iniciativa de Oxfam Intermón para fortalecer a la sociedad civil en la defensa de los derechos humanos en España, fomentando el aprendizaje colectivo, el trabajo en red y la financiación de actividades.",
+      "image": "/imgs/projects/oxfam.webp",
+      "technologies": ["WordPress", "Twig", "PHP", "HTML", "CSS", "JavaScript", "MySQL"],
+      "link": "https://tejiendoderechos.oxfamintermon.org/"
+    },
+    {
+      "id": 3,
+      "title": "Corona",
+      "description": "Sitio web oficial de Cerveza Corona en España que destaca la naturalidad de sus ingredientes y promueve experiencias únicas al aire libre, especialmente durante los atardeceres.",
+      "image": "/imgs/projects/corona.webp",
+      "technologies": ["WordPress", "Gsap", "PHP", "HTML", "CSS", "JavaScript", "MySQL"],
+      "link": "https://www.cervezacorona.es/"
+    },
+    {
+      "id": 4,
+      "title": "ICA",
+      "description": "Portal del Instituto de Consejeros-Administradores, la asociación española de referencia en gobierno corporativo que promueve las mejores prácticas en la dirección de empresas.",
+      "image": "/imgs/projects/ica.webp",
+      "technologies": ["WordPress", "PHP", "HTML", "CSS", "JavaScript", "MySQL"],
+      "link": "https://www.iconsejeros.com/"
+    },
+    {
+      "id": 5,
+      "title": "Boreal",
+      "description": "Sitio web de Boreal Capital Management, una firma independiente de gestión patrimonial con presencia global que ofrece servicios financieros personalizados desde sus sedes en Suiza y Estados Unidos.",
+      "image": "/imgs/projects/boreal.webp",
+      "technologies": ["WordPress", "PHP", "HTML", "CSS", "JavaScript", "MySQL"],
+      "link": "https://www.borealcm.com/"
+    },
+    {
+      "id": 6,
+      "title": "Greenpeace Olas de calor",
+      "description": "Micrositio interactivo de Greenpeace España que informa y conciencia sobre el impacto del cambio climático en las olas de calor y sus consecuencias.",
+      "image": "/imgs/projects/greenpeace.webp",
+      "technologies": ["HTML", "CSS", "JavaScript"],
+      "link": "https://es.greenpeace.org/es/trabajamos-en/cambio-climatico/olas-de-calor/"
+    },
+    {
+      "id": 7,
+      "title": "Doers DF",
+      "description": "Website de Doers DF, una agencia de diseño y desarrollo web que ofrece servicios de diseño web, desarrollo web, marketing digital y consultoría en tecnología.",
+      "image": "/imgs/projects/doers.webp",
+      "technologies": ["React", "React three fiber", "React three drei", "Three.js", "GSAP"],
+      "link": "https://doersdf.com/"
+    },
+    {
+      "id": 8,
+      "title": "Misstake",
+      "description": "Plataforma de co-creación que utiliza la creatividad y el conocimiento transversal para diseñar escenarios futuros y el crecimiento sostenible para aportar valor económico y social.",
+      "image": "/imgs/projects/misstake.webp",
+      "technologies": ["WordPress", "PHP", "HTML", "CSS", "JavaScript", "Twig"],
+      "link": "https://misstake.es/"
+    }
+  ]
+} 

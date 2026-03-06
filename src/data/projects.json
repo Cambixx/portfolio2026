@@ -11,37 +11,115 @@
     },
     "items": [
         {
-            "title": "Neo-Bank Dashboard",
-            "description": "A high-performance financial dashboard utilizing glassmorphic aesthetics and real-time 3D data visualizations.",
+            "title": "Doers DF",
+            "description": "Agency portfolio exploring spatial computing via React-Three-Fiber, featuring interactive GLTF models and smooth state transitions.",
             "tech": [
                 "React",
                 "Three.js",
-                "D3.js"
-            ],
-            "year": "2025",
-            "url": ""
-        },
-        {
-            "title": "Zenith Code Editor",
-            "description": "Next-gen browser-based IDE with collaborative features and AI-powered code completion.",
-            "tech": [
-                "Next.js",
-                "WebAssembly",
-                "Yjs"
+                "GSAP",
+                "WebGL"
             ],
             "year": "2024",
-            "url": ""
+            "url": "https://doersdf.com/",
+            "image": "/projects/doers.png",
+            "category": "Creative Development"
         },
         {
-            "title": "Nebula OS",
-            "description": "An experimental web OS exploring spatial computing interfaces in the browser.",
+            "title": "Nexho - Mahou",
+            "description": "Hospitality service platform for Mahou clients, streamlining service requests and loyalty management.",
             "tech": [
-                "Vue 3",
-                "WebGL",
-                "Rust"
+                "PHP",
+                "JavaScript",
+                "MySQL",
+                "CSS"
             ],
-            "year": "2024",
-            "url": ""
+            "year": "2023",
+            "url": "https://www.somosnexho.com/",
+            "image": "/projects/nexho.png",
+            "category": "Full-Stack"
+        },
+        {
+            "title": "Tejiendo Derechos",
+            "description": "Interactive platform for Oxfam Intermón to strengthen human rights advocacy through collective learning and network funding.",
+            "tech": [
+                "WordPress",
+                "Twig",
+                "PHP",
+                "UI Engineering"
+            ],
+            "year": "2023",
+            "url": "https://tejiendoderechos.oxfamintermon.org/",
+            "image": "/projects/oxfam.png",
+            "category": "UI / Design"
+        },
+        {
+            "title": "Corona Official",
+            "description": "Official Cerveza Corona portal featuring high-fidelity motion graphics and immersive storytelling for the brand's 'outdoor' experiences.",
+            "tech": [
+                "WordPress",
+                "GSAP",
+                "PHP",
+                "Motion Design"
+            ],
+            "year": "2023",
+            "url": "https://www.cervezacorona.es/",
+            "image": "/projects/corona.png",
+            "category": "Motion Graphics"
+        },
+        {
+            "title": "ICA Governance",
+            "description": "Professional governance portal for the Institute of Board Members-Administrators, focused on best practices in corporate leadership.",
+            "tech": [
+                "WordPress",
+                "PHP",
+                "MySQL",
+                "UI Architecture"
+            ],
+            "year": "2022",
+            "url": "https://www.iconsejeros.com/",
+            "image": "/projects/ica.png",
+            "category": "UI / Design"
+        },
+        {
+            "title": "Boreal Wealth",
+            "description": "Global wealth management platform for Boreal Capital, delivering high-performance financial service interfaces for Swiss and US markets.",
+            "tech": [
+                "WordPress",
+                "PHP",
+                "Internationalization"
+            ],
+            "year": "2022",
+            "url": "https://www.borealcm.com/",
+            "image": "/projects/boreal.png",
+            "category": "Full-Stack"
+        },
+        {
+            "title": "Greenpeace Olas",
+            "description": "Interactive climate awareness microsite documenting the impact of heatwaves through data-driven storytelling.",
+            "tech": [
+                "JavaScript",
+                "HTML5",
+                "CSS3",
+                "Interactive Data"
+            ],
+            "year": "2022",
+            "url": "https://es.greenpeace.org/es/trabajamos-en/cambio-climatico/olas-de-calor/",
+            "image": "/projects/doers.png",
+            "category": "Creative Development"
+        },
+        {
+            "title": "Misstake",
+            "description": "Co-creation platform for sustainable growth scenarios, bridging creativity and economic value through transversal knowledge.",
+            "tech": [
+                "WordPress",
+                "PHP",
+                "Twig",
+                "UX Design"
+            ],
+            "year": "2021",
+            "url": "https://misstake.es/",
+            "image": "/projects/nexho.png",
+            "category": "UI / Design"
         }
     ]
 }
