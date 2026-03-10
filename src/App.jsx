@@ -12,6 +12,7 @@ import Antigravity from './components/Antigravity';
 import CircularText from './components/CircularText';
 import TextPressure from './components/TextPressure';
 import SvgIntro from './components/SvgIntro';
+import ScrollCompanion from './components/ScrollCompanion';
 import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence } from 'motion/react';
 import Lenis from 'lenis';
@@ -125,6 +126,9 @@ function App() {
             <AnimatePresence>
                 {showIntro && <SvgIntro onComplete={handleIntroComplete} initialProgress={introProgress} />}
             </AnimatePresence>
+
+            {/* Scroll Companion - Persists after intro */}
+            {!showIntro && <ScrollCompanion />}
 
             {/* Background Layer */}
             <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 0 }}>

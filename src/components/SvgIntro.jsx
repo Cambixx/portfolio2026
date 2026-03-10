@@ -290,11 +290,11 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                             }}
                         />
 
-                        {/* PHASE 4: JOYFUL TEXT REVEAL */}
+                        {/* PHASE 4: SPECTACULAR TEXT REVEAL */}
                         <motion.g
                             initial={{ opacity: 0 }}
                             animate={{
-                                opacity: progress > 0.70 ? 1 : 0
+                                opacity: progress > 0.62 ? 1 : 0
                             }}
                         >
                             {(() => {
@@ -302,6 +302,25 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                                 const letters = name.split("");
                                 return (
                                     <g transform="translate(0, -15)">
+                                        {/* SVG Glow Filter for the text */}
+                                        <defs>
+                                            <filter id="textGlow" x="-50%" y="-50%" width="200%" height="200%">
+                                                <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="blur" />
+                                                <feMerge>
+                                                    <feMergeNode in="blur" />
+                                                    <feMergeNode in="SourceGraphic" />
+                                                </feMerge>
+                                            </filter>
+                                            <filter id="glitchFlicker">
+                                                <feFlood floodColor="var(--accent)" floodOpacity="0.3" />
+                                                <feComposite in2="SourceGraphic" operator="in" />
+                                                <feMerge>
+                                                    <feMergeNode />
+                                                    <feMergeNode in="SourceGraphic" />
+                                                </feMerge>
+                                            </filter>
+                                        </defs>
+
                                         {isMobile ? (
                                             /* Simple Reverted Animation for Mobile */
                                             <motion.text
@@ -312,71 +331,171 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                                                 className="svg-intro-playful__text-main"
                                                 fontSize="70"
                                                 animate={{
-                                                    // Simple fadeIn (0.7-0.85) and fadeOut (0.96-1.0)
                                                     opacity: curve(progress, 0.70, 0.85) * (1 - curve(progress, 0.96, 1.0))
                                                 }}
                                             >
                                                 CARLOS RÁBAGO
                                             </motion.text>
                                         ) : (
-                                            /* Drawn Stroke Animation for Desktop */
-                                            letters.map((char, i) => {
-                                                // Sequential drawing from left to right (staggered more)
-                                                const letterDelay = i * 0.012;
-                                                // Starts earlier and lasts longer
-                                                const drawInProg = curve(progress, 0.65 + letterDelay, 0.82 + letterDelay);
+                                            <>
+                                                {/* === SPARK PARTICLES along the stroke path === */}
+                                                {letters.map((char, i) => {
+                                                    const letterDelay = i * 0.012;
+                                                    const drawInProg = curve(progress, 0.65 + letterDelay, 0.82 + letterDelay);
+                                                    const exitProg = curve(progress, 0.90, 0.98);
+                                                    const targetX = (i - 6) * 48;
 
-                                                // 500 is enough length to cover the stroke of a 75px font character
-                                                const pathLength = 500;
-                                                const dashOffset = pathLength * (1 - drawInProg);
+                                                    // Only show sparks while drawing
+                                                    if (drawInProg <= 0 || drawInProg >= 1) return null;
 
-                                                // Fade the fill in after the stroke starts
-                                                const fillInProg = curve(progress, 0.70 + letterDelay, 0.85 + letterDelay);
+                                                    // Generate 3 sparks per active letter
+                                                    return Array.from({ length: 3 }).map((_, s) => {
+                                                        const sparkAngle = (drawInProg * Math.PI * 4) + (s * Math.PI * 0.7);
+                                                        const sparkDist = 15 + s * 8;
+                                                        const sparkX = targetX + Math.cos(sparkAngle) * sparkDist;
+                                                        const sparkY = Math.sin(sparkAngle) * sparkDist;
+                                                        const sparkSize = 1.5 - s * 0.4;
+                                                        return (
+                                                            <motion.circle
+                                                                key={`spark-${i}-${s}`}
+                                                                cx={sparkX}
+                                                                cy={sparkY}
+                                                                r={sparkSize}
+                                                                fill={s === 0 ? '#ffffff' : 'var(--accent)'}
+                                                                animate={{
+                                                                    opacity: (1 - drawInProg) * (1 - exitProg) * 0.8,
+                                                                }}
+                                                            />
+                                                        );
+                                                    });
+                                                })}
 
-                                                // Exit Phase: Zoom out and fade
-                                                // Starts quite late so it stays static for a bit
-                                                const outDelay = (letters.length - 1 - i) * 0.005;
-                                                const exitProg = curve(progress, 0.90 + outDelay, 0.98);
+                                                {/* === GLITCH / GHOST LAYER (offset colored copies) === */}
+                                                {letters.map((char, i) => {
+                                                    const letterDelay = i * 0.012;
+                                                    const drawInProg = curve(progress, 0.65 + letterDelay, 0.82 + letterDelay);
+                                                    const settleProg = curve(progress, 0.78 + letterDelay, 0.86 + letterDelay);
+                                                    const exitProg = curve(progress, 0.90, 0.98);
+                                                    const targetX = (i - 6) * 48;
 
-                                                // Opacity drops as exitProg goes from 0 to 1
-                                                const finalOpacity = (drawInProg > 0 ? 1 : 0) * (1 - exitProg);
-                                                const finalFillOpacity = fillInProg * (1 - exitProg);
+                                                    // Glitch offset shrinks to 0 as letter settles
+                                                    const glitchX = (1 - settleProg) * (Math.sin(i * 7.3) * 12);
+                                                    const glitchY = (1 - settleProg) * (Math.cos(i * 5.1) * 8);
+                                                    const glitchOpacity = drawInProg * (1 - settleProg) * 0.4 * (1 - exitProg);
 
-                                                // Scale goes from 1 down to say 0.2 (Zoom out effect)
-                                                const scale = 1 - (exitProg * 0.8);
+                                                    if (glitchOpacity <= 0.01) return null;
+                                                    return (
+                                                        <motion.text
+                                                            key={`glitch-${i}`}
+                                                            x={targetX + glitchX}
+                                                            y={glitchY}
+                                                            dy="0.35em"
+                                                            textAnchor="middle"
+                                                            className="svg-intro-playful__text-main"
+                                                            fontSize="75"
+                                                            style={{
+                                                                fill: 'var(--accent)',
+                                                                mixBlendMode: 'screen',
+                                                            }}
+                                                            animate={{
+                                                                opacity: glitchOpacity,
+                                                            }}
+                                                        >
+                                                            {char}
+                                                        </motion.text>
+                                                    );
+                                                })}
 
-                                                // Wider spacing as requested
-                                                const targetX = (i - 6) * 48;
+                                                {/* === MAIN LETTERS with stroke draw + fill + glow === */}
+                                                {letters.map((char, i) => {
+                                                    const letterDelay = i * 0.012;
+                                                    const drawInProg = curve(progress, 0.65 + letterDelay, 0.82 + letterDelay);
+                                                    const pathLength = 500;
+                                                    const dashOffset = pathLength * (1 - drawInProg);
+                                                    const fillInProg = curve(progress, 0.78 + letterDelay, 0.88 + letterDelay);
 
-                                                return (
-                                                    <motion.text
-                                                        key={`char-${i}`}
-                                                        x={targetX}
-                                                        y={0}
-                                                        dy="0.35em"
-                                                        textAnchor="middle"
-                                                        className="svg-intro-playful__text-main"
-                                                        fontSize="75"
-                                                        style={{
-                                                            stroke: '#ffffff',
-                                                            strokeWidth: 0.75, // Thinner stroke for a more delicate look
-                                                            strokeDasharray: pathLength,
-                                                        }}
-                                                        animate={{
-                                                            strokeDashoffset: dashOffset,
-                                                            fillOpacity: finalFillOpacity,
-                                                            opacity: finalOpacity,
-                                                            scale: scale
-                                                        }}
-                                                    >
-                                                        {char}
-                                                    </motion.text>
-                                                );
-                                            })
+                                                    // Exit: each letter disperses outward and fades
+                                                    const outDelay = (letters.length - 1 - i) * 0.004;
+                                                    const exitProg = curve(progress, 0.90 + outDelay, 0.98);
+
+                                                    const finalOpacity = (drawInProg > 0 ? 1 : 0) * (1 - exitProg);
+                                                    const finalFillOpacity = fillInProg * (1 - exitProg);
+
+                                                    // Exit: dispersal with blur feel
+                                                    const scale = 1 + (exitProg * 0.3); // Slight zoom UP on exit
+                                                    const exitY = exitProg * ((i % 2 === 0 ? -1 : 1) * 30); // scatter vertically
+
+                                                    const targetX = (i - 6) * 48;
+
+                                                    // Glow intensity peaks when stroke is being drawn
+                                                    const glowIntensity = drawInProg > 0 && drawInProg < 1;
+
+                                                    return (
+                                                        <motion.text
+                                                            key={`char-${i}`}
+                                                            x={targetX}
+                                                            y={exitY}
+                                                            dy="0.35em"
+                                                            textAnchor="middle"
+                                                            className="svg-intro-playful__text-main"
+                                                            fontSize="75"
+                                                            filter={glowIntensity ? 'url(#textGlow)' : 'none'}
+                                                            style={{
+                                                                stroke: '#ffffff',
+                                                                strokeWidth: 0.75,
+                                                                strokeDasharray: pathLength,
+                                                            }}
+                                                            animate={{
+                                                                strokeDashoffset: dashOffset,
+                                                                fillOpacity: finalFillOpacity,
+                                                                opacity: finalOpacity,
+                                                                scale: scale,
+                                                            }}
+                                                        >
+                                                            {char}
+                                                        </motion.text>
+                                                    );
+                                                })}
+
+                                                {/* === UNDERLINE / SCAN LINE that sweeps left to right === */}
+                                                {(() => {
+                                                    const scanProg = curve(progress, 0.68, 0.85);
+                                                    const scanExitProg = curve(progress, 0.90, 0.96);
+                                                    if (scanProg <= 0) return null;
+                                                    const lineWidth = 620; // total span of text
+                                                    const scanX = -lineWidth / 2 + scanProg * lineWidth;
+                                                    return (
+                                                        <motion.g animate={{ opacity: (scanProg > 0 ? 0.6 : 0) * (1 - scanExitProg) }}>
+                                                            {/* Main scan line */}
+                                                            <motion.line
+                                                                x1={-lineWidth / 2}
+                                                                y1={38}
+                                                                x2={scanX}
+                                                                y2={38}
+                                                                stroke="var(--accent)"
+                                                                strokeWidth={1.5}
+                                                            />
+                                                            {/* Glowing head of the scan */}
+                                                            <motion.circle
+                                                                cx={scanX}
+                                                                cy={38}
+                                                                r={3}
+                                                                fill="#ffffff"
+                                                                animate={{
+                                                                    opacity: scanProg < 1 ? [0.5, 1, 0.5] : 0,
+                                                                }}
+                                                                transition={{ duration: 0.3, repeat: Infinity }}
+                                                            />
+                                                        </motion.g>
+                                                    );
+                                                })()}
+                                            </>
                                         )}
                                     </g>
                                 );
                             })()}
+
+                            {/* Subtitle with dramatic sweep-in */}
                             <motion.text
                                 x="0"
                                 y="55"
@@ -386,11 +505,24 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                                 fontSize="18"
                                 animate={{
                                     y: isMobile ? 55 : 55 + (1 - curve(progress, 0.85, 0.95)) * 25,
-                                    opacity: curve(progress, 0.85, 0.95) * (1 - curve(progress, 0.96, 1.0))
+                                    opacity: curve(progress, 0.85, 0.95) * (1 - curve(progress, 0.96, 1.0)),
                                 }}
                             >
                                 CREATIVE ENGINEER
                             </motion.text>
+
+                            {/* Decorative brackets around subtitle */}
+                            {!isMobile && (() => {
+                                const subReveal = curve(progress, 0.86, 0.94);
+                                const subExit = curve(progress, 0.96, 1.0);
+                                if (subReveal <= 0) return null;
+                                return (
+                                    <motion.g animate={{ opacity: subReveal * (1 - subExit) }}>
+                                        <motion.line x1={-130} y1={50} x2={-130} y2={68} stroke="var(--accent)" strokeWidth={1} />
+                                        <motion.line x1={130} y1={50} x2={130} y2={68} stroke="var(--accent)" strokeWidth={1} />
+                                    </motion.g>
+                                );
+                            })()}
                         </motion.g>
 
 
