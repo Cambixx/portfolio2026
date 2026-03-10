@@ -319,49 +319,55 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                                                 CARLOS RÁBAGO
                                             </motion.text>
                                         ) : (
-                                            /* Fun Scrambled-to-Ordered Animation for Desktop */
+                                            /* Drawn Stroke Animation for Desktop */
                                             letters.map((char, i) => {
-                                                const data = scrambledData[i];
+                                                // Sequential drawing from left to right (staggered more)
+                                                const letterDelay = i * 0.012;
+                                                // Starts earlier and lasts longer
+                                                const drawInProg = curve(progress, 0.65 + letterDelay, 0.82 + letterDelay);
 
-                                                // Phase 1: Entry timing (Scrambled appearance)
-                                                // Each letter appears between 0.72 and 0.88 in random order
-                                                const entryStart = 0.72 + (data.delayFactor * 0.12);
-                                                const entryEnd = entryStart + 0.08;
-                                                const entryProg = curve(progress, entryStart, entryEnd);
+                                                // 500 is enough length to cover the stroke of a 75px font character
+                                                const pathLength = 500;
+                                                const dashOffset = pathLength * (1 - drawInProg);
 
-                                                // Phase 2: Convergence (Ordering & Straightening)
-                                                // All letters move to their spot between 0.91 and 0.98
-                                                const convProg = curve(progress, 0.91, 0.98);
+                                                // Fade the fill in after the stroke starts
+                                                const fillInProg = curve(progress, 0.70 + letterDelay, 0.85 + letterDelay);
 
-                                                // Calculate dynamic positions - Tighter spacing
-                                                const spacing = 30;
-                                                const targetX = (i - 6) * spacing;
-                                                const scrambledX = targetX + data.offsetX;
-                                                const x = scrambledX + (targetX - scrambledX) * convProg;
+                                                // Exit Phase: Zoom out and fade
+                                                // Starts quite late so it stays static for a bit
+                                                const outDelay = (letters.length - 1 - i) * 0.005;
+                                                const exitProg = curve(progress, 0.90 + outDelay, 0.98);
 
-                                                const scrambledY = data.offsetY;
-                                                const y = (1 - entryProg) * 50 + (scrambledY * (1 - convProg));
+                                                // Opacity drops as exitProg goes from 0 to 1
+                                                const finalOpacity = (drawInProg > 0 ? 1 : 0) * (1 - exitProg);
+                                                const finalFillOpacity = fillInProg * (1 - exitProg);
 
-                                                const rotate = data.rotation * (1 - convProg);
-                                                const scale = elasticCurve(progress, entryStart, entryEnd);
+                                                // Scale goes from 1 down to say 0.2 (Zoom out effect)
+                                                const scale = 1 - (exitProg * 0.8);
+
+                                                // Wider spacing as requested
+                                                const targetX = (i - 6) * 48;
 
                                                 return (
                                                     <motion.text
                                                         key={`char-${i}`}
-                                                        x={x}
-                                                        y={y}
+                                                        x={targetX}
+                                                        y={0}
                                                         dy="0.35em"
                                                         textAnchor="middle"
                                                         className="svg-intro-playful__text-main"
                                                         fontSize="75"
-                                                        animate={{
-                                                            opacity: progress > entryStart ? 1 : 0,
-                                                            scale: scale,
-                                                            x: x,
-                                                            y: y,
-                                                            rotate: rotate
+                                                        style={{
+                                                            stroke: '#ffffff',
+                                                            strokeWidth: 0.75, // Thinner stroke for a more delicate look
+                                                            strokeDasharray: pathLength,
                                                         }}
-                                                        transition={{ duration: 0.1, ease: "easeOut" }}
+                                                        animate={{
+                                                            strokeDashoffset: dashOffset,
+                                                            fillOpacity: finalFillOpacity,
+                                                            opacity: finalOpacity,
+                                                            scale: scale
+                                                        }}
                                                     >
                                                         {char}
                                                     </motion.text>
@@ -380,9 +386,7 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                                 fontSize="18"
                                 animate={{
                                     y: isMobile ? 55 : 55 + (1 - curve(progress, 0.85, 0.95)) * 25,
-                                    opacity: isMobile
-                                        ? curve(progress, 0.85, 0.95) * (1 - curve(progress, 0.96, 1.0))
-                                        : curve(progress, 0.85, 0.95)
+                                    opacity: curve(progress, 0.85, 0.95) * (1 - curve(progress, 0.96, 1.0))
                                 }}
                             >
                                 CREATIVE ENGINEER
