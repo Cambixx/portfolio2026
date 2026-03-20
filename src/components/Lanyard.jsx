@@ -74,6 +74,14 @@ export default function Lanyard({
                         rotation={[0, Math.PI / 2, Math.PI / 3]}
                         scale={[100, 10, 1]}
                     />
+                    {/* Subtle accent rim light */}
+                    <Lightformer
+                        intensity={1.5}
+                        color="#5227FF"
+                        position={[5, 2, -3]}
+                        rotation={[0, -Math.PI / 4, 0]}
+                        scale={[20, 5, 1]}
+                    />
                 </Environment>
             </Canvas>
         </div>
@@ -142,7 +150,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
     useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
     useSphericalJoint(j3, card, [
         [0, 0, 0],
-        [0, 1.5, 0]
+        [0, 1.65, 0]
     ]);
 
     useEffect(() => {
@@ -178,8 +186,10 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
             // Automatic Flip Logic - Only when NOT dragging
             if (!dragged) {
                 const time = state.clock.getElapsedTime();
-                const shouldFlip = Math.floor(time / 5) % 2 === 1;
-                const targetRotY = shouldFlip ? Math.PI : 0;
+
+                // Smooth sinusoidal flip — 8s full cycle, eased transitions
+                const flipPhase = (Math.sin(time * (Math.PI / 4)) + 1) / 2; // 0→1→0 over 8s
+                const targetRotY = flipPhase > 0.5 ? Math.PI : 0;
 
                 ang.copy(card.current.angvel());
                 rot.copy(card.current.rotation());
@@ -187,10 +197,14 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
                 // Use sin difference for shortest path and smoother torque
                 const rotDiff = Math.sin(rot.y - targetRotY);
 
+                // Subtle idle sway — gentle breeze effect
+                const swayX = Math.sin(time * 0.7) * 0.08;
+                const swayZ = Math.cos(time * 0.5) * 0.06;
+
                 card.current.setAngvel({
-                    x: ang.x * 0.95, // Dampen X/Z to stabilize during flip
-                    y: ang.y - rotDiff * 0.25,
-                    z: ang.z * 0.95
+                    x: ang.x * 0.95 + swayX,
+                    y: ang.y - rotDiff * 0.2,
+                    z: ang.z * 0.95 + swayZ
                 });
             }
         }

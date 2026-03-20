@@ -1,164 +1,334 @@
-.svg-intro-playful {
+/* ═══════════════════════════════════════
+   SvgIntro V2 — Cinematic GSAP Edition
+   ═══════════════════════════════════════ */
+
+.svg-intro-v2 {
     position: fixed;
     inset: 0;
-    background: #0B0A10;
-    /* Very dark rich background to make colors pop */
+    background: #06050E;
     z-index: 9999;
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
+    will-change: transform;
+}
+
+/* ── Dynamic Lighting Layer ── */
+.intro-lighting {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 1;
+    opacity: 0;
+    transition: opacity 0.1s linear;
+    will-change: opacity, background;
+}
+
+/* ── Screen Flash ── */
+.intro-flash {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(82, 39, 255, 0.8), rgba(255, 255, 255, 0.3) 30%, transparent 70%);
+    pointer-events: none;
+    z-index: 15;
+    opacity: 0;
+    will-change: opacity;
+}
+
+/* ── Canvas Particle System ── */
+.intro-canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+}
+
+/* ── 3D Text Layer ── */
+.intro-text-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    transform-origin: center;
-    touch-action: none;
-    /* Block default scroll */
-    overscroll-behavior: none;
+    pointer-events: none;
+    perspective: 1200px;
 }
 
-.svg-intro-playful__content {
+.intro-text-container {
     position: relative;
-    z-index: 10;
-    width: 95%;
-    max-width: 1400px;
-    height: 100%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    gap: 12px;
 }
 
-.svg-intro-playful__main {
+.intro-letters-row {
+    position: relative;
+    height: 80px;
     width: 100%;
-    height: auto;
-    max-height: 80vh;
-    overflow: visible;
 }
 
-.svg-intro-playful__text-main {
+.intro-letter {
+    position: absolute;
+    top: 0;
     font-family: var(--font-sans);
     font-weight: 100;
-    fill: #ffffff;
+    font-size: 75px;
+    color: #ffffff;
     letter-spacing: 0.1em;
-    will-change: transform, opacity;
+    opacity: 0;
+    transform-style: preserve-3d;
+    will-change: transform, opacity, filter, text-shadow;
+    transition: text-shadow 0.05s linear;
+    /* Subtle glow on letters */
+    text-shadow: 0 0 30px rgba(82, 39, 255, 0.3);
 }
 
-.svg-intro-playful__text-sub {
-    font-family: var(--font-mono);
-    /* Keep some tech roots but softer */
-    font-size: 16px;
-    font-weight: 500;
-    fill: var(--accent);
-    /* #5227FF */
-    letter-spacing: 0.2em;
+.intro-letter--space {
+    width: 20px;
 }
 
-/* Playful Status Panel */
-.svg-intro-playful__panel {
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 300px;
-}
-
-.status-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    font-family: var(--font-sans);
-    font-size: 14px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.7);
-    margin-bottom: 20px;
-}
-
-.status-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    /* Background color will be animated via Framer Motion */
-}
-
-/* Smooth continuous progress track */
-.progress-track {
-    width: 100%;
-    height: 6px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 4px;
-    overflow: hidden;
+/* ── Scan Line ── */
+.intro-scan-line {
     position: relative;
+    width: 640px;
+    height: 2px;
+    margin-top: 18px;
+    opacity: 0;
+    --scan-progress: 0;
 }
 
-.progress-fill {
+.intro-scan-line__track {
     position: absolute;
     top: 0;
     left: 0;
-    bottom: 0;
-    width: 100%;
-    transform-origin: left;
-    border-radius: 4px;
+    height: 100%;
+    width: calc(var(--scan-progress) * 100%);
+    background: var(--accent, #5227FF);
+    transition: width 0.05s linear;
 }
 
-@media (max-width: 768px) {
-    .svg-intro-playful__panel {
-        margin-top: 20px;
-    }
-}
-
-/* Scroll Indication */
-.scroll-indicator {
+.intro-scan-line__head {
     position: absolute;
     top: 50%;
+    left: calc(var(--scan-progress) * 100%);
+    transform: translate(-50%, -50%);
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 0 12px 3px rgba(82, 39, 255, 0.8), 0 0 30px 8px rgba(82, 39, 255, 0.3);
+    animation: scan-head-pulse 0.4s ease-in-out infinite alternate;
+}
+
+@keyframes scan-head-pulse {
+    from { opacity: 0.6; transform: translate(-50%, -50%) scale(0.8); }
+    to   { opacity: 1;   transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* ── Subtitle ── */
+.intro-subtitle {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--accent, #5227FF);
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    opacity: 0;
+    margin-top: 14px;
+    will-change: transform, opacity;
+}
+
+.intro-subtitle__bracket {
+    color: rgba(255, 255, 255, 0.2);
+    font-weight: 300;
+    margin: 0 4px;
+}
+
+/* ── Terminal HUD Panel ── */
+.intro-hud {
+    position: absolute;
+    bottom: 40px;
     left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 12px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(6, 5, 14, 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    opacity: 0;
+    width: auto;
+    max-width: 90vw;
+}
+
+.intro-hud__status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.intro-hud__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #00E5FF;
+    box-shadow: 0 0 8px #00E5FF;
+    flex-shrink: 0;
+    animation: hud-dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes hud-dot-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+}
+
+.intro-hud__phase {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.intro-hud__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.intro-hud__counter {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+}
+
+.intro-hud__progress-track {
+    width: 120px;
+    height: 3px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.intro-hud__progress-fill {
+    height: 100%;
+    width: 100%;
+    transform-origin: left;
+    transform: scaleX(0);
+    border-radius: 2px;
+    background: #00E5FF;
+    will-change: transform;
+}
+
+/* ── Scroll Indicator ── */
+.scroll-indicator-new {
+    position: absolute;
+    bottom: 120px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
     pointer-events: none;
-    z-index: 100;
+    z-index: 25;
+    transition: opacity 0.5s ease, transform 0.5s ease;
 }
 
-.scroll-indicator__text {
+.scroll-indicator-new--hidden {
+    opacity: 0 !important;
+    transform: translateX(-50%) translateY(10px) !important;
+}
+
+.scroll-indicator-new__text {
     font-family: var(--font-mono);
     font-size: 10px;
     letter-spacing: 0.2em;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.35);
     text-transform: uppercase;
 }
 
-.scroll-indicator__mouse {
+.scroll-indicator-new__mouse {
     width: 20px;
     height: 32px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     border-radius: 12px;
     position: relative;
 }
 
-.scroll-indicator__wheel {
+.scroll-indicator-new__wheel {
     width: 2px;
     height: 6px;
-    background: var(--accent);
+    background: var(--accent, #5227FF);
     position: absolute;
     top: 6px;
     left: 50%;
     transform: translateX(-50%);
     border-radius: 1px;
-    animation: scroll-wheel-anim 1.5s infinite;
+    animation: scroll-wheel-v2 1.5s infinite;
 }
 
-@keyframes scroll-wheel-anim {
-    0% {
-        opacity: 0;
-        top: 6px;
+@keyframes scroll-wheel-v2 {
+    0%   { opacity: 0; top: 6px; }
+    30%  { opacity: 1; }
+    100% { opacity: 0; top: 18px; }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — Mobile
+   ═══════════════════════════════════════ */
+
+@media (max-width: 768px) {
+    .intro-letter {
+        font-size: 36px;
     }
 
-    30% {
-        opacity: 1;
+    .intro-letters-row {
+        height: 44px;
     }
 
-    100% {
-        opacity: 0;
-        top: 18px;
+    .intro-scan-line {
+        width: 320px;
+    }
+
+    .intro-subtitle {
+        font-size: 11px;
+        letter-spacing: 0.2em;
+    }
+
+    .intro-hud {
+        bottom: 24px;
+        padding: 8px 16px;
+        gap: 12px;
+    }
+
+    .intro-hud__phase {
+        font-size: 9px;
+        max-width: 140px;
+    }
+
+    .intro-hud__counter {
+        font-size: 10px;
+    }
+
+    .intro-hud__progress-track {
+        width: 60px;
+    }
+
+    .scroll-indicator-new {
+        bottom: 80px;
     }
 }
