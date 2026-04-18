@@ -150,7 +150,7 @@ function Band({ maxSpeed = 50, minSpeed = 0, isMobile = false, cardImage, lanyar
     useRopeJoint(j2, j3, [[0, 0, 0], [0, 0, 0], 1]);
     useSphericalJoint(j3, card, [
         [0, 0, 0],
-        [0, 1.65, 0]
+        [0, 1.7, 0]
     ]);
 
     useEffect(() => {

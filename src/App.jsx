@@ -250,12 +250,14 @@ function App() {
                         pointerEvents: 'none'
                     }}>
                         <div style={{ pointerEvents: 'auto', width: '100%', height: '100%' }}>
-                            <Lanyard
-                                position={[0, 0, 24]}
-                                gravity={[0, -40, 0]}
-                                cardImage={hero.lanyard.cardImage}
-                                lanyardImage={hero.lanyard.lanyardImage}
-                            />
+                            {!isMobile && (
+                                <Lanyard
+                                    position={[0, 0, 24]}
+                                    gravity={[0, -40, 0]}
+                                    cardImage={hero.lanyard.cardImage}
+                                    lanyardImage={hero.lanyard.lanyardImage}
+                                />
+                            )}
                         </div>
                     </div>
 
