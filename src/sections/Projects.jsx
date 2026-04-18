@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { useState, useMemo, useRef } from 'react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
 import { RemotionHero } from '../components/RemotionHero';
 import { ProjectHoverReveal } from '../components/ProjectHoverReveal';
 import data from '../data/projects.json';
@@ -7,6 +7,15 @@ import data from '../data/projects.json';
 export function Projects() {
     const [activeCategory, setActiveCategory] = useState('ALL');
     const [hoveredProject, setHoveredProject] = useState(null);
+
+    const titleRef = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: titleRef,
+        offset: ["start 90%", "end 50%"]
+    });
+    const xEven = useTransform(scrollYProgress, [0, 1], [-200, 0]);
+    const xOdd = useTransform(scrollYProgress, [0, 1], [200, 0]);
+    const opacityValue = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
 
     const categories = useMemo(() => {
         const cats = new Set(data.items.map(item => item.category));
@@ -24,9 +33,20 @@ export function Projects() {
             <div className="section-header">
                 <span className="section-number">{data.sectionNumber}</span>
                 <div className="section-title-wrapper">
-                    <h2 className="section-title">
+                    <h2 className="section-title" ref={titleRef}>
                         {data.title.map((line, i) => (
-                            <span key={i}>{line}{i < data.title.length - 1 && <br />}</span>
+                            <span key={i}>
+                                <motion.span
+                                    style={{ 
+                                        display: 'inline-block',
+                                        x: i % 2 === 0 ? xEven : xOdd,
+                                        opacity: opacityValue
+                                    }}
+                                >
+                                    {line}
+                                </motion.span>
+                                {i < data.title.length - 1 && <br />}
+                            </span>
                         ))}
                     </h2>
                     <p className="mono section-description">
