@@ -56,7 +56,7 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
     const hudRef = useRef(null);
     const lightingRef = useRef(null);
     const shockwaveRef = useRef(null);
-    const letterRefs = useRef([]);
+    const wordRefs = useRef([]);
     const subtitleRef = useRef(null);
     const scanLineRef = useRef(null);
     const flashRef = useRef(null);
@@ -74,7 +74,7 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
     const canvasSize = useRef({ w: 0, h: 0 });
 
     const NAME = 'CARLOS RÁBAGO';
-    const letters = useMemo(() => NAME.split(''), []);
+    const words = useMemo(() => NAME.split(' '), []);
 
     // ─── Mobile detection ────────────────────────────────────────────
     useEffect(() => {
@@ -447,43 +447,35 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
                 }
             }
 
-            // Text reveal (letters) — starts AFTER particles have fully faded
+            // Text reveal (words) — starts AFTER particles have fully faded
             const textRevealStart = 0.72;
             const textRevealEnd = 0.88;
             const exitStart = 0.94;
             const exitEnd = 1.0;
 
-            letterRefs.current.forEach((el, i) => {
+            wordRefs.current.forEach((el, i) => {
                 if (!el) return;
-                const delay = i * 0.006;
-                const revealProg = smoothstep(textRevealStart + delay, textRevealStart + 0.08 + delay, p);
+                
+                const revealProg = smoothstep(textRevealStart, textRevealEnd, p);
                 const exitProg = smoothstep(exitStart, exitEnd, p);
                 const visible = revealProg * (1 - exitProg);
 
-                // 3D assembly: letters come from random 3D positions
-                const fromY = (1 - revealProg) * (i % 2 === 0 ? -120 : 120);
-                const fromRotateX = (1 - revealProg) * (30 - i * 4);
-                const fromRotateY = (1 - revealProg) * ((i - 6) * 8);
-                const fromZ = (1 - revealProg) * (-200 - i * 20);
+                // Effect from section-title: words slide in horizontally from opposite sides
+                // i === 0 (Even) -> comes from -200, i === 1 (Odd) -> comes from 200
+                const startX = i % 2 === 0 ? -200 : 200;
+                
+                // Move from startX to 0
+                const currentX = (1 - revealProg) * startX;
+
                 const exitScale = 1 + exitProg * 0.3;
                 const exitBlur = exitProg * 15;
 
-                // RGB split on entry
-                const rgbSplit = revealProg > 0 && revealProg < 0.8
-                    ? (1 - revealProg / 0.8) * 3 : 0;
-
                 el.style.transform = `
-                    perspective(800px)
-                    translateY(${fromY + exitProg * (i % 2 === 0 ? -40 : 40)}px)
-                    translateZ(${fromZ}px)
-                    rotateX(${fromRotateX}deg)
-                    rotateY(${fromRotateY}deg)
+                    translateX(${currentX}px)
                     scale(${exitScale})
                 `;
                 el.style.opacity = visible;
                 el.style.filter = exitProg > 0 ? `blur(${exitBlur}px)` : 'none';
-                el.style.textShadow = rgbSplit > 0.1
-                    ? `${rgbSplit}px 0 rgba(255,51,102,0.6), ${-rgbSplit}px 0 rgba(0,229,255,0.6)` : 'none';
             });
 
             // Subtitle
@@ -534,7 +526,7 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
         return () => {
             if (rafId.current) cancelAnimationFrame(rafId.current);
         };
-    }, [onComplete, isMobile, letters]);
+    }, [onComplete, isMobile, words]);
 
     // ─── GSAP entry animations for HUD elements ─────────────────────
     useGSAP(() => {
@@ -554,16 +546,7 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
         );
     }, { scope: containerRef });
 
-    // ─── Letter spacing calculation ──────────────────────────────────
-    const getLetterStyle = useCallback((i) => {
-        const spacing = isMobile ? 22 : 48;
-        const totalWidth = (letters.length - 1) * spacing;
-        const x = i * spacing - totalWidth / 2;
-        return {
-            left: `calc(50% + ${x}px)`,
-            transform: 'translateX(-50%)',
-        };
-    }, [letters.length, isMobile]);
+
 
     return (
         <motion.div
@@ -592,16 +575,15 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
             {/* ── 3D Text Layer ── */}
             <div className="intro-text-layer" ref={textLayerRef}>
                 <div className="intro-text-container">
-                    {/* Main name letters */}
-                    <div className="intro-letters-row">
-                        {letters.map((char, i) => (
+                    {/* Main name words */}
+                    <div className="intro-words-row">
+                        {words.map((word, i) => (
                             <span
                                 key={i}
-                                ref={(el) => (letterRefs.current[i] = el)}
-                                className={`intro-letter ${char === ' ' ? 'intro-letter--space' : ''}`}
-                                style={getLetterStyle(i)}
+                                ref={(el) => (wordRefs.current[i] = el)}
+                                className="intro-word"
                             >
-                                {char === ' ' ? '\u00A0' : char}
+                                {word}
                             </span>
                         ))}
                     </div>

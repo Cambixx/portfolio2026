@@ -64,30 +64,25 @@
     gap: 12px;
 }
 
-.intro-letters-row {
-    position: relative;
-    height: 80px;
+.intro-words-row {
+    display: flex;
+    flex-direction: row;
+    gap: 0.25em;
+    align-items: center;
+    justify-content: center;
     width: 100%;
 }
 
-.intro-letter {
-    position: absolute;
-    top: 0;
+.intro-word {
     font-family: var(--font-sans);
-    font-weight: 100;
-    font-size: 75px;
-    color: #ffffff;
-    letter-spacing: 0.1em;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 0.95;
+    color: var(--white);
+    letter-spacing: -0.03em;
+    text-transform: uppercase;
     opacity: 0;
-    transform-style: preserve-3d;
-    will-change: transform, opacity, filter, text-shadow;
-    transition: text-shadow 0.05s linear;
-    /* Subtle glow on letters */
-    text-shadow: 0 0 30px rgba(82, 39, 255, 0.3);
-}
-
-.intro-letter--space {
-    width: 20px;
+    will-change: transform, opacity, filter;
 }
 
 /* ── Scan Line ── */
@@ -292,12 +287,8 @@
    ═══════════════════════════════════════ */
 
 @media (max-width: 768px) {
-    .intro-letter {
-        font-size: 36px;
-    }
-
-    .intro-letters-row {
-        height: 44px;
+    .intro-words-row {
+        gap: 0.15em;
     }
 
     .intro-scan-line {
