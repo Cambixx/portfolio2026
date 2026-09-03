@@ -323,3 +323,43 @@
         bottom: 80px;
     }
 }
+
+/* ── Skip Button ── */
+.intro-skip-btn {
+    position: absolute;
+    top: 24px;
+    right: 28px;
+    z-index: 50;
+    pointer-events: auto;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.7rem;
+    padding: 8px 16px;
+    border-radius: 9999px;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    letter-spacing: 0.1em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.intro-skip-btn:hover {
+    background: var(--accent, #5227FF);
+    border-color: var(--accent, #5227FF);
+    color: #fff;
+    transform: translateX(2px);
+    box-shadow: 0 0 15px rgba(82, 39, 255, 0.5);
+}
+
+@media (max-width: 768px) {
+    .intro-skip-btn {
+        top: 16px;
+        right: 16px;
+        font-size: 0.65rem;
+        padding: 6px 12px;
+    }
+}

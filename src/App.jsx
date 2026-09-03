@@ -1,4 +1,4 @@
-import Lanyard from './components/Lanyard';
+import HeroCard from './components/HeroCard';
 import DotGrid from './components/DotGrid';
 import { Projects } from './sections/Projects';
 import { Experience } from './sections/Experience';
@@ -33,7 +33,7 @@ function App() {
     const isMobile = useIsMobile();
     const [bgType, setBgType] = useState('antigravity');
     const [showIntro, setShowIntro] = useState(true);
-    const [introProgress, setIntroProgress] = useState(0); // Para saber si empezamos de 0 o de 0.99
+    const [introProgress, setIntroProgress] = useState(0);
     const lenisRef = useRef(null);
 
     useEffect(() => {
@@ -63,57 +63,6 @@ function App() {
         return () => {
             cancelAnimationFrame(rafId);
             lenis.destroy();
-        };
-    }, [showIntro]);
-
-    // Re-enable intro when scrolling up from the top
-    useEffect(() => {
-        if (showIntro) return; // Only listen when intro is hidden
-
-        // Mouse Wheel logic
-        const handleWheel = (e) => {
-            if (window.scrollY <= 0 && e.deltaY < 0) {
-                // User is trying to scroll up past the top
-                setIntroProgress(0.99); // Start near the end to reverse
-                setShowIntro(true);
-            }
-        };
-
-        // Touch swipe logic
-        let touchStart = null;
-
-        const handleTouchStart = (e) => {
-            touchStart = e.touches[0].clientY;
-        };
-
-        const handleTouchMove = (e) => {
-            if (touchStart === null) return; // Prevent firing if we caught a move without a start (like mid-swipe from the intro)
-
-            if (window.scrollY <= 0) {
-                const currentY = e.touches[0].clientY;
-                if (currentY > touchStart + 40) {
-                    // Swiped down significantly (scrolling up against the top boundary)
-                    setIntroProgress(0.99);
-                    setShowIntro(true);
-                    touchStart = null; // Reset so it doesn't fire repeatedly
-                }
-            }
-        };
-
-        const handleTouchEnd = () => {
-            touchStart = null;
-        };
-
-        window.addEventListener('wheel', handleWheel, { passive: true });
-        window.addEventListener('touchstart', handleTouchStart, { passive: true });
-        window.addEventListener('touchmove', handleTouchMove, { passive: true });
-        window.addEventListener('touchend', handleTouchEnd, { passive: true });
-
-        return () => {
-            window.removeEventListener('wheel', handleWheel);
-            window.removeEventListener('touchstart', handleTouchStart);
-            window.removeEventListener('touchmove', handleTouchMove);
-            window.removeEventListener('touchend', handleTouchEnd);
         };
     }, [showIntro]);
 
@@ -230,95 +179,57 @@ function App() {
             {/* All scrollable content */}
             <div style={{ position: 'relative', zIndex: 1 }}>
                 {/* ══════ HERO ══════ */}
-                <div style={{
-                    position: 'relative',
-                    maxWidth: '1400px',
-                    margin: '0 auto',
-                    minHeight: '100vh',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center'
-                }}>
-                    {/* Lanyard 3D */}
-                    <div style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        zIndex: 1,
-                        pointerEvents: 'none'
-                    }}>
-                        <div style={{ pointerEvents: 'auto', width: '100%', height: '100%' }}>
-                            {!isMobile && (
-                                <Lanyard
-                                    position={[0, 0, 24]}
-                                    gravity={[0, -40, 0]}
-                                    cardImage={hero.lanyard.cardImage}
-                                    lanyardImage={hero.lanyard.lanyardImage}
-                                />
-                            )}
-                        </div>
-                    </div>
+                <div className="hero-section-container">
+                    <div className="hero-grid">
+                        {/* Hero Text / Info Column */}
+                        <div className="hero-content-col">
+                            <div className="hero-status-pill mono">
+                                <span className="hero-status-dot" />
+                                <span>{hero.badge || "// AVAILABLE FOR NEW PROJECTS"}</span>
+                            </div>
 
-                    {/* Hero Text */}
-                    <div style={{
-                        position: 'relative',
-                        zIndex: 2,
-                        textAlign: 'left',
-                        pointerEvents: 'none',
-                        marginTop: isMobile ? '120px' : '-60px',
-                        padding: isMobile ? '0 24px' : '0 80px'
-                    }}>
-                        <span className="mono" style={{
-                            display: 'block',
-                            fontSize: isMobile ? '0.7rem' : '0.8rem',
-                            color: 'var(--muted)',
-                            letterSpacing: '0.15em',
-                            marginBottom: isMobile ? '24px' : '40px'
-                        }}>
-                            {hero.subtitle}
-                        </span>
+                            <div className="hero-title-group">
+                                {hero.title.map((line, index) => (
+                                    <div
+                                        key={index}
+                                        className="hero-title-line"
+                                    >
+                                        <TextPressure
+                                            text={line}
+                                            flex={false}
+                                            textColor={index === 0 ? "#ffffff" : "var(--accent)"}
+                                            minFontSize={isMobile ? 44 : 96}
+                                        />
+                                    </div>
+                                ))}
+                            </div>
 
-                        <div style={{ marginBottom: isMobile ? '24px' : '40px' }}>
-                            {hero.title.map((line, index) => (
-                                <div
-                                    key={index}
-                                    style={{
-                                        position: 'relative',
-                                        height: isMobile ? '60px' : '140px',
-                                        width: 'fit-content',
-                                        marginBottom: (index < hero.title.length - 1 && !isMobile) ? '10px' : '0'
-                                    }}
-                                >
-                                    <TextPressure
-                                        text={line}
-                                        flex={false}
-                                        textColor={index === 0 ? "#ffffff" : "var(--accent)"}
-                                        minFontSize={isMobile ? 50 : 120}
-                                    />
-                                </div>
-                            ))}
+                            <p className="mono hero-lead-description">
+                                {hero.description}
+                            </p>
+
+                            {/* Hero Action CTA Buttons */}
+                            <div className="hero-cta-group">
+                                <a href="#projects" className="hero-primary-btn mono">
+                                    <span>[ EXPLORE WORKS ↓ ]</span>
+                                </a>
+                                <a href="#contact" className="hero-secondary-btn mono">
+                                    <span>CONTACT ME →</span>
+                                </a>
+                            </div>
+
+                            <div className="hero-meta-strip mono">
+                                <span>{hero.coordinates}</span>
+                                <span className="hero-loc-tag">◉ {hero.location || "Madrid, Spain"}</span>
+                            </div>
                         </div>
 
-                        <p className="mono" style={{
-                            fontSize: isMobile ? '0.8rem' : '0.9rem',
-                            color: 'var(--muted)',
-                            maxWidth: isMobile ? '100%' : '500px',
-                            lineHeight: '1.7',
-                            whiteSpace: 'pre-line',
-                            textAlign: 'left'
-                        }}>
-                            {hero.description}
-                        </p>
-
-                        <div className="mono" style={{
-                            marginTop: isMobile ? '40px' : '60px',
-                            fontSize: '0.7rem',
-                            color: 'rgba(255,255,255,0.15)',
-                            letterSpacing: '0.1em'
-                        }}>
-                            {hero.coordinates}
+                        {/* Hero Visual Column (HeroCard) */}
+                        <div className="hero-visual-col">
+                            <HeroCard
+                                stats={hero.stats}
+                                coreStack={hero.coreStack}
+                            />
                         </div>
                     </div>
                 </div>

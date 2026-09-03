@@ -567,6 +567,18 @@ export default function SvgIntro({ onComplete, initialProgress = 0 }) {
             <div className="intro-lighting" ref={lightingRef} />
 
             {/* ── Screen Flash ── */}
+            {/* ── Skip Button ── */}
+            <button
+                className="intro-skip-btn mono"
+                onClick={() => {
+                    if (onComplete) onComplete();
+                }}
+                type="button"
+                aria-label="Skip introduction"
+            >
+                SKIP INTRO <span>→</span>
+            </button>
+
             <div className="intro-flash" ref={flashRef} />
 
             {/* ── Canvas Particle System ── */}
