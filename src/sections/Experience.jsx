@@ -1,102 +1,34 @@
-import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'motion/react';
+import { motion } from 'motion/react';
+import { SectionHeader } from '../components/SectionHeader';
 import data from '../data/experience.json';
 
+const EASE = [0.16, 1, 0.3, 1];
+
 export function Experience() {
-    const titleRef = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: titleRef,
-        offset: ["start 90%", "end 50%"]
-    });
-    const xEven = useTransform(scrollYProgress, [0, 1], [-200, 0]);
-    const xOdd = useTransform(scrollYProgress, [0, 1], [200, 0]);
-    const opacityValue = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
     return (
         <section id="experience" className="responsive-section">
-            {/* Section Header */}
-            <div className="section-header">
-                <span className="section-number">{data.sectionNumber}</span>
-                <h2 className="section-title" ref={titleRef}>
-                    {data.title.map((line, i) => (
-                        <span key={i}>
-                            <motion.span
-                                style={{ 
-                                    display: 'inline-block',
-                                    x: i % 2 === 0 ? xEven : xOdd,
-                                    opacity: opacityValue
-                                }}
-                            >
-                                {line}
-                            </motion.span>
-                            {i < data.title.length - 1 && <br />}
-                        </span>
-                    ))}
-                </h2>
-                <div className="brutal-divider" style={{ marginTop: '40px' }} />
-            </div>
+            <SectionHeader number={data.sectionNumber} title={data.title} />
 
-            {/* Timeline */}
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <div className="experience-list">
                 {data.items.map((role, i) => (
-                    <div
-                        key={i}
-                        className="brutal-card"
-                        style={{
-                            padding: '50px 40px',
-                            borderTop: 'none',
-                            borderLeft: role.isCurrent ? '3px solid var(--accent)' : '1px solid var(--border)',
-                            borderRight: '1px solid var(--border)',
-                            borderBottom: '1px solid var(--border)',
-                        }}
+                    <motion.article
+                        key={role.line}
+                        className={`brutal-card experience-card${role.isCurrent ? ' experience-card--current' : ''}`}
+                        initial={{ opacity: 0, y: 32 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, margin: '-10% 0px' }}
+                        transition={{ duration: 0.8, ease: EASE, delay: Math.min(i, 3) * 0.06 }}
                     >
                         <div className="experience-grid">
                             <div>
-                                <span className="mono" style={{
-                                    fontSize: '0.7rem',
-                                    color: 'rgba(255,255,255,0.15)',
-                                    display: 'block',
-                                    marginBottom: '16px'
-                                }}>
-                                    {role.line}
-                                </span>
-                                <h3 style={{
-                                    fontSize: 'clamp(1.3rem, 2.5vw, 1.8rem)',
-                                    fontWeight: 700,
-                                    textTransform: 'uppercase',
-                                    letterSpacing: '-0.02em',
-                                    lineHeight: 1.1,
-                                    marginBottom: '12px'
-                                }}>
-                                    {role.title}
-                                </h3>
-                                <span className="mono" style={{
-                                    fontSize: '0.8rem',
-                                    color: 'var(--muted)',
-                                    display: 'block',
-                                    marginBottom: '8px'
-                                }}>
-                                    {role.company}
-                                </span>
-                                <span className="mono" style={{
-                                    fontSize: '0.7rem',
-                                    padding: '4px 10px',
-                                    border: '1px solid var(--border)',
-                                    color: role.isCurrent ? 'var(--accent)' : 'var(--muted)',
-                                    display: 'inline-block'
-                                }}>
-                                    {role.period}
-                                </span>
+                                <span className="experience-index">{role.line}</span>
+                                <h3 className="experience-role">{role.title}</h3>
+                                <span className="experience-company">{role.company}</span>
+                                <span className="experience-period">{role.period}</span>
                             </div>
-
-                            <p className="mono" style={{
-                                color: 'var(--muted)',
-                                fontSize: '0.85rem',
-                                lineHeight: '1.8',
-                            }}>
-                                {role.description}
-                            </p>
+                            <p className="experience-description">{role.description}</p>
                         </div>
-                    </div>
+                    </motion.article>
                 ))}
             </div>
         </section>

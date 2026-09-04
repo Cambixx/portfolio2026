@@ -135,9 +135,10 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                     <button
                         onClick={copyEmail}
                         className="hero-card-action-btn mono copy-btn"
+                        aria-live="polite"
                         title="Copy email to clipboard"
                     >
-                        <span>{copied ? '✓ COPIED!' : '📋 carlos@rabago.dev'}</span>
+                        <span>{copied ? '✓ COPIED' : 'carlos@rabago.dev'}</span>
                     </button>
                     <div className="hero-card-socials-mini">
                         <a

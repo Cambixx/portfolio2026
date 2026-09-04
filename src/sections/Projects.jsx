@@ -1,60 +1,31 @@
-import { useState, useMemo, useRef } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform } from 'motion/react';
+import { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { RemotionHero } from '../components/RemotionHero';
 import { ProjectHoverReveal } from '../components/ProjectHoverReveal';
+import { SectionHeader } from '../components/SectionHeader';
 import data from '../data/projects.json';
 
-export function Projects() {
+export function Projects({ isMobile }) {
     const [activeCategory, setActiveCategory] = useState('ALL');
     const [hoveredProject, setHoveredProject] = useState(null);
 
-    const titleRef = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: titleRef,
-        offset: ["start 90%", "end 50%"]
-    });
-    const xEven = useTransform(scrollYProgress, [0, 1], [-200, 0]);
-    const xOdd = useTransform(scrollYProgress, [0, 1], [200, 0]);
-    const opacityValue = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
-
     const categories = useMemo(() => {
-        const cats = new Set(data.items.map(item => item.category));
+        const cats = new Set(data.items.map((item) => item.category));
         return ['ALL', ...Array.from(cats)];
     }, []);
 
     const filteredProjects = useMemo(() => {
         if (activeCategory === 'ALL') return data.items;
-        return data.items.filter(item => item.category === activeCategory);
+        return data.items.filter((item) => item.category === activeCategory);
     }, [activeCategory]);
 
     return (
         <section id="projects" className="responsive-section">
-            {/* Section Header */}
-            <div className="section-header">
-                <span className="section-number">{data.sectionNumber}</span>
-                <div className="section-title-wrapper">
-                    <h2 className="section-title" ref={titleRef}>
-                        {data.title.map((line, i) => (
-                            <span key={i}>
-                                <motion.span
-                                    style={{ 
-                                        display: 'inline-block',
-                                        x: i % 2 === 0 ? xEven : xOdd,
-                                        opacity: opacityValue
-                                    }}
-                                >
-                                    {line}
-                                </motion.span>
-                                {i < data.title.length - 1 && <br />}
-                            </span>
-                        ))}
-                    </h2>
-                    <p className="mono section-description">
-                        {data.description}
-                    </p>
-                </div>
-                <div className="brutal-divider" style={{ marginTop: '40px' }} />
-            </div>
+            <SectionHeader
+                number={data.sectionNumber}
+                title={data.title}
+                description={data.description}
+            />
 
             {/* Showreel */}
             <div className="showreel-container">
@@ -72,10 +43,12 @@ export function Projects() {
             </div>
 
             {/* Filters */}
-            <div className="project-filters">
+            <div className="project-filters" role="tablist" aria-label="Project categories">
                 {categories.map((cat) => (
                     <button
                         key={cat}
+                        role="tab"
+                        aria-selected={activeCategory === cat}
                         className={`filter-btn mono ${activeCategory === cat ? 'active' : ''}`}
                         onClick={() => setActiveCategory(cat)}
                     >
@@ -88,25 +61,30 @@ export function Projects() {
             <div className="project-list">
                 <AnimatePresence mode="popLayout">
                     {filteredProjects.map((project, i) => (
-                        <motion.div
+                        <motion.article
                             layout
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95 }}
-                            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                            exit={{ opacity: 0, scale: 0.97 }}
+                            transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1], delay: i * 0.03 }}
                             key={project.title}
                             className="project-card-container"
-                            onClick={() => project.url && window.open(project.url, '_blank')}
+                            onClick={() => project.url && window.open(project.url, '_blank', 'noopener')}
                             onMouseEnter={() => setHoveredProject(project)}
                             onMouseLeave={() => setHoveredProject(null)}
                         >
                             <div className="project-grid">
+                                <span className="project-index">
+                                    {String(i + 1).padStart(2, '0')}
+                                </span>
+
                                 <div className="project-info">
                                     <span className="mono project-meta">
                                         {project.category} / {project.year}
                                     </span>
                                     <h3 className="project-title-text">
                                         {project.title}
+                                        <span className="project-title-arrow" aria-hidden="true">↗</span>
                                     </h3>
                                 </div>
 
@@ -115,25 +93,22 @@ export function Projects() {
                                 </p>
 
                                 <div className="project-tech-tags">
-                                    {project.tech.map((techItem, k) => (
-                                        <span key={k} className="brutal-tag">{techItem}</span>
+                                    {project.tech.map((techItem) => (
+                                        <span key={techItem} className="brutal-tag">{techItem}</span>
                                     ))}
                                 </div>
                             </div>
-                        </motion.div>
+                        </motion.article>
                     ))}
                 </AnimatePresence>
             </div>
 
-            {/* Hover Reveal Portal (Desktop Only) */}
-            {typeof window !== 'undefined' && window.innerWidth > 768 && (
+            {!isMobile && (
                 <ProjectHoverReveal
                     image={hoveredProject?.image}
                     isActive={!!hoveredProject}
                 />
             )}
-
-            <div className="brutal-divider" />
         </section>
     );
 }

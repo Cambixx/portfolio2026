@@ -1,30 +1,28 @@
-import HeroCard from './components/HeroCard';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import Lenis from 'lenis';
+
+import Intro from './components/Intro';
+import { Nav } from './components/Nav';
+import { StatusBar } from './components/StatusBar';
+import ScrollCompanion from './components/ScrollCompanion';
 import DotGrid from './components/DotGrid';
+import Antigravity from './components/Antigravity';
+
+import { Hero } from './sections/Hero';
 import { Projects } from './sections/Projects';
 import { Experience } from './sections/Experience';
 import { Stack } from './sections/Stack';
 import { Contact } from './sections/Contact';
-import site from './data/site.json';
-import hero from './data/hero.json';
-import './App.css';
 
-import Antigravity from './components/Antigravity';
-import CircularText from './components/CircularText';
-import TextPressure from './components/TextPressure';
-import SvgIntro from './components/SvgIntro';
-import ScrollCompanion from './components/ScrollCompanion';
-import { useState, useEffect, useRef } from 'react';
-import { AnimatePresence } from 'motion/react';
-import Lenis from 'lenis';
-
-function useIsMobile() {
-    const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+function useIsMobile(breakpoint = 768) {
+    const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint);
 
     useEffect(() => {
-        const handleResize = () => setIsMobile(window.innerWidth < 768);
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+        const mq = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+        const handle = (e) => setIsMobile(e.matches);
+        mq.addEventListener('change', handle);
+        return () => mq.removeEventListener('change', handle);
+    }, [breakpoint]);
 
     return isMobile;
 }
@@ -33,11 +31,13 @@ function App() {
     const isMobile = useIsMobile();
     const [bgType, setBgType] = useState('antigravity');
     const [showIntro, setShowIntro] = useState(true);
-    const [introProgress, setIntroProgress] = useState(0);
+    // `revealed` flips when the intro curtain starts lifting so the hero can
+    // animate in behind it; `showIntro` flips once the curtain has fully left.
+    const [revealed, setRevealed] = useState(false);
     const lenisRef = useRef(null);
 
+    // Smooth scroll
     useEffect(() => {
-        // ... (lenis functionality)
         const lenis = new Lenis({
             autoRaf: false,
             smoothWheel: true,
@@ -54,33 +54,43 @@ function App() {
         };
         rafId = requestAnimationFrame(raf);
 
-        if (showIntro) {
-            lenis.stop();
-        } else {
-            lenis.start();
-        }
-
         return () => {
             cancelAnimationFrame(rafId);
             lenis.destroy();
         };
+    }, []);
+
+    // Lock scroll while the intro is on screen
+    useEffect(() => {
+        const lenis = lenisRef.current;
+        if (!lenis) return;
+        if (showIntro) {
+            window.scrollTo(0, 0);
+            lenis.stop();
+        } else {
+            lenis.start();
+        }
     }, [showIntro]);
 
-    const handleIntroComplete = () => {
+    const handleReveal = useCallback(() => setRevealed(true), []);
+    const handleIntroComplete = useCallback(() => {
+        setRevealed(true);
         setShowIntro(false);
-    };
+    }, []);
+
+    const toggleBg = useCallback(
+        () => setBgType((prev) => (prev === 'dotgrid' ? 'antigravity' : 'dotgrid')),
+        []
+    );
 
     return (
-        <main style={{ minHeight: '100vh', position: 'relative', background: 'var(--bg)', overflowX: 'hidden' }}>
-            <AnimatePresence>
-                {showIntro && <SvgIntro onComplete={handleIntroComplete} initialProgress={introProgress} />}
-            </AnimatePresence>
+        <main className="app">
+            {showIntro && (
+                <Intro onReveal={handleReveal} onComplete={handleIntroComplete} />
+            )}
 
-            {/* Scroll Companion - Persists after intro */}
-            {!showIntro && <ScrollCompanion />}
-
-            {/* Background Layer */}
-            <div style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100vh', zIndex: 0 }}>
+            {/* Background layer */}
+            <div className="app-bg" aria-hidden="true">
                 {bgType === 'dotgrid' ? (
                     <DotGrid
                         dotSize={5}
@@ -113,187 +123,26 @@ function App() {
                     />
                 )}
             </div>
+            <div className="vignette" aria-hidden="true" />
+            <div className="grain" aria-hidden="true" />
 
-            {/* Navigation */}
-            <nav style={{
-                position: 'fixed',
-                top: 0,
-                left: 0,
-                width: '100%',
-                padding: isMobile ? '16px 20px' : '24px 40px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: isMobile ? 'flex-start' : 'center',
-                zIndex: 100,
-                pointerEvents: 'none',
-                background: 'linear-gradient(to bottom, rgba(5,5,5,0.9) 0%, transparent 100%)'
-            }}>
-                <div style={{
-                    pointerEvents: 'auto',
-                    padding: isMobile ? '0' : '0 10px',
-                    marginTop: isMobile ? '0' : '20px'
-                }}>
-                    <CircularText
-                        text="CARLOS*RÁBAGO*"
-                        spinDuration={15}
-                        onHover="speedUp"
-                        radius={isMobile ? 18 : 28}
-                    />
-                </div>
-                <div style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    gap: isMobile ? '4px' : '8px',
-                    alignItems: 'center',
-                    pointerEvents: 'auto',
-                    border: '1px solid var(--border)',
-                    padding: isMobile ? '4px 8px' : '8px 12px',
-                    background: 'rgba(255, 255, 255, 0.04)',
-                    backdropFilter: 'blur(20px)',
-                    WebkitBackdropFilter: 'blur(20px)'
-                }}>
-                    {site.nav.map(item => (
-                        <a
-                            key={item.label}
-                            href={item.href}
-                            style={{
-                                textDecoration: 'none',
-                                color: 'var(--muted)',
-                                fontFamily: 'var(--font-mono)',
-                                fontSize: isMobile ? '0.55rem' : '0.75rem',
-                                fontWeight: 400,
-                                padding: isMobile ? '4px 6px' : '6px 14px',
-                                transition: 'color 0.2s',
-                                letterSpacing: '0.02em',
-                            }}
-                            onMouseEnter={e => e.target.style.color = 'white'}
-                            onMouseLeave={e => e.target.style.color = 'var(--muted)'}
-                        >
-                            {!isMobile && <span style={{ color: 'var(--accent)', marginRight: '6px' }}>{item.num}</span>}
-                            {isMobile ? item.num : item.label.toUpperCase()}
-                        </a>
-                    ))}
-                </div>
-            </nav>
+            <Nav isMobile={isMobile} ready={revealed} />
+            {!showIntro && <ScrollCompanion />}
 
-            {/* All scrollable content */}
-            <div style={{ position: 'relative', zIndex: 1 }}>
-                {/* ══════ HERO ══════ */}
-                <div className="hero-section-container">
-                    <div className="hero-grid">
-                        {/* Hero Text / Info Column */}
-                        <div className="hero-content-col">
-                            <div className="hero-status-pill mono">
-                                <span className="hero-status-dot" />
-                                <span>{hero.badge || "// AVAILABLE FOR NEW PROJECTS"}</span>
-                            </div>
-
-                            <div className="hero-title-group">
-                                {hero.title.map((line, index) => (
-                                    <div
-                                        key={index}
-                                        className="hero-title-line"
-                                    >
-                                        <TextPressure
-                                            text={line}
-                                            flex={false}
-                                            textColor={index === 0 ? "#ffffff" : "var(--accent)"}
-                                            minFontSize={isMobile ? 44 : 96}
-                                        />
-                                    </div>
-                                ))}
-                            </div>
-
-                            <p className="mono hero-lead-description">
-                                {hero.description}
-                            </p>
-
-                            {/* Hero Action CTA Buttons */}
-                            <div className="hero-cta-group">
-                                <a href="#projects" className="hero-primary-btn mono">
-                                    <span>[ EXPLORE WORKS ↓ ]</span>
-                                </a>
-                                <a href="#contact" className="hero-secondary-btn mono">
-                                    <span>CONTACT ME →</span>
-                                </a>
-                            </div>
-
-                            <div className="hero-meta-strip mono">
-                                <span>{hero.coordinates}</span>
-                                <span className="hero-loc-tag">◉ {hero.location || "Madrid, Spain"}</span>
-                            </div>
-                        </div>
-
-                        {/* Hero Visual Column (HeroCard) */}
-                        <div className="hero-visual-col">
-                            <HeroCard
-                                stats={hero.stats}
-                                coreStack={hero.coreStack}
-                            />
-                        </div>
-                    </div>
-                </div>
-
-                <Projects />
+            <div className="app-content">
+                <Hero ready={revealed} />
+                <Projects isMobile={isMobile} />
                 <Experience />
                 <Stack />
                 <Contact />
             </div>
 
-            {/* Status Bar */}
-            <div style={{
-                position: 'fixed',
-                bottom: isMobile ? '16px' : '24px',
-                left: isMobile ? '16px' : '24px',
-                right: isMobile ? '16px' : 'auto',
-                padding: '8px 16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: '10px',
-                zIndex: 20,
-                border: '1px solid var(--border)',
-                background: 'rgba(5, 5, 5, 0.8)',
-                backdropFilter: 'blur(20px)',
-                WebkitBackdropFilter: 'blur(20px)'
-            }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <div style={{
-                        width: 6,
-                        height: 6,
-                        background: site.statusBar.color,
-                        boxShadow: `0 0 8px ${site.statusBar.color}`
-                    }} />
-                    <span className="mono" style={{
-                        fontSize: '0.6rem',
-                        fontWeight: 400,
-                        letterSpacing: '0.08em',
-                        color: 'rgba(255,255,255,0.6)',
-                    }}>
-                        {site.statusBar.text}
-                    </span>
-                </div>
-
-                <button
-                    onClick={() => setBgType(prev => prev === 'dotgrid' ? 'antigravity' : 'dotgrid')}
-                    className="mono"
-                    style={{
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)',
-                        color: 'white',
-                        fontSize: '0.55rem',
-                        padding: '4px 8px',
-                        cursor: 'pointer',
-                        letterSpacing: '0.1em',
-                        transition: 'all 0.2s'
-                    }}
-                    onMouseEnter={e => e.target.style.background = 'var(--accent)'}
-                    onMouseLeave={e => e.target.style.background = 'rgba(255,255,255,0.05)'}
-                >
-                    {isMobile ? 'BG' : `SWITCH BG: ${bgType === 'dotgrid' ? 'ANTIGRAVITY' : 'DOTGRID'}`}
-                </button>
-            </div>
-
+            <StatusBar
+                bgType={bgType}
+                onToggleBg={toggleBg}
+                isMobile={isMobile}
+                ready={revealed}
+            />
         </main>
     );
 }

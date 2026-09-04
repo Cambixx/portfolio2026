@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import { motion, useSpring, useMotionValue } from 'motion/react';
 
 export function ProjectHoverReveal({ image, isActive }) {
