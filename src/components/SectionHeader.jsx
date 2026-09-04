@@ -4,8 +4,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 /**
  * Shared animated section header.
  * Title lines slide in horizontally from alternating sides as the header
- * scrolls into view. The clip wrapper prevents the offset lines from causing
- * horizontal overflow on narrow viewports.
+ * scrolls into view with smooth opacity fade.
  */
 export function SectionHeader({ number, title, description, divider = true }) {
     const ref = useRef(null);
