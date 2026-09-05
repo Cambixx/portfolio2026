@@ -1,13 +1,11 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RemotionHero } from '../components/RemotionHero';
-import { ProjectHoverReveal } from '../components/ProjectHoverReveal';
 import { SectionHeader } from '../components/SectionHeader';
 import data from '../data/projects.json';
 
 export function Projects({ isMobile }) {
     const [activeCategory, setActiveCategory] = useState('ALL');
-    const [hoveredProject, setHoveredProject] = useState(null);
 
     const categories = useMemo(() => {
         const cats = new Set(data.items.map((item) => item.category));
@@ -70,8 +68,6 @@ export function Projects({ isMobile }) {
                             key={project.title}
                             className="project-card-container"
                             onClick={() => project.url && window.open(project.url, '_blank', 'noopener')}
-                            onMouseEnter={() => setHoveredProject(project)}
-                            onMouseLeave={() => setHoveredProject(null)}
                         >
                             <div className="project-grid">
                                 <span className="project-index">
@@ -102,13 +98,6 @@ export function Projects({ isMobile }) {
                     ))}
                 </AnimatePresence>
             </div>
-
-            {!isMobile && (
-                <ProjectHoverReveal
-                    image={hoveredProject?.image}
-                    isActive={!!hoveredProject}
-                />
-            )}
         </section>
     );
 }
