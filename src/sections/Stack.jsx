@@ -1,10 +1,11 @@
 import { motion } from 'motion/react';
 import { SectionHeader } from '../components/SectionHeader';
-import data from '../data/stack.json';
+import { useContent } from '../i18n/useLanguage';
 
 const EASE = [0.16, 1, 0.3, 1];
 
 export function Stack() {
+    const data = useContent('stack');
     return (
         <section id="stack" className="responsive-section">
             <SectionHeader

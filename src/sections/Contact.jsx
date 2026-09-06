@@ -1,16 +1,20 @@
 import { motion } from 'motion/react';
 import { SectionHeader } from '../components/SectionHeader';
-import data from '../data/contact.json';
-import site from '../data/site.json';
+import { useContent, useLanguage } from '../i18n/useLanguage';
 
 const EASE = [0.16, 1, 0.3, 1];
 
 const buildDate = new Date(__BUILD_DATE__);
-const lastUpdated = buildDate
-    .toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
-    .toUpperCase();
 
 export function Contact() {
+    const data = useContent('contact');
+    const site = useContent('site');
+    const ui = useContent('ui');
+    const { lang } = useLanguage();
+    const lastUpdated = buildDate
+        .toLocaleDateString(lang === 'es' ? 'es-ES' : 'en-US', { month: 'short', year: 'numeric' })
+        .toUpperCase();
+
     return (
         <section id="contact" className="responsive-section" style={{ paddingBottom: '80px' }}>
             <SectionHeader number={data.sectionNumber} title={data.title} />
@@ -57,7 +61,7 @@ export function Contact() {
 
             <footer className="site-footer">
                 <span>© {buildDate.getFullYear()} — {site.brand} — {site.version}</span>
-                <span>LAST UPDATED: {lastUpdated}</span>
+                <span>{ui.contact.lastUpdated}: {lastUpdated}</span>
             </footer>
         </section>
     );

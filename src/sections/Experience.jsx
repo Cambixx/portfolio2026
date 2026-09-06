@@ -1,10 +1,11 @@
 import { motion } from 'motion/react';
 import { SectionHeader } from '../components/SectionHeader';
-import data from '../data/experience.json';
+import { useContent } from '../i18n/useLanguage';
 
 const EASE = [0.16, 1, 0.3, 1];
 
 export function Experience() {
+    const data = useContent('experience');
     return (
         <section id="experience" className="responsive-section">
             <SectionHeader number={data.sectionNumber} title={data.title} />

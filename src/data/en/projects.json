@@ -22,7 +22,8 @@
             "year": "2024",
             "url": "https://doersdf.com/",
             "image": "/projects/doers.png",
-            "category": "Creative Development"
+            "category": "Creative Development",
+            "categoryKey": "creative"
         },
         {
             "title": "Nexho — Mahou",
@@ -36,7 +37,8 @@
             "year": "2023",
             "url": "https://www.somosnexho.com/",
             "image": "/projects/nexho.png",
-            "category": "Full-Stack"
+            "category": "Full-Stack",
+            "categoryKey": "fullstack"
         },
         {
             "title": "Greenpeace España",
@@ -50,7 +52,8 @@
             "year": "2024",
             "url": "https://es.greenpeace.org/",
             "image": "/projects/doers.png",
-            "category": "Creative Development"
+            "category": "Creative Development",
+            "categoryKey": "creative"
         },
         {
             "title": "Budweiser España",
@@ -64,7 +67,8 @@
             "year": "2024",
             "url": "https://www.budweiser.es/",
             "image": "/projects/corona.png",
-            "category": "Motion Graphics"
+            "category": "Motion Graphics",
+            "categoryKey": "motion"
         },
         {
             "title": "Corona Official",
@@ -78,7 +82,8 @@
             "year": "2023",
             "url": "https://www.cervezacorona.es/",
             "image": "/projects/corona.png",
-            "category": "Motion Graphics"
+            "category": "Motion Graphics",
+            "categoryKey": "motion"
         },
         {
             "title": "Tejiendo Derechos — Oxfam",
@@ -92,7 +97,8 @@
             "year": "2023",
             "url": "https://tejiendoderechos.oxfamintermon.org/",
             "image": "/projects/oxfam.png",
-            "category": "UI / Design"
+            "category": "UI / Design",
+            "categoryKey": "ui"
         },
         {
             "title": "Nextep Finance",
@@ -106,7 +112,8 @@
             "year": "2024",
             "url": "https://nextepfinance.com/",
             "image": "/projects/boreal.png",
-            "category": "Full-Stack"
+            "category": "Full-Stack",
+            "categoryKey": "fullstack"
         },
         {
             "title": "Boreal Wealth",
@@ -119,7 +126,8 @@
             "year": "2022",
             "url": "https://www.borealcm.com/",
             "image": "/projects/boreal.png",
-            "category": "Full-Stack"
+            "category": "Full-Stack",
+            "categoryKey": "fullstack"
         },
         {
             "title": "IC-A Governance",
@@ -133,7 +141,8 @@
             "year": "2022",
             "url": "https://www.iconsejeros.com/",
             "image": "/projects/ica.png",
-            "category": "UI / Design"
+            "category": "UI / Design",
+            "categoryKey": "ui"
         },
         {
             "title": "Misstake",
@@ -147,7 +156,27 @@
             "year": "2021",
             "url": "https://misstake.es/",
             "image": "/projects/nexho.png",
-            "category": "UI / Design"
+            "category": "UI / Design",
+            "categoryKey": "ui"
+        }
+    ],
+    "filterAllLabel": "ALL",
+    "categories": [
+        {
+            "key": "creative",
+            "label": "Creative Development"
+        },
+        {
+            "key": "fullstack",
+            "label": "Full-Stack"
+        },
+        {
+            "key": "motion",
+            "label": "Motion Graphics"
+        },
+        {
+            "key": "ui",
+            "label": "UI / Design"
         }
     ]
 }

@@ -25,6 +25,10 @@
     position: relative;
     z-index: 2;
     min-width: 0;
+    /* Title sizing is driven by this column's width, not the viewport, so long
+       words (ES "DESARROLLADOR") can't overflow the clipped title lines. */
+    container-type: inline-size;
+    container-name: hero-copy;
 }
 
 /* Status pill */
@@ -60,11 +64,11 @@
 
 /* Title */
 .hero-title {
-    font-family: var(--font-sans);
-    font-size: clamp(3rem, 7.4vw, 7.4rem);
-    font-weight: 700;
-    line-height: 0.9;
-    letter-spacing: -0.045em;
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 11.6cqw, 6.6rem);
+    font-weight: 300;
+    line-height: 0.92;
+    letter-spacing: -0.035em;
     text-transform: uppercase;
     margin: 0 0 32px;
     color: var(--white);
@@ -72,7 +76,8 @@
 
 .hero-title__line {
     display: block;
-    overflow: hidden;
+    overflow-x: visible;
+    overflow-y: clip;
     padding: 0.06em 0;
     margin: -0.06em 0;
 }
@@ -83,7 +88,9 @@
 }
 
 .hero-title__line--accent .hero-title__inner {
-    background: linear-gradient(100deg, #7b5cff 0%, var(--accent) 45%, #b39cff 100%);
+    /* Lifted off --accent: at weight 300 the darker violet drops to ~3:1 on the
+       near-black ground, which reads as muddy on thin strokes. */
+    background: linear-gradient(100deg, #8f74ff 0%, #6f4dff 45%, #c2b0ff 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -239,10 +246,6 @@
         gap: 56px;
     }
 
-    .hero-title {
-        font-size: clamp(3rem, 11vw, 6.5rem);
-    }
-
     .hero-visual-col {
         justify-content: flex-start;
     }
@@ -260,7 +263,6 @@
     }
 
     .hero-title {
-        font-size: clamp(2.7rem, 13.5vw, 4.5rem);
         margin-bottom: 24px;
     }
 

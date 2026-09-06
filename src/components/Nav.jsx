@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from 'motion/react';
 import CircularText from './CircularText';
-import site from '../data/site.json';
+import { LangToggle } from './LangToggle';
+import { useContent } from '../i18n/useLanguage';
 import './Nav.css';
 
 const EASE = [0.16, 1, 0.3, 1];
 
 export function Nav({ isMobile, ready }) {
+    const site = useContent('site');
+    const ui = useContent('ui');
     const [active, setActive] = useState('');
     const [hidden, setHidden] = useState(false);
     const [scrolled, setScrolled] = useState(false);
@@ -47,7 +50,7 @@ export function Nav({ isMobile, ready }) {
             observer.disconnect();
             window.removeEventListener('scroll', onTop);
         };
-    }, []);
+    }, [site.nav]);
 
     // Lock scroll while the mobile menu is open
     useEffect(() => {
@@ -65,7 +68,7 @@ export function Nav({ isMobile, ready }) {
                 animate={{ y: hidden ? -110 : 0, opacity: ready ? 1 : 0 }}
                 transition={{ duration: 0.6, ease: EASE }}
             >
-                <a href="#hero" className="nav__brand" aria-label="Back to top" onClick={close}>
+                <a href="#hero" className="nav__brand" aria-label={ui.nav.brandAria} onClick={close}>
                     <CircularText
                         text="CARLOS*RÁBAGO*"
                         spinDuration={18}
@@ -76,13 +79,13 @@ export function Nav({ isMobile, ready }) {
                 </a>
 
                 {!isMobile && (
-                    <nav className="nav__links" aria-label="Primary">
+                    <nav className="nav__links" aria-label={ui.nav.primaryAria}>
                         {site.nav.map((item) => {
                             const id = item.href.replace('#', '');
                             const isActive = active === id;
                             return (
                                 <a
-                                    key={item.label}
+                                    key={item.href}
                                     href={item.href}
                                     className={`nav__link mono${isActive ? ' nav__link--active' : ''}`}
                                     aria-current={isActive ? 'true' : undefined}
@@ -103,9 +106,10 @@ export function Nav({ isMobile, ready }) {
                 )}
 
                 <div className="nav__right">
+                    {!isMobile && <LangToggle variant="nav" />}
                     {!isMobile && (
                         <a href="#contact" className="nav__cta mono">
-                            LET'S TALK <span aria-hidden="true">→</span>
+                            {ui.nav.cta} <span aria-hidden="true">→</span>
                         </a>
                     )}
                     {isMobile && (
@@ -115,9 +119,9 @@ export function Nav({ isMobile, ready }) {
                             onClick={() => setMenuOpen((v) => !v)}
                             aria-expanded={menuOpen}
                             aria-controls="mobile-menu"
-                            aria-label={menuOpen ? 'Close menu' : 'Open menu'}
+                            aria-label={menuOpen ? ui.nav.menuCloseAria : ui.nav.menuOpenAria}
                         >
-                            <span>{menuOpen ? 'CLOSE' : 'MENU'}</span>
+                            <span>{menuOpen ? ui.nav.menuClose : ui.nav.menuOpen}</span>
                             <span className="nav__burger-lines" aria-hidden="true">
                                 <i /><i />
                             </span>
@@ -136,10 +140,10 @@ export function Nav({ isMobile, ready }) {
                         exit={{ opacity: 0, clipPath: 'inset(0 0 100% 0)' }}
                         transition={{ duration: 0.55, ease: EASE }}
                     >
-                        <nav className="mobile-menu__links" aria-label="Mobile">
+                        <nav className="mobile-menu__links" aria-label={ui.nav.mobileAria}>
                             {site.nav.map((item, i) => (
                                 <motion.a
-                                    key={item.label}
+                                    key={item.href}
                                     href={item.href}
                                     className="mobile-menu__link"
                                     onClick={close}
@@ -159,8 +163,9 @@ export function Nav({ isMobile, ready }) {
                             transition={{ delay: 0.5 }}
                         >
                             <a href="#contact" onClick={close} className="mobile-menu__cta">
-                                LET'S TALK →
+                                {ui.nav.cta} →
                             </a>
+                            <LangToggle variant="mobile" />
                             <span>{site.statusBar.text}</span>
                         </motion.div>
                     </motion.div>

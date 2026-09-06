@@ -1,6 +1,6 @@
 import { motion, useReducedMotion } from 'motion/react';
 import HeroCard from '../components/HeroCard';
-import hero from '../data/hero.json';
+import { useContent } from '../i18n/useLanguage';
 import './Hero.css';
 
 const EASE = [0.16, 1, 0.3, 1];
@@ -26,11 +26,13 @@ const cardIn = {
 };
 
 export function Hero({ ready }) {
+    const hero = useContent('hero');
+    const ui = useContent('ui');
     const reduce = useReducedMotion();
     const state = ready || reduce ? 'show' : 'hidden';
 
     return (
-        <section id="hero" className="hero" aria-label="Introduction">
+        <section id="hero" className="hero" aria-label={ui.hero.aria}>
             <motion.div
                 className="hero-grid"
                 variants={container}
@@ -63,11 +65,11 @@ export function Hero({ ready }) {
 
                     <motion.div className="hero-cta-group" variants={rise}>
                         <a href="#projects" className="hero-primary-btn mono">
-                            <span>EXPLORE WORKS</span>
+                            <span>{ui.hero.primaryCta}</span>
                             <span className="hero-btn-icon" aria-hidden="true">↓</span>
                         </a>
                         <a href="#contact" className="hero-secondary-btn mono">
-                            <span>CONTACT ME</span>
+                            <span>{ui.hero.secondaryCta}</span>
                             <span className="hero-btn-icon" aria-hidden="true">→</span>
                         </a>
                     </motion.div>
@@ -94,7 +96,7 @@ export function Hero({ ready }) {
                 transition={{ delay: 1.6, duration: 0.8 }}
                 aria-hidden="true"
             >
-                <span>SCROLL</span>
+                <span>{ui.hero.scroll}</span>
                 <span className="hero-scroll-hint__line" />
             </motion.div>
         </section>

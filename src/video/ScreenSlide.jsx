@@ -48,7 +48,7 @@ export const ScreenSlide = ({
             backgroundColor: '#050505',
             justifyContent: 'center',
             alignItems: 'center',
-            fontFamily: "'Space Grotesk', sans-serif"
+            fontFamily: "'Outfit Variable', 'Outfit', sans-serif"
         }}>
             {/* Background Data Grid (Animated opacity) */}
             <svg style={{ position: 'absolute', width: '100%', height: '100%', opacity: drawGrid * 0.15 }}>

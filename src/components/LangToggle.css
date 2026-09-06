@@ -1,0 +1,63 @@
+.lang-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding: 3px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.lang-toggle__btn {
+    position: relative;
+    appearance: none;
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    padding: 5px 9px;
+    border-radius: calc(var(--radius-sm) - 2px);
+    font-size: 0.62rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    transition: color 0.25s ease;
+    line-height: 1;
+}
+
+.lang-toggle__btn:hover {
+    color: var(--text);
+}
+
+.lang-toggle__btn--active {
+    color: var(--white);
+}
+
+.lang-toggle__code {
+    position: relative;
+    z-index: 1;
+}
+
+.lang-toggle__pill {
+    position: absolute;
+    inset: 0;
+    border-radius: calc(var(--radius-sm) - 2px);
+    background: rgba(82, 39, 255, 0.28);
+    border: 1px solid rgba(82, 39, 255, 0.5);
+    box-shadow: 0 0 14px var(--accent-glow);
+}
+
+.lang-toggle__btn:focus-visible {
+    outline: 2px solid var(--accent-soft);
+    outline-offset: 2px;
+}
+
+/* Larger, roomier variant for the mobile menu footer */
+.lang-toggle--mobile .lang-toggle__btn {
+    padding: 9px 16px;
+    font-size: 0.72rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .lang-toggle__btn {
+        transition: none;
+    }
+}

@@ -210,10 +210,10 @@
 .mobile-menu__link {
     text-decoration: none;
     color: var(--white);
-    font-family: var(--font-sans);
+    font-family: var(--font-display);
     font-size: clamp(2.4rem, 11vw, 3.6rem);
-    font-weight: 700;
-    letter-spacing: -0.04em;
+    font-weight: 300;
+    letter-spacing: -0.035em;
     text-transform: uppercase;
     line-height: 1.05;
     display: flex;
@@ -232,6 +232,7 @@
 .mobile-menu__footer {
     margin-top: 40px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     gap: 16px;

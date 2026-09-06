@@ -1,10 +1,11 @@
 import { motion } from 'motion/react';
 import { SectionHeader } from '../components/SectionHeader';
-import data from '../data/education.json';
+import { useContent } from '../i18n/useLanguage';
 
 const EASE = [0.16, 1, 0.3, 1];
 
 export function Education() {
+    const data = useContent('education');
     return (
         <section id="education" className="responsive-section">
             <SectionHeader

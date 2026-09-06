@@ -1,18 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
+import { useContent } from '../i18n/useLanguage';
 import './Intro.css';
 
 const NAME = 'CARLOS RÁBAGO';
-const ROLE = 'Creative Frontend & 3D Developer';
-const LOCATION = 'MADRID, ES';
 const COORDS = '40.4168° N, 3.7038° W';
 
-const LOADING_STEPS = [
-    { threshold: 0, text: 'SYSTEM INITIALIZING' },
-    { threshold: 30, text: 'LOADING 3D ENGINE' },
-    { threshold: 65, text: 'COMPOSING SHADERS' },
-    { threshold: 90, text: 'READY FOR EXPERIENCE' },
-];
+/** Progress marks for each loading phase; the labels live in the ui bundle. */
+const STEP_THRESHOLDS = [0, 30, 65, 90];
 
 /**
  * High-End Cinematic Editorial Preloader
@@ -25,12 +20,15 @@ const LOADING_STEPS = [
  * - Laser scanline curtain unveil into 3D particle hero
  */
 export default function Intro({ onReveal, onComplete }) {
+    const ui = useContent('ui');
     const rootRef = useRef(null);
     const tlRef = useRef(null);
     const revealed = useRef(false);
     const completed = useRef(false);
 
-    const [statusText, setStatusText] = useState('SYSTEM INITIALIZING');
+    // Track the phase by index, not by text, so the label follows the active
+    // language even if it changes mid-animation.
+    const [stepIndex, setStepIndex] = useState(0);
     const [currentTime, setCurrentTime] = useState('');
 
     const words = useMemo(() => NAME.split(' '), []);
@@ -125,8 +123,11 @@ export default function Intro({ onReveal, onComplete }) {
                     if (counterEl) {
                         counterEl.textContent = String(val).padStart(3, '0');
                     }
-                    const step = [...LOADING_STEPS].reverse().find((s) => val >= s.threshold);
-                    if (step) setStatusText(step.text);
+                    let next = 0;
+                    STEP_THRESHOLDS.forEach((threshold, i) => {
+                        if (val >= threshold) next = i;
+                    });
+                    setStepIndex(next);
                 },
             }, 0.1)
                 .to('.intro__progress-fill', {
@@ -240,7 +241,7 @@ export default function Intro({ onReveal, onComplete }) {
     };
 
     return (
-        <aside className="intro" ref={rootRef} aria-label="Intro preloader">
+        <aside className="intro" ref={rootRef} aria-label={ui.intro.aria}>
             <div className="intro__panel intro__panel--dark">
                 {/* Visual backdrops */}
                 <div className="intro__spotlight" aria-hidden="true" />
@@ -251,9 +252,9 @@ export default function Intro({ onReveal, onComplete }) {
                 <header className="intro__header">
                     <div className="intro__hud-item intro__hud-item--brand mono">
                         <span className="intro__status-dot" aria-hidden="true" />
-                        <span className="intro__hud-bold">PORTFOLIO</span>
+                        <span className="intro__hud-bold">{ui.intro.badge}</span>
                         <span className="intro__hud-dim">//</span>
-                        <span className="intro__hud-dim">2026 ARCHIVE</span>
+                        <span className="intro__hud-dim">{ui.intro.archive}</span>
                     </div>
 
                     <div className="intro__hud-item">
@@ -261,9 +262,9 @@ export default function Intro({ onReveal, onComplete }) {
                             type="button"
                             className="intro__skip-btn mono"
                             onClick={handleSkipClick}
-                            aria-label="Skip intro animation"
+                            aria-label={ui.intro.skipAria}
                         >
-                            <span>SKIP</span>
+                            <span>{ui.intro.skip}</span>
                             <span className="intro__skip-shortcut">ESC</span>
                             <span className="intro__skip-arrow" aria-hidden="true">→</span>
                         </button>
@@ -289,8 +290,8 @@ export default function Intro({ onReveal, onComplete }) {
                     </div>
 
                     <div className="intro__role-pill mono">
-                        <span className="intro__role-badge">SPECIALIZATION</span>
-                        <span className="intro__role-text">{ROLE}</span>
+                        <span className="intro__role-badge">{ui.intro.specialization}</span>
+                        <span className="intro__role-text">{ui.intro.role}</span>
                     </div>
                 </main>
 
@@ -302,14 +303,14 @@ export default function Intro({ onReveal, onComplete }) {
                             <span className="intro__counter-symbol">%</span>
                         </div>
                         <div className="intro__counter-status">
-                            <span className="intro__status-label">SYSTEM STATUS</span>
-                            <span className="intro__status-val">{statusText}</span>
+                            <span className="intro__status-label">{ui.intro.systemStatus}</span>
+                            <span className="intro__status-val">{ui.intro.steps[stepIndex]}</span>
                         </div>
                     </div>
 
                     <div className="intro__hud-item intro__coords-block mono">
                         <div className="intro__coords-row">
-                            <span className="intro__hud-bold">{LOCATION}</span>
+                            <span className="intro__hud-bold">{ui.intro.location}</span>
                             <span className="intro__time-badge">{currentTime || 'MADRID'}</span>
                         </div>
                         <div className="intro__coords-sub">

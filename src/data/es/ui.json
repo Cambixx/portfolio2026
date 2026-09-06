@@ -1,0 +1,64 @@
+{
+    "langToggle": {
+        "label": "Idioma",
+        "switchTo": "View in English"
+    },
+    "nav": {
+        "cta": "HABLEMOS",
+        "brandAria": "Volver arriba",
+        "primaryAria": "Principal",
+        "mobileAria": "Móvil",
+        "menuOpen": "MENÚ",
+        "menuClose": "CERRAR",
+        "menuOpenAria": "Abrir menú",
+        "menuCloseAria": "Cerrar menú"
+    },
+    "hero": {
+        "aria": "Introducción",
+        "primaryCta": "VER PROYECTOS",
+        "secondaryCta": "CONTACTAR",
+        "scroll": "SCROLL"
+    },
+    "heroCard": {
+        "tag": "SENIOR",
+        "role": "Desarrollador Frontend e Ingeniero Industrial",
+        "location": "Madrid, España",
+        "specLabel": "// ESTADO Y DISPONIBILIDAD",
+        "liveBadge": "ACTIVO",
+        "specText": "Especializado en interfaces web modernas, dinámicas e interactivas — animación avanzada con GSAP y Three.js, arquitecturas React y entornos WordPress (Timber/Twig).",
+        "copied": "✓ COPIADO",
+        "copyTitle": "Copiar email al portapapeles",
+        "avatarStatus": "En línea / Disponible",
+        "linkedinTitle": "Perfil de LinkedIn",
+        "phoneTitle": "Llamar al +34 603 728 243"
+    },
+    "statusBar": {
+        "backgroundTitle": "Cambiar fondo",
+        "backgroundAria": "Cambiar fondo a {mode}",
+        "grid": "REJILLA",
+        "field": "CAMPO"
+    },
+    "projects": {
+        "categoriesAria": "Categorías de proyectos"
+    },
+    "contact": {
+        "lastUpdated": "ÚLTIMA ACTUALIZACIÓN"
+    },
+    "intro": {
+        "aria": "Precarga de introducción",
+        "role": "Desarrollador Frontend e Ingeniero Industrial",
+        "location": "MADRID, ES",
+        "badge": "PORTFOLIO",
+        "archive": "ARCHIVO 2026",
+        "skip": "SALTAR",
+        "skipAria": "Saltar la animación de introducción",
+        "specialization": "ESPECIALIZACIÓN",
+        "systemStatus": "ESTADO DEL SISTEMA",
+        "steps": [
+            "INICIANDO SISTEMA",
+            "CARGANDO MOTOR 3D",
+            "COMPILANDO SHADERS",
+            "LISTO PARA LA EXPERIENCIA"
+        ]
+    }
+}

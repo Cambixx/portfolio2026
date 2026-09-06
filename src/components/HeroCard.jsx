@@ -1,7 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
+import { useContent, useLanguage } from '../i18n/useLanguage';
 import './HeroCard.css';
 
 export default function HeroCard({ stats = [], coreStack = [] }) {
+    const ui = useContent('ui');
+    const contact = useContent('contact');
+    const { lang } = useLanguage();
     const cardRef = useRef(null);
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
     const [copied, setCopied] = useState(false);
@@ -11,7 +15,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
     useEffect(() => {
         const updateTime = () => {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString('es-ES', {
+            const timeStr = now.toLocaleTimeString(lang === 'es' ? 'es-ES' : 'en-GB', {
                 timeZone: 'Europe/Madrid',
                 hour: '2-digit',
                 minute: '2-digit',
@@ -23,7 +27,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
         updateTime();
         const interval = setInterval(updateTime, 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [lang]);
 
     // 3D perspective tilt effect
     const handleMouseMove = (e) => {
@@ -45,7 +49,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
     };
 
     const copyEmail = () => {
-        navigator.clipboard.writeText('carlosmiguel40@gmail.com');
+        navigator.clipboard.writeText(contact.email);
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);
     };
@@ -79,18 +83,18 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                                 e.target.src = '/assets/logo.jpeg';
                             }}
                         />
-                        <span className="hero-avatar-pulse" title="Online / Available" />
+                        <span className="hero-avatar-pulse" title={ui.heroCard.avatarStatus} />
                     </div>
 
                     <div className="hero-card-user-info">
                         <div className="hero-card-name-row">
                             <h3 className="hero-card-name">Carlos Rábago</h3>
-                            <span className="hero-card-tag mono">SENIOR</span>
+                            <span className="hero-card-tag mono">{ui.heroCard.tag}</span>
                         </div>
-                        <p className="hero-card-role mono">Frontend Developer & Industrial Engineer</p>
+                        <p className="hero-card-role mono">{ui.heroCard.role}</p>
                         <div className="hero-card-location mono">
                             <span className="hero-card-loc-icon">◉</span>
-                            <span>Madrid, Spain</span>
+                            <span>{ui.heroCard.location}</span>
                             <span className="hero-card-time">{currentTime}</span>
                         </div>
                     </div>
@@ -99,14 +103,12 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                 {/* Middle: Live Spec / Status Box */}
                 <div className="hero-card-spec-box">
                     <div className="hero-card-spec-header">
-                        <span className="mono spec-label">// STATUS & AVAILABILITY</span>
+                        <span className="mono spec-label">{ui.heroCard.specLabel}</span>
                         <span className="hero-live-badge mono">
-                            <span className="live-dot" /> ACTIVE
+                            <span className="live-dot" /> {ui.heroCard.liveBadge}
                         </span>
                     </div>
-                    <p className="mono hero-spec-text">
-                        Specialized in modern, dynamic and interactive web interfaces — advanced motion with GSAP and Three.js, React architectures and WordPress (Timber/Twig) environments.
-                    </p>
+                    <p className="mono hero-spec-text">{ui.heroCard.specText}</p>
                     <div className="hero-card-tech-chips">
                         {(coreStack.length > 0 ? coreStack : ['React', 'JavaScript ES6+', 'GSAP', 'Three.js', 'Framer Motion', 'WordPress']).map((tech, i) => (
                             <span key={i} className="hero-tech-chip mono">
@@ -136,24 +138,24 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                         onClick={copyEmail}
                         className="hero-card-action-btn mono copy-btn"
                         aria-live="polite"
-                        title="Copy email to clipboard"
+                        title={ui.heroCard.copyTitle}
                     >
-                        <span>{copied ? '✓ COPIED' : 'carlosmiguel40@gmail.com'}</span>
+                        <span>{copied ? ui.heroCard.copied : contact.email}</span>
                     </button>
                     <div className="hero-card-socials-mini">
                         <a
-                            href="https://www.linkedin.com/in/carlos-miguel-r%C3%A1bago-torcates-2a5447208"
+                            href={contact.social[0].url}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hero-mini-social mono"
-                            title="LinkedIn Profile"
+                            title={ui.heroCard.linkedinTitle}
                         >
                             IN
                         </a>
                         <a
-                            href="tel:+34603728243"
+                            href={contact.social[1].url}
                             className="hero-mini-social mono"
-                            title="Call +34 603 728 243"
+                            title={ui.heroCard.phoneTitle}
                         >
                             TEL
                         </a>

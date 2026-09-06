@@ -1,8 +1,12 @@
 import { motion } from 'motion/react';
-import site from '../data/site.json';
+import { useContent } from '../i18n/useLanguage';
 import './StatusBar.css';
 
 export function StatusBar({ bgType, onToggleBg, isMobile, ready }) {
+    const site = useContent('site');
+    const ui = useContent('ui');
+    const nextMode = bgType === 'dotgrid' ? ui.statusBar.field : ui.statusBar.grid;
+
     return (
         <motion.div
             className="status-bar"
@@ -19,11 +23,11 @@ export function StatusBar({ bgType, onToggleBg, isMobile, ready }) {
                 type="button"
                 onClick={onToggleBg}
                 className="status-bar__toggle mono"
-                title="Switch background"
-                aria-label={`Switch background to ${bgType === 'dotgrid' ? 'antigravity' : 'dotgrid'}`}
+                title={ui.statusBar.backgroundTitle}
+                aria-label={ui.statusBar.backgroundAria.replace('{mode}', nextMode)}
             >
                 <span className="status-bar__toggle-icon" aria-hidden="true">◐</span>
-                {!isMobile && <span>{bgType === 'dotgrid' ? 'GRID' : 'FIELD'}</span>}
+                {!isMobile && <span>{bgType === 'dotgrid' ? ui.statusBar.grid : ui.statusBar.field}</span>}
             </button>
         </motion.div>
     );

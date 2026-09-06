@@ -200,11 +200,11 @@
     justify-content: center;
     column-gap: 0.32em;
     row-gap: 0.02em;
-    font-family: var(--font-sans);
-    font-size: clamp(3rem, 11vw, 9.2rem);
-    font-weight: 700;
+    font-family: var(--font-display);
+    font-size: clamp(2.8rem, 10.4vw, 8.6rem);
+    font-weight: 300;
     line-height: 0.92;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.035em;
     margin: 0;
     text-transform: uppercase;
     text-align: center;
@@ -212,7 +212,8 @@
 
 .intro__word {
     display: inline-flex;
-    overflow: hidden;
+    overflow-x: visible;
+    overflow-y: clip;
     padding: 0.06em 0.02em;
     margin: -0.06em -0.02em;
 }
@@ -220,7 +221,7 @@
 .intro__char {
     display: inline-block;
     will-change: transform, opacity, filter;
-    background: linear-gradient(180deg, #ffffff 25%, rgba(255, 255, 255, 0.65) 100%);
+    background: linear-gradient(180deg, #ffffff 25%, rgba(255, 255, 255, 0.78) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;

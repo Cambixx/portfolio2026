@@ -2,20 +2,25 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { RemotionHero } from '../components/RemotionHero';
 import { SectionHeader } from '../components/SectionHeader';
-import data from '../data/projects.json';
+import { useContent } from '../i18n/useLanguage';
 
 export function Projects({ isMobile }) {
-    const [activeCategory, setActiveCategory] = useState('ALL');
+    const data = useContent('projects');
+    const ui = useContent('ui');
 
-    const categories = useMemo(() => {
-        const cats = new Set(data.items.map((item) => item.category));
-        return ['ALL', ...Array.from(cats)];
-    }, []);
+    // Filter on the stable `categoryKey`, never on the translated label, so the
+    // active filter survives a language switch.
+    const [activeCategory, setActiveCategory] = useState('all');
+
+    const categories = useMemo(
+        () => [{ key: 'all', label: data.filterAllLabel }, ...data.categories],
+        [data]
+    );
 
     const filteredProjects = useMemo(() => {
-        if (activeCategory === 'ALL') return data.items;
-        return data.items.filter((item) => item.category === activeCategory);
-    }, [activeCategory]);
+        if (activeCategory === 'all') return data.items;
+        return data.items.filter((item) => item.categoryKey === activeCategory);
+    }, [activeCategory, data]);
 
     return (
         <section id="projects" className="responsive-section">
@@ -41,16 +46,16 @@ export function Projects({ isMobile }) {
             </div>
 
             {/* Filters */}
-            <div className="project-filters" role="tablist" aria-label="Project categories">
+            <div className="project-filters" role="tablist" aria-label={ui.projects.categoriesAria}>
                 {categories.map((cat) => (
                     <button
-                        key={cat}
+                        key={cat.key}
                         role="tab"
-                        aria-selected={activeCategory === cat}
-                        className={`filter-btn mono ${activeCategory === cat ? 'active' : ''}`}
-                        onClick={() => setActiveCategory(cat)}
+                        aria-selected={activeCategory === cat.key}
+                        className={`filter-btn mono ${activeCategory === cat.key ? 'active' : ''}`}
+                        onClick={() => setActiveCategory(cat.key)}
                     >
-                        {cat}
+                        {cat.label}
                     </button>
                 ))}
             </div>

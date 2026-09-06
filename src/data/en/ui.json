@@ -1,0 +1,64 @@
+{
+    "langToggle": {
+        "label": "Language",
+        "switchTo": "Ver en español"
+    },
+    "nav": {
+        "cta": "LET'S TALK",
+        "brandAria": "Back to top",
+        "primaryAria": "Primary",
+        "mobileAria": "Mobile",
+        "menuOpen": "MENU",
+        "menuClose": "CLOSE",
+        "menuOpenAria": "Open menu",
+        "menuCloseAria": "Close menu"
+    },
+    "hero": {
+        "aria": "Introduction",
+        "primaryCta": "EXPLORE WORKS",
+        "secondaryCta": "CONTACT ME",
+        "scroll": "SCROLL"
+    },
+    "heroCard": {
+        "tag": "SENIOR",
+        "role": "Frontend Developer & Industrial Engineer",
+        "location": "Madrid, Spain",
+        "specLabel": "// STATUS & AVAILABILITY",
+        "liveBadge": "ACTIVE",
+        "specText": "Specialized in modern, dynamic and interactive web interfaces — advanced motion with GSAP and Three.js, React architectures and WordPress (Timber/Twig) environments.",
+        "copied": "✓ COPIED",
+        "copyTitle": "Copy email to clipboard",
+        "avatarStatus": "Online / Available",
+        "linkedinTitle": "LinkedIn profile",
+        "phoneTitle": "Call +34 603 728 243"
+    },
+    "statusBar": {
+        "backgroundTitle": "Switch background",
+        "backgroundAria": "Switch background to {mode}",
+        "grid": "GRID",
+        "field": "FIELD"
+    },
+    "projects": {
+        "categoriesAria": "Project categories"
+    },
+    "contact": {
+        "lastUpdated": "LAST UPDATED"
+    },
+    "intro": {
+        "aria": "Intro preloader",
+        "role": "Frontend Developer & Industrial Engineer",
+        "location": "MADRID, ES",
+        "badge": "PORTFOLIO",
+        "archive": "2026 ARCHIVE",
+        "skip": "SKIP",
+        "skipAria": "Skip intro animation",
+        "specialization": "SPECIALIZATION",
+        "systemStatus": "SYSTEM STATUS",
+        "steps": [
+            "SYSTEM INITIALIZING",
+            "LOADING 3D ENGINE",
+            "COMPOSING SHADERS",
+            "READY FOR EXPERIENCE"
+        ]
+    }
+}
