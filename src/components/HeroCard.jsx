@@ -1,11 +1,15 @@
 import { useState, useRef, useEffect } from 'react';
+import { useReducedMotion } from 'motion/react';
 import { useContent, useLanguage } from '../i18n/useLanguage';
 import './HeroCard.css';
+
+const MONOGRAM = 'CR';
 
 export default function HeroCard({ stats = [], coreStack = [] }) {
     const ui = useContent('ui');
     const contact = useContent('contact');
     const { lang } = useLanguage();
+    const reduce = useReducedMotion();
     const cardRef = useRef(null);
     const [tilt, setTilt] = useState({ x: 0, y: 0 });
     const [copied, setCopied] = useState(false);
@@ -15,38 +19,29 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
     useEffect(() => {
         const updateTime = () => {
             const now = new Date();
-            const timeStr = now.toLocaleTimeString(lang === 'es' ? 'es-ES' : 'en-GB', {
+            setCurrentTime(now.toLocaleTimeString(lang === 'es' ? 'es-ES' : 'en-GB', {
                 timeZone: 'Europe/Madrid',
                 hour: '2-digit',
                 minute: '2-digit',
-                second: '2-digit',
-                hour12: false
-            });
-            setCurrentTime(`${timeStr} CET`);
+                hour12: false,
+            }));
         };
         updateTime();
-        const interval = setInterval(updateTime, 1000);
+        // Sin segundos, basta con refrescar cada 30 s.
+        const interval = setInterval(updateTime, 30000);
         return () => clearInterval(interval);
     }, [lang]);
 
-    // 3D perspective tilt effect
+    // Tilt sutil en perspectiva; se anula si el usuario pide menos movimiento.
     const handleMouseMove = (e) => {
-        if (!cardRef.current) return;
+        if (!cardRef.current || reduce) return;
         const rect = cardRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        const centerX = rect.width / 2;
-        const centerY = rect.height / 2;
-
-        const rotateX = ((y - centerY) / centerY) * -8;
-        const rotateY = ((x - centerX) / centerX) * 8;
-
+        const rotateX = ((e.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * -4;
+        const rotateY = ((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 4;
         setTilt({ x: rotateX, y: rotateY });
     };
 
-    const handleMouseLeave = () => {
-        setTilt({ x: 0, y: 0 });
-    };
+    const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
 
     const copyEmail = () => {
         navigator.clipboard.writeText(contact.email);
@@ -54,114 +49,99 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
         setTimeout(() => setCopied(false), 2500);
     };
 
+    const stack = coreStack.length > 0 ? coreStack : ['React', 'GSAP', 'Three.js', 'WordPress'];
+
     return (
         <div
             className="hero-card-perspective-wrapper"
             onMouseMove={handleMouseMove}
             onMouseLeave={handleMouseLeave}
         >
-            <div
+            <article
                 ref={cardRef}
                 className="hero-card glass"
                 style={{
-                    transform: `perspective(1000px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-                    transition: tilt.x === 0 && tilt.y === 0 ? 'transform 0.5s ease-out' : 'transform 0.1s ease-out'
+                    transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+                    transition: tilt.x === 0 && tilt.y === 0
+                        ? 'transform .6s var(--ease-out)'
+                        : 'transform .15s ease-out',
                 }}
             >
-                {/* Subtle top glare/gradient line */}
-                <div className="hero-card-glow-line" />
-
-                {/* Card Header: Profile Info */}
-                <div className="hero-card-header">
-                    <div className="hero-avatar-wrapper">
-                        <img
-                            src="/assets/carlos.png"
-                            alt="Carlos Rábago"
-                            className="hero-avatar-img"
-                            onError={(e) => {
-                                e.target.onerror = null;
-                                e.target.src = '/assets/logo.jpeg';
-                            }}
-                        />
-                        <span className="hero-avatar-pulse" title={ui.heroCard.avatarStatus} />
+                <header className="hc-head">
+                    <span className="hc-monogram" aria-hidden="true">{MONOGRAM}</span>
+                    <div className="hc-id">
+                        <h3 className="hc-name">
+                            Carlos Rábago
+                            <span className="hc-tag mono">{ui.heroCard.tag}</span>
+                        </h3>
+                        <p className="hc-role mono">{ui.heroCard.role}</p>
                     </div>
+                </header>
 
-                    <div className="hero-card-user-info">
-                        <div className="hero-card-name-row">
-                            <h3 className="hero-card-name">Carlos Rábago</h3>
-                            <span className="hero-card-tag mono">{ui.heroCard.tag}</span>
-                        </div>
-                        <p className="hero-card-role mono">{ui.heroCard.role}</p>
-                        <div className="hero-card-location mono">
-                            <span className="hero-card-loc-icon">◉</span>
-                            <span>{ui.heroCard.location}</span>
-                            <span className="hero-card-time">{currentTime}</span>
-                        </div>
-                    </div>
+                <div className="hc-meta mono">
+                    <span className="hc-status">
+                        <span className="hc-dot" aria-hidden="true" />
+                        {ui.heroCard.liveBadge}
+                    </span>
+                    <span className="hc-meta-right">
+                        {ui.heroCard.location}
+                        <time className="hc-time">{currentTime}</time>
+                    </span>
                 </div>
 
-                {/* Middle: Live Spec / Status Box */}
-                <div className="hero-card-spec-box">
-                    <div className="hero-card-spec-header">
-                        <span className="mono spec-label">{ui.heroCard.specLabel}</span>
-                        <span className="hero-live-badge mono">
-                            <span className="live-dot" /> {ui.heroCard.liveBadge}
-                        </span>
-                    </div>
-                    <p className="mono hero-spec-text">{ui.heroCard.specText}</p>
-                    <div className="hero-card-tech-chips">
-                        {(coreStack.length > 0 ? coreStack : ['React', 'JavaScript ES6+', 'GSAP', 'Three.js', 'Framer Motion', 'WordPress']).map((tech, i) => (
-                            <span key={i} className="hero-tech-chip mono">
-                                {tech}
-                            </span>
-                        ))}
-                    </div>
-                </div>
+                <p className="mono hc-spec">{ui.heroCard.specText}</p>
 
-                {/* Stats row */}
-                <div className="hero-card-stats-grid">
-                    {(stats.length > 0 ? stats : [
-                        { value: '05+', label: 'Years Frontend' },
-                        { value: '10+', label: 'Brand Projects' },
-                        { value: 'ENG', label: 'Industrial Engineer' }
-                    ]).map((s, idx) => (
-                        <div key={idx} className="hero-card-stat-item">
-                            <span className="hero-card-stat-val mono">{s.value}</span>
-                            <span className="hero-card-stat-lbl mono">{s.label}</span>
+                <ul className="hc-stack mono">
+                    {stack.map((tech) => (
+                        <li key={tech}>{tech}</li>
+                    ))}
+                </ul>
+
+                <dl className="hc-stats">
+                    {stats.map((s) => (
+                        <div key={s.label} className="hc-stat">
+                            <dt className="hc-stat-val">{s.value}</dt>
+                            <dd className="hc-stat-lbl mono">{s.label}</dd>
                         </div>
                     ))}
-                </div>
+                </dl>
 
-                {/* Footer Quick Actions */}
-                <div className="hero-card-actions">
+                <footer className="hc-actions">
                     <button
+                        type="button"
                         onClick={copyEmail}
-                        className="hero-card-action-btn mono copy-btn"
+                        className="hc-mail mono"
                         aria-live="polite"
                         title={ui.heroCard.copyTitle}
                     >
-                        <span>{copied ? ui.heroCard.copied : contact.email}</span>
+                        <span className="hc-mail-text">
+                            {copied ? ui.heroCard.copied : contact.email}
+                        </span>
+                        <span className="hc-mail-icon" aria-hidden="true">
+                            {copied ? '✓' : '⧉'}
+                        </span>
                     </button>
-                    <div className="hero-card-socials-mini">
+
+                    <div className="hc-links">
                         <a
                             href={contact.social[0].url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="hero-mini-social mono"
+                            className="hc-link mono"
                             title={ui.heroCard.linkedinTitle}
                         >
                             IN
                         </a>
                         <a
                             href={contact.social[1].url}
-                            className="hero-mini-social mono"
+                            className="hc-link mono"
                             title={ui.heroCard.phoneTitle}
                         >
                             TEL
                         </a>
                     </div>
-                </div>
-            </div>
+                </footer>
+            </article>
         </div>
     );
 }

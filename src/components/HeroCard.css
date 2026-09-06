@@ -1,7 +1,13 @@
+/* ═══════════════════════════════════════
+   HERO CARD
+   Una sola caja. Dentro, la jerarquía la marcan el espacio y unas
+   pocas reglas de 1px — nunca cajas anidadas.
+   ═══════════════════════════════════════ */
+
 .hero-card-perspective-wrapper {
     perspective: 1200px;
     width: 100%;
-    max-width: 480px;
+    max-width: 460px;
     margin: 0 auto;
     display: flex;
     justify-content: center;
@@ -13,322 +19,342 @@
     width: 100%;
     position: relative;
     border-radius: var(--radius-lg);
-    padding: 28px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(10, 10, 15, 0.7) 100%);
+    padding: 30px 30px 26px;
+    border: 1px solid var(--border);
+    background: linear-gradient(150deg, rgba(255, 255, 255, 0.045), rgba(10, 10, 14, 0.72) 62%);
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), 0 0 40px rgb(var(--accent-rgb) / 0.1);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
     transform-style: preserve-3d;
-    transition: box-shadow 0.3s ease, border-color 0.3s ease;
+    transition: border-color .35s ease, box-shadow .35s ease;
 }
 
 .hero-card:hover {
-    border-color: rgb(var(--accent-rgb) / 0.4);
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 50px rgb(var(--accent-rgb) / 0.2);
+    border-color: rgb(var(--accent-rgb) / 0.30);
+    box-shadow: 0 28px 70px rgba(0, 0, 0, 0.62), 0 0 46px rgb(var(--accent-rgb) / 0.10);
 }
 
-.hero-card-glow-line {
-    position: absolute;
-    top: 0;
-    left: 15%;
-    right: 15%;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, rgb(var(--accent-rgb) / 0.8), rgba(255, 255, 255, 0.8), rgb(var(--accent-rgb) / 0.8), transparent);
-}
+/* ── Cabecera: monograma + identidad ───────────────────── */
 
-/* Header */
-.hero-card-header {
+.hc-head {
     display: flex;
     align-items: center;
-    gap: 18px;
-    margin-bottom: 22px;
+    gap: 16px;
 }
 
-.hero-avatar-wrapper {
-    position: relative;
-    width: 68px;
-    height: 68px;
+.hc-monogram {
     flex-shrink: 0;
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
     border-radius: var(--radius-md);
-    padding: 2px;
-    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.8), rgba(255, 255, 255, 0.2));
+    background: rgb(var(--accent-rgb) / 0.12);
+    border: 1px solid rgb(var(--accent-rgb) / 0.34);
+    color: var(--accent-soft);
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 1.15rem;
+    letter-spacing: 0.01em;
+    /* Las mayúsculas se ven altas dentro de una caja; se compensa a ojo. */
+    padding-top: 2px;
 }
 
-.hero-avatar-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: calc(var(--radius-md) - 2px);
-    background: #111;
-    display: block;
-}
-
-.hero-avatar-pulse {
-    position: absolute;
-    bottom: -2px;
-    right: -2px;
-    width: 14px;
-    height: 14px;
-    background: #22c55e;
-    border: 2px solid #050505;
-    border-radius: 50%;
-    box-shadow: 0 0 8px #22c55e;
-    animation: pulse-ring 2s infinite ease-in-out;
-}
-
-@keyframes pulse-ring {
-    0% {
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-    }
-    70% {
-        box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
-    }
-    100% {
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
-    }
-}
-
-.hero-card-user-info {
-    flex: 1;
+.hc-id {
     min-width: 0;
 }
 
-.hero-card-name-row {
+.hc-name {
     display: flex;
     align-items: center;
-    gap: 8px;
-}
-
-.hero-card-name {
-    font-size: 1.25rem;
+    gap: 9px;
+    font-family: var(--font-display);
+    font-size: 1.22rem;
     font-weight: 500;
-    color: #ffffff;
-    margin: 0;
-    letter-spacing: -0.01em;
+    letter-spacing: -0.015em;
+    color: var(--white);
+    margin: 0 0 5px;
+    line-height: 1.1;
 }
 
-.hero-card-tag {
-    font-size: 0.6rem;
-    padding: 2px 6px;
-    background: rgb(var(--accent-rgb) / 0.2);
-    border: 1px solid rgb(var(--accent-rgb) / 0.4);
-    color: #a894ff;
+.hc-tag {
+    font-size: 0.54rem;
+    letter-spacing: 0.14em;
+    padding: 3px 7px;
     border-radius: var(--radius-sm);
-    letter-spacing: 0.05em;
+    color: var(--accent-soft);
+    background: rgb(var(--accent-rgb) / 0.12);
+    white-space: nowrap;
 }
 
-.hero-card-role {
-    font-size: 0.78rem;
-    color: rgba(255, 255, 255, 0.7);
-    margin: 4px 0;
+.hc-role {
+    font-size: 0.7rem;
+    line-height: 1.5;
+    color: var(--muted);
+    margin: 0;
 }
 
-.hero-card-location {
+/* ── Línea de estado ───────────────────────────────────── */
+
+.hc-meta {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 0.68rem;
-    color: rgba(255, 255, 255, 0.4);
-}
-
-.hero-card-loc-icon {
-    color: #22c55e;
-    font-size: 0.6rem;
-}
-
-.hero-card-time {
-    padding-left: 6px;
-    border-left: 1px solid rgba(255, 255, 255, 0.15);
-    color: rgba(255, 255, 255, 0.6);
-}
-
-/* Spec Box */
-.hero-card-spec-box {
-    background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: var(--radius-md);
-    padding: 16px;
-    margin-bottom: 20px;
-}
-
-.hero-card-spec-header {
-    display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 22px;
+    padding: 13px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.62rem;
+    letter-spacing: 0.08em;
+    color: var(--muted);
 }
 
-.spec-label {
-    font-size: 0.65rem;
-    color: rgba(255, 255, 255, 0.4);
-    letter-spacing: 0.05em;
-}
-
-.hero-live-badge {
+.hc-status {
     display: inline-flex;
     align-items: center;
-    gap: 5px;
-    font-size: 0.6rem;
-    color: #22c55e;
-    letter-spacing: 0.05em;
+    gap: 8px;
+    color: var(--success);
 }
 
-.live-dot {
+/* El punto vive en su propia línea de texto, así que se alinea solo:
+   antes colgaba de la esquina del avatar y se salía del recorte. */
+.hc-dot {
     width: 6px;
     height: 6px;
-    background: #22c55e;
     border-radius: 50%;
-    box-shadow: 0 0 6px #22c55e;
+    background: var(--success);
+    box-shadow: 0 0 8px var(--success);
+    animation: hc-pulse 2.4s infinite ease-in-out;
 }
 
-.hero-spec-text {
-    font-size: 0.75rem;
-    color: rgba(255, 255, 255, 0.75);
-    line-height: 1.5;
-    margin: 0 0 12px 0;
+@keyframes hc-pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .45; transform: scale(.8); }
 }
 
-.hero-card-tech-chips {
+.hc-meta-right {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.hc-time {
+    color: var(--text);
+    font-variant-numeric: tabular-nums;
+    padding-left: 10px;
+    border-left: 1px solid var(--border);
+}
+
+/* ── Descripción ───────────────────────────────────────── */
+
+.hc-spec {
+    font-size: 0.72rem;
+    line-height: 1.8;
+    color: var(--muted);
+    margin: 20px 0 0;
+}
+
+/* ── Stack: lista en línea, sin chips ──────────────────── */
+
+.hc-stack {
+    list-style: none;
     display: flex;
     flex-wrap: wrap;
+    gap: 6px 0;
+    margin: 16px 0 0;
+    padding: 0;
+    font-size: 0.64rem;
+    letter-spacing: 0.05em;
+    color: var(--text);
+}
+
+.hc-stack li {
+    display: inline-flex;
+    align-items: center;
+}
+
+.hc-stack li:not(:last-child)::after {
+    content: '·';
+    margin: 0 9px;
+    color: rgb(var(--accent-rgb) / 0.7);
+}
+
+/* ── Cifras ────────────────────────────────────────────── */
+
+.hc-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin: 22px 0 0;
+    padding: 18px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+}
+
+.hc-stat {
+    min-width: 0;
+}
+
+.hc-stat + .hc-stat {
+    padding-left: 14px;
+    border-left: 1px solid var(--border);
+}
+
+.hc-stat-val {
+    display: block;
+    font-family: var(--font-display);
+    font-size: 1.32rem;
+    font-weight: 500;
+    line-height: 1;
+    color: var(--white);
+    letter-spacing: -0.01em;
+    font-variant-numeric: tabular-nums;
+}
+
+.hc-stat-lbl {
+    display: block;
+    margin: 7px 0 0;
+    font-size: 0.5rem;
+    letter-spacing: 0.11em;
+    line-height: 1.4;
+    color: var(--muted-2);
+    text-transform: uppercase;
+}
+
+/* ── Acciones ──────────────────────────────────────────── */
+
+.hc-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+}
+
+.hc-mail {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    appearance: none;
+    cursor: pointer;
+    text-align: left;
+    padding: 11px 13px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--muted);
+    font-size: 0.66rem;
+    transition: color .22s ease, border-color .22s ease, background .22s ease;
+}
+
+.hc-mail:hover {
+    color: var(--white);
+    border-color: rgb(var(--accent-rgb) / 0.4);
+    background: rgb(var(--accent-rgb) / 0.07);
+}
+
+.hc-mail-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hc-mail-icon {
+    flex-shrink: 0;
+    color: var(--accent-soft);
+    font-size: 0.72rem;
+}
+
+.hc-links {
+    display: flex;
     gap: 6px;
 }
 
-.hero-tech-chip {
-    font-size: 0.65rem;
-    padding: 3px 8px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.85);
-    border-radius: var(--radius-sm);
-    transition: all 0.2s ease;
-}
-
-.hero-tech-chip:hover {
-    background: rgb(var(--accent-rgb) / 0.15);
-    border-color: rgb(var(--accent-rgb) / 0.4);
-    color: #fff;
-}
-
-/* Stats */
-.hero-card-stats-grid {
+.hc-link {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding: 14px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    margin-bottom: 18px;
-}
-
-.hero-card-stat-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-}
-
-.hero-card-stat-val {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #fff;
-    letter-spacing: -0.02em;
-}
-
-.hero-card-stat-lbl {
-    font-size: 0.6rem;
-    color: rgba(255, 255, 255, 0.4);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-top: 2px;
-}
-
-/* Footer Actions */
-.hero-card-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-}
-
-.hero-card-action-btn {
-    flex: 1;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #fff;
-    padding: 10px 14px;
-    font-size: 0.7rem;
-    border-radius: calc(var(--radius-md) - 2px);
-    cursor: pointer;
-    transition: all 0.2s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    letter-spacing: 0.05em;
-}
-
-.hero-card-action-btn:hover {
-    background: var(--accent);
-    border-color: var(--accent);
-    box-shadow: 0 4px 15px rgb(var(--accent-rgb) / 0.4);
-}
-
-.hero-card-socials-mini {
-    display: flex;
-    gap: 8px;
-}
-
-.hero-mini-social {
-    width: 36px;
-    height: 36px;
-    border-radius: calc(var(--radius-md) - 2px);
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: rgba(255, 255, 255, 0.7);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.65rem;
+    place-items: center;
+    width: 42px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: rgba(255, 255, 255, 0.02);
+    color: var(--muted);
     text-decoration: none;
-    transition: all 0.2s ease;
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    transition: color .22s ease, border-color .22s ease, background .22s ease;
 }
 
-.hero-mini-social:hover {
-    background: rgba(255, 255, 255, 0.12);
-    color: #fff;
-    border-color: rgba(255, 255, 255, 0.3);
+.hc-link:hover {
+    color: var(--white);
+    border-color: rgb(var(--accent-rgb) / 0.4);
+    background: rgb(var(--accent-rgb) / 0.07);
 }
 
-@media (max-width: 768px) {
+.hc-mail:focus-visible,
+.hc-link:focus-visible {
+    outline: 2px solid var(--accent-soft);
+    outline-offset: 2px;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    .hero-card-perspective-wrapper {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
     .hero-card {
-        padding: 20px;
+        padding: 24px 20px 22px;
     }
 
-    .hero-avatar-wrapper {
-        width: 56px;
-        height: 56px;
+    .hc-monogram {
+        width: 46px;
+        height: 46px;
+        font-size: 1rem;
     }
 
-    .hero-card-name {
+    .hc-name {
         font-size: 1.1rem;
     }
+
+    .hc-meta {
+        font-size: 0.58rem;
+    }
+
+    /* En pantalla estrecha las tres cifras no caben en fila. */
+    .hc-stats {
+        grid-template-columns: 1fr 1fr;
+        gap: 16px 12px;
+    }
+
+    .hc-stat + .hc-stat {
+        padding-left: 12px;
+    }
+
+    .hc-stat:nth-child(3) {
+        padding-left: 0;
+        border-left: 0;
+    }
+
+    .hc-actions {
+        flex-wrap: wrap;
+    }
+
+    .hc-mail {
+        flex-basis: 100%;
+    }
 }
 
-.copy-btn::after {
-    content: 'COPY';
-    font-size: 0.55rem;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    margin-left: auto;
-    padding-left: 12px;
-    transition: color 0.2s ease;
-}
-
-.copy-btn:hover::after {
-    color: rgba(255, 255, 255, 0.85);
-}
-
-.hero-card-action-btn {
-    justify-content: space-between;
+@media (prefers-reduced-motion: reduce) {
+    .hc-dot {
+        animation: none;
+    }
 }

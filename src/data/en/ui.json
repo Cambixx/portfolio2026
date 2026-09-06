@@ -21,14 +21,12 @@
     },
     "heroCard": {
         "tag": "SENIOR",
-        "role": "Frontend Developer & Industrial Engineer",
+        "role": "Frontend Developer · Industrial Engineer",
         "location": "Madrid, Spain",
-        "specLabel": "// STATUS & AVAILABILITY",
-        "liveBadge": "ACTIVE",
+        "liveBadge": "AVAILABLE",
         "specText": "Specialized in modern, dynamic and interactive web interfaces — advanced motion with GSAP and Three.js, React architectures and WordPress (Timber/Twig) environments.",
         "copied": "✓ COPIED",
         "copyTitle": "Copy email to clipboard",
-        "avatarStatus": "Online / Available",
         "linkedinTitle": "LinkedIn profile",
         "phoneTitle": "Call +34 603 728 243"
     },

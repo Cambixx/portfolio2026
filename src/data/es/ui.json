@@ -21,14 +21,12 @@
     },
     "heroCard": {
         "tag": "SENIOR",
-        "role": "Desarrollador Frontend e Ingeniero Industrial",
+        "role": "Desarrollador Frontend · Ing. Industrial",
         "location": "Madrid, España",
-        "specLabel": "// ESTADO Y DISPONIBILIDAD",
-        "liveBadge": "ACTIVO",
+        "liveBadge": "DISPONIBLE",
         "specText": "Especializado en interfaces web modernas, dinámicas e interactivas — animación avanzada con GSAP y Three.js, arquitecturas React y entornos WordPress (Timber/Twig).",
         "copied": "✓ COPIADO",
         "copyTitle": "Copiar email al portapapeles",
-        "avatarStatus": "En línea / Disponible",
         "linkedinTitle": "Perfil de LinkedIn",
         "phoneTitle": "Llamar al +34 603 728 243"
     },
