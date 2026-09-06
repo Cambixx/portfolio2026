@@ -6,7 +6,7 @@ import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
  * Title lines slide in horizontally from alternating sides as the header
  * scrolls into view with smooth opacity fade.
  */
-export function SectionHeader({ number, title, description, divider = true }) {
+export function SectionHeader({ meta, title, description, divider = true }) {
     const ref = useRef(null);
     const reduce = useReducedMotion();
     const { scrollYProgress } = useScroll({
@@ -23,7 +23,7 @@ export function SectionHeader({ number, title, description, divider = true }) {
 
     return (
         <div className="section-header" ref={ref}>
-            <span className="section-number">{number}</span>
+            <span className="section-meta">{meta}</span>
             <div className="section-title-wrapper">
                 <div className="section-title-clip">
                     <h2 className="section-title">
@@ -42,7 +42,7 @@ export function SectionHeader({ number, title, description, divider = true }) {
                 </div>
                 {description && (
                     <motion.p
-                        className="mono section-description"
+                        className="section-description"
                         style={{ opacity: descOpacity, y: descY }}
                     >
                         {description}

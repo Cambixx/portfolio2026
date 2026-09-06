@@ -1,10 +1,10 @@
 {
-    "sectionNumber": "002/",
+    "sectionMeta": "10 PROJECTS",
     "title": [
         "Selected",
         "Works"
     ],
-    "description": "> Production sites for global brands and institutions — developed and maintained at Doers DF.",
+    "description": "Production sites for global brands and institutions — developed and maintained at Doers DF.",
     "showreel": {
         "label": "SHOWREEL 2026",
         "techLine": "Remotion · React · WebGL"
@@ -36,7 +36,7 @@
             ],
             "year": "2023",
             "url": "https://www.somosnexho.com/",
-            "image": "/projects/nexho.png",
+            "image": "/projects/nexho-web.jpg",
             "category": "Full-Stack",
             "categoryKey": "fullstack"
         },
@@ -66,7 +66,7 @@
             ],
             "year": "2024",
             "url": "https://www.budweiser.es/",
-            "image": "/projects/corona.png",
+            "image": "/projects/budweiser.jpg",
             "category": "Motion Graphics",
             "categoryKey": "motion"
         },
@@ -81,7 +81,7 @@
             ],
             "year": "2023",
             "url": "https://www.cervezacorona.es/",
-            "image": "/projects/corona.png",
+            "image": "/projects/corona-web.jpg",
             "category": "Motion Graphics",
             "categoryKey": "motion"
         },

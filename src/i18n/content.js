@@ -6,6 +6,7 @@ import enEducation from '../data/en/education.json';
 import enStack from '../data/en/stack.json';
 import enContact from '../data/en/contact.json';
 import enUi from '../data/en/ui.json';
+import enShowreel from '../data/en/showreel.json';
 
 import esSite from '../data/es/site.json';
 import esHero from '../data/es/hero.json';
@@ -15,6 +16,7 @@ import esEducation from '../data/es/education.json';
 import esStack from '../data/es/stack.json';
 import esContact from '../data/es/contact.json';
 import esUi from '../data/es/ui.json';
+import esShowreel from '../data/es/showreel.json';
 
 export const LANGUAGES = ['en', 'es'];
 export const DEFAULT_LANGUAGE = 'en';
@@ -29,6 +31,7 @@ export const CONTENT = {
         stack: enStack,
         contact: enContact,
         ui: enUi,
+        showreel: enShowreel,
     },
     es: {
         site: esSite,
@@ -39,5 +42,6 @@ export const CONTENT = {
         stack: esStack,
         contact: esContact,
         ui: esUi,
+        showreel: esShowreel,
     },
 };

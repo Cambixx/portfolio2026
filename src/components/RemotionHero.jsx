@@ -1,9 +1,10 @@
 import { useRef, useState, useEffect } from 'react';
 import { Player } from '@remotion/player';
 import { WalkthroughComposition } from '../video/WalkthroughComposition';
-import showreelData from '../data/showreel.json';
+import { useContent } from '../i18n/useLanguage';
 
 export function RemotionHero() {
+    const showreelData = useContent('showreel');
     const playerRef = useRef(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -83,6 +84,7 @@ export function RemotionHero() {
                 ref={playerRef}
                 component={WalkthroughComposition}
                 durationInFrames={totalDuration}
+                inputProps={{ slides: showreelData }}
                 compositionWidth={1920}
                 compositionHeight={1080}
                 fps={30}
@@ -119,9 +121,11 @@ export function RemotionHero() {
                     alignItems: 'center',
                     gap: '12px'
                 }}>
-                    <span style={{ color: 'var(--accent)', fontWeight: 700 }}>[ EXPLORE_MODE ]</span>
+                    <span style={{ color: 'var(--accent-soft)', fontWeight: 700 }}>
+                        {showreelData[activeIndex].client.toUpperCase()}
+                    </span>
                     <span style={{ opacity: 0.2 }}>|</span>
-                    <span>PROJECT_ID: {showreelData[activeIndex].id.toUpperCase()}</span>
+                    <span>{showreelData[activeIndex].year}</span>
                 </div>
 
                 <div style={{

@@ -8,7 +8,7 @@ export function Experience() {
     const data = useContent('experience');
     return (
         <section id="experience" className="responsive-section">
-            <SectionHeader number={data.sectionNumber} title={data.title} />
+            <SectionHeader meta={data.sectionMeta} title={data.title} />
 
             <div className="experience-list">
                 {data.items.map((role, i) => (

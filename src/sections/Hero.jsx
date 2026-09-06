@@ -59,7 +59,7 @@ export function Hero({ ready }) {
                         ))}
                     </h1>
 
-                    <motion.p className="mono hero-lead-description" variants={rise}>
+                    <motion.p className="hero-lead-description" variants={rise}>
                         {hero.description}
                     </motion.p>
 

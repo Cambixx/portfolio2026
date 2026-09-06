@@ -17,7 +17,7 @@ export function Contact() {
 
     return (
         <section id="contact" className="responsive-section" style={{ paddingBottom: '80px' }}>
-            <SectionHeader number={data.sectionNumber} title={data.title} />
+            <SectionHeader meta={data.sectionMeta} title={data.title} />
 
             <motion.div
                 className="brutal-card contact-card-main"

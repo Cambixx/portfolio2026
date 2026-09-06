@@ -104,10 +104,10 @@
 }
 
 .hero-lead-description {
-    font-size: 0.92rem;
+    font-size: 1.02rem;
     color: var(--muted);
     max-width: 520px;
-    line-height: 1.8;
+    line-height: 1.7;
     margin-bottom: 36px;
     text-wrap: pretty;
 }

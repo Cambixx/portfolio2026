@@ -151,8 +151,8 @@
 /* ── Descripción ───────────────────────────────────────── */
 
 .hc-spec {
-    font-size: 0.72rem;
-    line-height: 1.8;
+    font-size: 0.84rem;
+    line-height: 1.6;
     color: var(--muted);
     margin: 20px 0 0;
 }

@@ -4,7 +4,9 @@ export const ScreenSlide = ({
     imageSrc,
     title,
     description,
+    url = '',
 }) => {
+    const domain = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
     const frame = useCurrentFrame();
     const { fps } = useVideoConfig();
 
@@ -181,25 +183,38 @@ export const ScreenSlide = ({
                     }} />
                 </div>
 
-                {/* Overlay UI Info inside the frame */}
+                {/* Dominio real del proyecto, sobre el marco */}
                 <div style={{
                     position: 'absolute',
                     top: '-25px',
                     left: '5px',
                     fontFamily: 'Space Mono',
                     fontSize: '11px',
-                    color: 'var(--accent)',
+                    color: 'var(--accent-soft)',
                     letterSpacing: '2.5px',
-                    opacity: drawGrid * 0.7,
+                    opacity: drawGrid * 0.8,
                 }}>
-                    [ TARGET_ACQUIRED ]
+                    {domain}
                 </div>
             </div>
+
+            {/* Velo inferior: el título cae sobre la captura y sin él deja de
+                leerse en cuanto la web tiene el pie claro (caso Corona). */}
+            <div style={{
+                position: 'absolute',
+                left: 0,
+                right: 0,
+                bottom: 0,
+                height: '46%',
+                background: 'linear-gradient(to top, rgba(5,5,5,0.94) 12%, rgba(5,5,5,0.72) 42%, transparent 100%)',
+                zIndex: 15,
+                pointerEvents: 'none',
+            }} />
 
             {/* Title & Description Overlay */}
             <div style={{
                 position: 'absolute',
-                bottom: '8%',
+                bottom: '13%',
                 right: '12%',
                 textAlign: 'right',
                 maxWidth: '600px',

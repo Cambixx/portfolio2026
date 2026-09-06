@@ -25,7 +25,7 @@ export function Projects({ isMobile }) {
     return (
         <section id="projects" className="responsive-section">
             <SectionHeader
-                number={data.sectionNumber}
+                meta={data.sectionMeta}
                 title={data.title}
                 description={data.description}
             />
@@ -34,10 +34,6 @@ export function Projects({ isMobile }) {
             <div className="showreel-container">
                 <div className="showreel-video-wrapper">
                     <RemotionHero />
-                    <div className="showreel-badge">
-                        <div className="badge-dot" />
-                        {data.showreel.label}
-                    </div>
                 </div>
                 <div className="showreel-footer">
                     <span className="mono showreel-label">{data.showreel.label}</span>
@@ -89,7 +85,7 @@ export function Projects({ isMobile }) {
                                     </h3>
                                 </div>
 
-                                <p className="mono project-desc">
+                                <p className="project-desc">
                                     {project.description}
                                 </p>
 

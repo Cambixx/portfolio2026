@@ -1,0 +1,32 @@
+[
+    {
+        "id": "budweiser",
+        "imageSrc": "/projects/budweiser.jpg",
+        "title": "BUDWEISER SPAIN",
+        "client": "Budweiser",
+        "year": "2024",
+        "description": "Official brand portal with campaigns and motion-led sections.",
+        "duration": 180,
+        "url": "https://www.budweiser.es/"
+    },
+    {
+        "id": "corona",
+        "imageSrc": "/projects/corona-web.jpg",
+        "title": "CERVEZA CORONA",
+        "client": "Corona",
+        "year": "2023",
+        "description": "Motion graphics and immersive storytelling for the Sunset Spots experiences.",
+        "duration": 180,
+        "url": "https://www.cervezacorona.es/"
+    },
+    {
+        "id": "nexho",
+        "imageSrc": "/projects/nexho-web.jpg",
+        "title": "NEXHO — MAHOU",
+        "client": "Mahou",
+        "year": "2023",
+        "description": "Hospitality platform used by over 130,000 professionals.",
+        "duration": 180,
+        "url": "https://www.somosnexho.com/"
+    }
+]

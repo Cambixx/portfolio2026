@@ -1,13 +1,13 @@
 {
-    "sectionNumber": "005/",
+    "sectionMeta": "28 TOOLS",
     "title": [
-        "Technical",
-        "Arsenal"
+        "What I",
+        "work with"
     ],
-    "description": "> The toolset behind every production site I ship — from markup fundamentals to advanced motion and CMS architecture.",
+    "description": "The toolset behind every production site I ship — from markup fundamentals to advanced motion and CMS architecture.",
     "categories": [
         {
-            "label": "// FRONTEND",
+            "label": "FRONTEND",
             "skills": [
                 {
                     "name": "HTML5",
@@ -36,7 +36,7 @@
             ]
         },
         {
-            "label": "// MOTION & 3D",
+            "label": "MOTION & 3D",
             "skills": [
                 {
                     "name": "GSAP",
@@ -57,7 +57,7 @@
             ]
         },
         {
-            "label": "// BACKEND & DATA",
+            "label": "BACKEND & DATA",
             "skills": [
                 {
                     "name": "Node.js",
@@ -74,7 +74,7 @@
             ]
         },
         {
-            "label": "// CMS & TEMPLATING",
+            "label": "CMS & TEMPLATING",
             "skills": [
                 {
                     "name": "WordPress",
@@ -91,7 +91,7 @@
             ]
         },
         {
-            "label": "// TOOLING",
+            "label": "TOOLING",
             "skills": [
                 {
                     "name": "Vite",
@@ -116,7 +116,7 @@
             ]
         },
         {
-            "label": "// METHODOLOGY",
+            "label": "METHODOLOGY",
             "skills": [
                 {
                     "name": "Scrum",

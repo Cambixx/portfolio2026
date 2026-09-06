@@ -1,10 +1,10 @@
 {
-    "sectionNumber": "004/",
+    "sectionMeta": "2 DEGREES",
     "title": [
         "Education",
         "& Background"
     ],
-    "description": "> Industrial engineering discipline applied to frontend architecture — structured thinking, measurable standards, systems that scale.",
+    "description": "Industrial engineering discipline applied to frontend architecture — structured thinking, measurable standards, systems that scale.",
     "items": [
         {
             "line": "001",
@@ -22,7 +22,7 @@
         }
     ],
     "languages": {
-        "label": "// LANGUAGES",
+        "label": "LANGUAGES",
         "items": [
             "Spanish — Native",
             "English — B2"

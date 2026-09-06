@@ -1,10 +1,10 @@
 {
-    "sectionNumber": "004/",
+    "sectionMeta": "2 TITULACIONES",
     "title": [
         "Formación",
         "y Trayectoria"
     ],
-    "description": "> La disciplina de la ingeniería industrial aplicada a la arquitectura frontend: pensamiento estructurado, estándares medibles y sistemas que escalan.",
+    "description": "La disciplina de la ingeniería industrial aplicada a la arquitectura frontend: pensamiento estructurado, estándares medibles y sistemas que escalan.",
     "items": [
         {
             "line": "001",
@@ -22,7 +22,7 @@
         }
     ],
     "languages": {
-        "label": "// IDIOMAS",
+        "label": "IDIOMAS",
         "items": [
             "Español — Nativo",
             "Inglés — B2"

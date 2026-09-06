@@ -9,7 +9,7 @@ export function Education() {
     return (
         <section id="education" className="responsive-section">
             <SectionHeader
-                number={data.sectionNumber}
+                meta={data.sectionMeta}
                 title={data.title}
                 description={data.description}
             />

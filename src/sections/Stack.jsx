@@ -9,16 +9,17 @@ export function Stack() {
     return (
         <section id="stack" className="responsive-section">
             <SectionHeader
-                number={data.sectionNumber}
+                meta={data.sectionMeta}
                 title={data.title}
                 description={data.description}
+                divider={false}
             />
 
             <div className="stack-list">
                 {data.categories.map((cat, i) => (
                     <motion.div
                         key={cat.label}
-                        className="brutal-card stack-card"
+                        className="stack-card"
                         initial={{ opacity: 0, y: 28 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true, margin: '-10% 0px' }}

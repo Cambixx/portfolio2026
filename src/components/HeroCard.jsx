@@ -89,7 +89,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                     </span>
                 </div>
 
-                <p className="mono hc-spec">{ui.heroCard.specText}</p>
+                <p className="hc-spec">{ui.heroCard.specText}</p>
 
                 <ul className="hc-stack mono">
                     {stack.map((tech) => (

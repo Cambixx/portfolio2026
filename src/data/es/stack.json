@@ -1,13 +1,13 @@
 {
-    "sectionNumber": "005/",
+    "sectionMeta": "28 HERRAMIENTAS",
     "title": [
-        "Arsenal",
-        "Técnico"
+        "Con qué",
+        "trabajo"
     ],
-    "description": "> Las herramientas detrás de cada web que pongo en producción: desde los fundamentos del maquetado hasta animación avanzada y arquitectura de CMS.",
+    "description": "Las herramientas detrás de cada web que pongo en producción: desde los fundamentos del maquetado hasta animación avanzada y arquitectura de CMS.",
     "categories": [
         {
-            "label": "// FRONTEND",
+            "label": "FRONTEND",
             "skills": [
                 {
                     "name": "HTML5",
@@ -36,7 +36,7 @@
             ]
         },
         {
-            "label": "// ANIMACIÓN Y 3D",
+            "label": "ANIMACIÓN Y 3D",
             "skills": [
                 {
                     "name": "GSAP",
@@ -57,7 +57,7 @@
             ]
         },
         {
-            "label": "// BACKEND Y DATOS",
+            "label": "BACKEND Y DATOS",
             "skills": [
                 {
                     "name": "Node.js",
@@ -74,7 +74,7 @@
             ]
         },
         {
-            "label": "// CMS Y PLANTILLAS",
+            "label": "CMS Y PLANTILLAS",
             "skills": [
                 {
                     "name": "WordPress",
@@ -91,7 +91,7 @@
             ]
         },
         {
-            "label": "// HERRAMIENTAS",
+            "label": "HERRAMIENTAS",
             "skills": [
                 {
                     "name": "Vite",
@@ -116,7 +116,7 @@
             ]
         },
         {
-            "label": "// METODOLOGÍA",
+            "label": "METODOLOGÍA",
             "skills": [
                 {
                     "name": "Scrum",
