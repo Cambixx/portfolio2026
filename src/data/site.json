@@ -14,11 +14,16 @@
         },
         {
             "num": "03",
+            "label": "Education",
+            "href": "#education"
+        },
+        {
+            "num": "04",
             "label": "Stack",
             "href": "#stack"
         },
         {
-            "num": "04",
+            "num": "05",
             "label": "Contact",
             "href": "#contact"
         }

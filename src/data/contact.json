@@ -1,28 +1,28 @@
 {
-    "sectionNumber": "005/",
+    "sectionNumber": "006/",
     "title": [
         "Get In",
         "Touch"
     ],
-    "availability": "// AVAILABLE FOR FREELANCE & CONTRACT",
-    "email": "carlos@rabago.dev",
+    "availability": "// AVAILABLE FOR FREELANCE & CONTRACT — MADRID / REMOTE",
+    "email": "carlosmiguel40@gmail.com",
     "cta": "[ START A PROJECT ]",
-    "socialLabel": "// SOCIAL",
+    "socialLabel": "// DIRECT",
     "social": [
         {
-            "label": "GitHub",
-            "url": "https://github.com/carlosrabago",
-            "path": "github.com/carlosrabago"
-        },
-        {
             "label": "LinkedIn",
-            "url": "https://linkedin.com/in/carlosrabago",
-            "path": "linkedin.com/in/carlosrabago"
+            "url": "https://www.linkedin.com/in/carlos-miguel-r%C3%A1bago-torcates-2a5447208",
+            "path": "linkedin.com/in/carlos-miguel-rábago-torcates"
         },
         {
-            "label": "Twitter / X",
-            "url": "https://x.com/carlosrabago",
-            "path": "x.com/carlosrabago"
+            "label": "Phone",
+            "url": "tel:+34603728243",
+            "path": "+34 603 728 243"
+        },
+        {
+            "label": "Location",
+            "url": "https://maps.google.com/?q=Madrid,Spain",
+            "path": "Madrid, España — 28018"
         }
     ]
 }

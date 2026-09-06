@@ -26,7 +26,16 @@ export function Experience() {
                                 <span className="experience-company">{role.company}</span>
                                 <span className="experience-period">{role.period}</span>
                             </div>
-                            <p className="experience-description">{role.description}</p>
+                            <div>
+                                <p className="experience-description">{role.description}</p>
+                                {role.highlights?.length > 0 && (
+                                    <ul className="experience-highlights">
+                                        {role.highlights.map((point) => (
+                                            <li key={point}>{point}</li>
+                                        ))}
+                                    </ul>
+                                )}
+                            </div>
                         </div>
                     </motion.article>
                 ))}

@@ -1,34 +1,34 @@
 {
-    "badge": "AVAILABLE FOR CONTRACT & NEW PROJECTS",
-    "subtitle": "// Creative Frontend & 3D Web Developer",
+    "badge": "AVAILABLE FOR CONTRACT — REMOTE OR ON-SITE",
+    "subtitle": "// Frontend Developer & Industrial Engineer",
     "title": [
         "FRONTEND",
         "DEVELOPER"
     ],
     "titleSeparator": "—",
-    "description": "Crafting high-impact digital experiences where engineering rigor meets creative motion, WebGL 3D interfaces, and modern React architectures.",
+    "description": "Frontend Developer and Industrial Engineer building modern, dynamic and interactive web interfaces. I pair engineering-grade structured thinking with performance, SEO and accessibility standards to ship scalable, high-impact products for leading brands.",
     "location": "Madrid, Spain (UTC+1)",
     "coordinates": "40.4168° N, 3.7038° W — 2026",
     "stats": [
         {
             "value": "05+",
-            "label": "Years Experience"
+            "label": "Years Frontend"
         },
         {
-            "value": "15+",
-            "label": "Production Projects"
+            "value": "10+",
+            "label": "Brand Projects"
         },
         {
-            "value": "100%",
-            "label": "Creative Focus"
+            "value": "ENG",
+            "label": "Industrial Engineer"
         }
     ],
     "coreStack": [
         "React",
-        "Three.js",
-        "TypeScript",
+        "JavaScript ES6+",
         "GSAP",
-        "Next.js",
-        "WebGL"
+        "Three.js",
+        "Framer Motion",
+        "WordPress"
     ]
 }

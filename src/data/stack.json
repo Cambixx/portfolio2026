@@ -1,78 +1,149 @@
 {
-    "sectionNumber": "004/",
+    "sectionNumber": "005/",
     "title": [
         "Technical",
         "Arsenal"
     ],
-    "description": "> Always evolving with the latest ecosystem standards to deliver robust solutions.",
+    "description": "> The toolset behind every production site I ship — from markup fundamentals to advanced motion and CMS architecture.",
     "categories": [
         {
-            "label": "// CORE",
+            "label": "// FRONTEND",
             "skills": [
                 {
-                    "name": "React 19",
+                    "name": "HTML5",
+                    "highlighted": false
+                },
+                {
+                    "name": "CSS3",
+                    "highlighted": false
+                },
+                {
+                    "name": "JavaScript ES6+",
                     "highlighted": true
                 },
                 {
-                    "name": "Next.js 15",
-                    "highlighted": false
-                },
-                {
-                    "name": "TypeScript",
-                    "highlighted": false
+                    "name": "React",
+                    "highlighted": true
                 },
                 {
                     "name": "Tailwind CSS",
+                    "highlighted": false
+                },
+                {
+                    "name": "Bootstrap",
                     "highlighted": false
                 }
             ]
         },
         {
-            "label": "// CREATIVE",
+            "label": "// MOTION & 3D",
             "skills": [
-                {
-                    "name": "Three.js",
-                    "highlighted": true
-                },
-                {
-                    "name": "Spline",
-                    "highlighted": false
-                },
                 {
                     "name": "GSAP",
                     "highlighted": true
                 },
                 {
-                    "name": "Remotion",
-                    "highlighted": false
+                    "name": "Three.js",
+                    "highlighted": true
                 },
                 {
                     "name": "Framer Motion",
+                    "highlighted": false
+                },
+                {
+                    "name": "WebGL",
                     "highlighted": false
                 }
             ]
         },
         {
-            "label": "// INFRASTRUCTURE",
+            "label": "// BACKEND & DATA",
             "skills": [
                 {
                     "name": "Node.js",
                     "highlighted": false
                 },
                 {
-                    "name": "Supabase",
+                    "name": "PHP",
                     "highlighted": false
                 },
                 {
-                    "name": "Docker",
+                    "name": "MySQL",
+                    "highlighted": false
+                }
+            ]
+        },
+        {
+            "label": "// CMS & TEMPLATING",
+            "skills": [
+                {
+                    "name": "WordPress",
+                    "highlighted": true
+                },
+                {
+                    "name": "Timber",
                     "highlighted": false
                 },
                 {
-                    "name": "AWS",
+                    "name": "Twig",
+                    "highlighted": false
+                }
+            ]
+        },
+        {
+            "label": "// TOOLING",
+            "skills": [
+                {
+                    "name": "Vite",
                     "highlighted": false
                 },
                 {
-                    "name": "Vercel",
+                    "name": "webpack",
+                    "highlighted": false
+                },
+                {
+                    "name": "Git",
+                    "highlighted": false
+                },
+                {
+                    "name": "GitHub",
+                    "highlighted": false
+                },
+                {
+                    "name": "Figma",
+                    "highlighted": false
+                }
+            ]
+        },
+        {
+            "label": "// METHODOLOGY",
+            "skills": [
+                {
+                    "name": "Scrum",
+                    "highlighted": false
+                },
+                {
+                    "name": "Kanban",
+                    "highlighted": false
+                },
+                {
+                    "name": "Jira",
+                    "highlighted": false
+                },
+                {
+                    "name": "Trello",
+                    "highlighted": false
+                },
+                {
+                    "name": "Core Web Vitals",
+                    "highlighted": true
+                },
+                {
+                    "name": "Accessibility (a11y)",
+                    "highlighted": false
+                },
+                {
+                    "name": "SEO",
                     "highlighted": false
                 }
             ]

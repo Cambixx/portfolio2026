@@ -7,10 +7,17 @@
     "items": [
         {
             "line": "001",
-            "title": "Full-Stack Developer",
+            "title": "Frontend Developer",
             "company": "DOERS DF",
             "period": "2023 — Present",
-            "description": "Architecting high-performance full-stack solutions with a focus on interactive 3D interfaces. Bridging the gap between creative design and robust engineering using React, Three.js, and modern PHP/WordPress ecosystems.",
+            "description": "Building high-impact web solutions for global brands and first-tier institutions — Mahou, Greenpeace, Corona, Budweiser and Oxfam — delivering interfaces aligned with the highest quality and branding standards.",
+            "highlights": [
+                "Modular, scalable frontend architectures with React and JavaScript (ES6+): clean, reusable components that cut delivery time on new features.",
+                "Interactive and 3D experiences with GSAP, Three.js and Framer Motion, raising visual engagement and user retention on promotional sites.",
+                "Custom WordPress themes and dynamic deployments through Timber and Twig, decoupling the presentation layer from CMS logic.",
+                "Continuous Core Web Vitals work: refactoring, asset strategy and mobile-first layout for better load times, a11y and SEO.",
+                "Agile collaboration: precise Figma-to-code handoff with UI/UX designers and PHP/MySQL backend sync for APIs and dynamic data."
+            ],
             "isCurrent": true
         },
         {
@@ -18,23 +25,36 @@
             "title": "Web Applications Developer",
             "company": "EDIX",
             "period": "2021 — 2023",
-            "description": "Enginneering modern web applications with a focus on UI optimization and responsive architecture. Implemented agile workflows to deliver high-quality frontend experiences and scalable code structures.",
+            "description": "Development of functional, scalable web applications alongside the web development programme.",
+            "highlights": [
+                "Built functional and scalable web applications from the ground up.",
+                "Designed and optimised user interfaces centred on experience and usability."
+            ],
             "isCurrent": false
         },
         {
             "line": "003",
-            "title": "Logistics Operations Analyst",
+            "title": "Logistics & Operations Planner",
             "company": "Mercadona",
             "period": "2016 — 2021",
-            "description": "Leveraged deep analytical skills to optimize complex logistics operations. Transitioned a solid foundation in data analysis and systematic problem-solving into efficient software engineering.",
+            "description": "Delivery planning and stock management across a high-volume retail operation — the analytical groundwork behind a systematic approach to engineering.",
+            "highlights": [
+                "Delivery planning and stock management.",
+                "Transport route scheduling and invoicing.",
+                "Sales report analysis and product supervision."
+            ],
             "isCurrent": false
         },
         {
             "line": "004",
-            "title": "Store Manager",
+            "title": "Service Store Manager",
             "company": "Drex Telecom",
             "period": "2014 — 2016",
-            "description": "Spearheaded retail operations for telecommunications, honing leadership and user-centric problem-solving. Developed a keen eye for customer needs that now informs intuitive interface design.",
+            "description": "Ran telecommunications service stores end to end, developing the user-centric problem solving that now informs interface design.",
+            "highlights": [
+                "Service store management.",
+                "Customer support and front-line service."
+            ],
             "isCurrent": false
         },
         {
@@ -42,15 +62,13 @@
             "title": "Commercial Supervisor",
             "company": "Iberia",
             "period": "2007 — 2013",
-            "description": "Managed critical commercial operations in a high-stakes aeronautical environment. Mastered team coordination and operational precision, essential for managing complex codebases.",
-            "isCurrent": false
-        },
-        {
-            "line": "006",
-            "title": "Quality Control Technician",
-            "company": "CAVIM",
-            "period": "2005 — 2007",
-            "description": "Established a rigorous technical mindset through quality control. Developed an uncompromising attention to detail and a systematic approach to technical excellence from the start.",
+            "description": "Supervised the commercial network and supported the sales force in the food channel, coordinating operations across logistics and marketing.",
+            "highlights": [
+                "Commercial network supervision and sales-force support in the food channel.",
+                "Client relationship management, order control and delivery tracking.",
+                "Promotion coordination, point-of-sale strategy and results analysis.",
+                "Collaboration with logistics and marketing to optimise distribution and product visibility."
+            ],
             "isCurrent": false
         }
     ]

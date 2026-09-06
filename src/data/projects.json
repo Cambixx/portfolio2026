@@ -4,7 +4,7 @@
         "Selected",
         "Works"
     ],
-    "description": "> A curation of digital products and immersive experiences built for the modern web.",
+    "description": "> Production sites for global brands and institutions — developed and maintained at Doers DF.",
     "showreel": {
         "label": "SHOWREEL 2026",
         "techLine": "Remotion · React · WebGL"
@@ -25,8 +25,8 @@
             "category": "Creative Development"
         },
         {
-            "title": "Nexho - Mahou",
-            "description": "Hospitality service platform for Mahou clients, streamlining service requests and loyalty management.",
+            "title": "Nexho — Mahou",
+            "description": "Hospitality platform for Mahou venue owners, streamlining service requests and loyalty management. Ongoing maintenance and associated projects.",
             "tech": [
                 "PHP",
                 "JavaScript",
@@ -39,18 +39,32 @@
             "category": "Full-Stack"
         },
         {
-            "title": "Tejiendo Derechos",
-            "description": "Interactive platform for Oxfam Intermón to strengthen human rights advocacy through collective learning and network funding.",
+            "title": "Greenpeace España",
+            "description": "Campaign and awareness work for Greenpeace, including data-driven climate storytelling. Ongoing maintenance and associated projects.",
+            "tech": [
+                "JavaScript",
+                "HTML5",
+                "CSS3",
+                "Interactive Data"
+            ],
+            "year": "2024",
+            "url": "https://es.greenpeace.org/",
+            "image": "/projects/doers.png",
+            "category": "Creative Development"
+        },
+        {
+            "title": "Budweiser España",
+            "description": "Official Budweiser Spain portal: brand campaigns, promotional experiences and motion-led sections built to the brand's global standards.",
             "tech": [
                 "WordPress",
-                "Twig",
+                "GSAP",
                 "PHP",
-                "UI Engineering"
+                "Motion Design"
             ],
-            "year": "2023",
-            "url": "https://tejiendoderechos.oxfamintermon.org/",
-            "image": "/projects/oxfam.png",
-            "category": "UI / Design"
+            "year": "2024",
+            "url": "https://www.budweiser.es/",
+            "image": "/projects/corona.png",
+            "category": "Motion Graphics"
         },
         {
             "title": "Corona Official",
@@ -67,18 +81,32 @@
             "category": "Motion Graphics"
         },
         {
-            "title": "ICA Governance",
-            "description": "Professional governance portal for the Institute of Board Members-Administrators, focused on best practices in corporate leadership.",
+            "title": "Tejiendo Derechos — Oxfam",
+            "description": "Interactive platform for Oxfam Intermón to strengthen human rights advocacy through collective learning and network funding.",
+            "tech": [
+                "WordPress",
+                "Twig",
+                "PHP",
+                "UI Engineering"
+            ],
+            "year": "2023",
+            "url": "https://tejiendoderechos.oxfamintermon.org/",
+            "image": "/projects/oxfam.png",
+            "category": "UI / Design"
+        },
+        {
+            "title": "Nextep Finance",
+            "description": "Financial services platform for Nextep, delivering a clear, high-performance interface for investment and advisory products.",
             "tech": [
                 "WordPress",
                 "PHP",
-                "MySQL",
+                "JavaScript",
                 "UI Architecture"
             ],
-            "year": "2022",
-            "url": "https://www.iconsejeros.com/",
-            "image": "/projects/ica.png",
-            "category": "UI / Design"
+            "year": "2024",
+            "url": "https://nextepfinance.com/",
+            "image": "/projects/boreal.png",
+            "category": "Full-Stack"
         },
         {
             "title": "Boreal Wealth",
@@ -94,18 +122,18 @@
             "category": "Full-Stack"
         },
         {
-            "title": "Greenpeace Olas",
-            "description": "Interactive climate awareness microsite documenting the impact of heatwaves through data-driven storytelling.",
+            "title": "IC-A Governance",
+            "description": "Professional governance portal for the Instituto de Consejeros-Administradores, focused on best practices in corporate leadership.",
             "tech": [
-                "JavaScript",
-                "HTML5",
-                "CSS3",
-                "Interactive Data"
+                "WordPress",
+                "PHP",
+                "MySQL",
+                "UI Architecture"
             ],
             "year": "2022",
-            "url": "https://es.greenpeace.org/es/trabajamos-en/cambio-climatico/olas-de-calor/",
-            "image": "/projects/doers.png",
-            "category": "Creative Development"
+            "url": "https://www.iconsejeros.com/",
+            "image": "/projects/ica.png",
+            "category": "UI / Design"
         },
         {
             "title": "Misstake",

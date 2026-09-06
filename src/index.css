@@ -556,6 +556,32 @@ a {
     line-height: 1.85;
 }
 
+.experience-highlights {
+    list-style: none;
+    margin: 20px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.experience-highlights li {
+    position: relative;
+    padding-left: 20px;
+    font-family: var(--font-mono);
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.7;
+}
+
+.experience-highlights li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--accent-soft);
+}
+
 /* ═══════════════════════════════════════
    STACK
    ═══════════════════════════════════════ */

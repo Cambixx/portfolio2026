@@ -45,7 +45,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
     };
 
     const copyEmail = () => {
-        navigator.clipboard.writeText('carlos@rabago.dev');
+        navigator.clipboard.writeText('carlosmiguel40@gmail.com');
         setCopied(true);
         setTimeout(() => setCopied(false), 2500);
     };
@@ -87,7 +87,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                             <h3 className="hero-card-name">Carlos Rábago</h3>
                             <span className="hero-card-tag mono">SENIOR</span>
                         </div>
-                        <p className="hero-card-role mono">Creative Frontend & 3D Web</p>
+                        <p className="hero-card-role mono">Frontend Developer & Industrial Engineer</p>
                         <div className="hero-card-location mono">
                             <span className="hero-card-loc-icon">◉</span>
                             <span>Madrid, Spain</span>
@@ -105,10 +105,10 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                         </span>
                     </div>
                     <p className="mono hero-spec-text">
-                        Specialized in high-performance WebGL interfaces, interactive creative frontend, and robust web applications.
+                        Specialized in modern, dynamic and interactive web interfaces — advanced motion with GSAP and Three.js, React architectures and WordPress (Timber/Twig) environments.
                     </p>
                     <div className="hero-card-tech-chips">
-                        {(coreStack.length > 0 ? coreStack : ['React', 'Three.js', 'TypeScript', 'GSAP', 'Next.js', 'WebGL']).map((tech, i) => (
+                        {(coreStack.length > 0 ? coreStack : ['React', 'JavaScript ES6+', 'GSAP', 'Three.js', 'Framer Motion', 'WordPress']).map((tech, i) => (
                             <span key={i} className="hero-tech-chip mono">
                                 {tech}
                             </span>
@@ -119,9 +119,9 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                 {/* Stats row */}
                 <div className="hero-card-stats-grid">
                     {(stats.length > 0 ? stats : [
-                        { value: '05+', label: 'Years Exp' },
-                        { value: '15+', label: 'Shipped Works' },
-                        { value: '100%', label: 'Commitment' }
+                        { value: '05+', label: 'Years Frontend' },
+                        { value: '10+', label: 'Brand Projects' },
+                        { value: 'ENG', label: 'Industrial Engineer' }
                     ]).map((s, idx) => (
                         <div key={idx} className="hero-card-stat-item">
                             <span className="hero-card-stat-val mono">{s.value}</span>
@@ -138,26 +138,24 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                         aria-live="polite"
                         title="Copy email to clipboard"
                     >
-                        <span>{copied ? '✓ COPIED' : 'carlos@rabago.dev'}</span>
+                        <span>{copied ? '✓ COPIED' : 'carlosmiguel40@gmail.com'}</span>
                     </button>
                     <div className="hero-card-socials-mini">
                         <a
-                            href="https://github.com/carlosrabago"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="hero-mini-social mono"
-                            title="GitHub Profile"
-                        >
-                            GH
-                        </a>
-                        <a
-                            href="https://linkedin.com/in/carlosrabago"
+                            href="https://www.linkedin.com/in/carlos-miguel-r%C3%A1bago-torcates-2a5447208"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hero-mini-social mono"
                             title="LinkedIn Profile"
                         >
                             IN
+                        </a>
+                        <a
+                            href="tel:+34603728243"
+                            className="hero-mini-social mono"
+                            title="Call +34 603 728 243"
+                        >
+                            TEL
                         </a>
                     </div>
                 </div>
