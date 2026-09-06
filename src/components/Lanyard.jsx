@@ -1,10 +1,10 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, extend, useFrame } from '@react-three/fiber';
 import { useGLTF, useTexture, Environment, Lightformer } from '@react-three/drei';
 import { BallCollider, CuboidCollider, Physics, RigidBody, useRopeJoint, useSphericalJoint } from '@react-three/rapier';
 import { MeshLineGeometry, MeshLineMaterial } from 'meshline';
 import { useInView } from 'motion/react';
-
+import { readPalette } from '../config/palette';
 // Import assets directly using Vite's path resolution
 import cardGLB from '../assets/lanyard/card.glb';
 import lanyardTexture from '../assets/lanyard/lanyard.png';
@@ -25,6 +25,8 @@ export default function Lanyard({
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
     const containerRef = useRef(null);
     const inView = useInView(containerRef);
+    // Luz de contorno con el acento de la paleta activa.
+    const accent = useMemo(() => readPalette().accent, []);
 
     useEffect(() => {
         const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -77,7 +79,7 @@ export default function Lanyard({
                     {/* Subtle accent rim light */}
                     <Lightformer
                         intensity={1.5}
-                        color="#5227FF"
+                        color={accent}
                         position={[5, 2, -3]}
                         rotation={[0, -Math.PI / 4, 0]}
                         scale={[20, 5, 1]}

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Lenis from 'lenis';
 
 import Intro from './components/Intro';
@@ -7,6 +7,7 @@ import { StatusBar } from './components/StatusBar';
 import ScrollCompanion from './components/ScrollCompanion';
 import DotGrid from './components/DotGrid';
 import Antigravity from './components/Antigravity';
+import { readPalette } from './config/palette';
 
 import { Hero } from './sections/Hero';
 import { Projects } from './sections/Projects';
@@ -30,6 +31,8 @@ function useIsMobile(breakpoint = 768) {
 
 function App() {
     const isMobile = useIsMobile();
+    // Los fondos 3D toman su color de la paleta CSS activa.
+    const palette = useMemo(() => readPalette(), []);
     const [bgType, setBgType] = useState('antigravity');
     const [showIntro, setShowIntro] = useState(true);
     // `revealed` flips when the intro curtain starts lifting so the hero can
@@ -96,8 +99,8 @@ function App() {
                     <DotGrid
                         dotSize={5}
                         gap={15}
-                        baseColor="#271E37"
-                        activeColor="#5227FF"
+                        baseColor={palette.accentDim}
+                        activeColor={palette.accent}
                         proximity={120}
                         shockRadius={250}
                         shockStrength={5}
@@ -113,7 +116,7 @@ function App() {
                         waveAmplitude={1}
                         particleSize={1.5}
                         lerpSpeed={0.05}
-                        color="#5227FF"
+                        color={palette.accent}
                         autoAnimate
                         particleVariance={1}
                         rotationSpeed={0}

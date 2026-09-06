@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import { InertiaPlugin } from 'gsap/InertiaPlugin';
 
 import './DotGrid.css';
+import { DEFAULT_PALETTE } from '../config/palette';
 
 gsap.registerPlugin(InertiaPlugin);
 
@@ -32,8 +33,8 @@ function hexToRgb(hex) {
 const DotGrid = ({
     dotSize = 16,
     gap = 32,
-    baseColor = '#5227FF',
-    activeColor = '#5227FF',
+    baseColor = DEFAULT_PALETTE.accentDim,
+    activeColor = DEFAULT_PALETTE.accent,
     proximity = 150,
     speedTrigger = 100,
     shockRadius = 250,

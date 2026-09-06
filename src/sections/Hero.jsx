@@ -49,7 +49,7 @@ export function Hero({ ready }) {
                     <h1 className="hero-title">
                         {hero.title.map((line, index) => (
                             <span
-                                key={line}
+                                key={index}
                                 className={`hero-title__line${index === 1 ? ' hero-title__line--accent' : ''}`}
                             >
                                 <motion.span className="hero-title__inner" variants={lineReveal}>

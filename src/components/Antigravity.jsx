@@ -2,6 +2,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { useMemo, useRef, useState } from 'react';
 import { useInView } from 'motion/react';
 import * as THREE from 'three';
+import { DEFAULT_PALETTE } from '../config/palette';
 
 const AntigravityInner = ({
     count = 400,
@@ -16,30 +17,46 @@ const AntigravityInner = ({
     rotationSpeed = 0.05,
     depthFactor = 1.5,
     pulseSpeed = 2,
-    fieldStrength = 8
+    fieldStrength = 8,
+    color = DEFAULT_PALETTE.accent
 }) => {
     const meshRef = useRef(null);
     const colorArray = useMemo(() => new Float32Array(count * 3), [count]);
     const baseColorArray = useMemo(() => new Float32Array(count * 3), [count]);
     const dummy = useMemo(() => new THREE.Object3D(), []);
 
-    // Refined palette — deeper, more harmonious
-    const palette = useMemo(() => [
-        new THREE.Color('#5227FF'), // Primary purple
-        new THREE.Color('#4285F4'), // Blue
-        new THREE.Color('#F06292'), // Pink/Coral
-        new THREE.Color('#FFAB40'), // Orange
-        new THREE.Color('#FFFFFF'), // White (accent)
-    ], []);
+    // Particle colours are derived from the site accent instead of being fixed,
+    // so the field stays in harmony whichever palette is active. Fixed blues and
+    // pinks read as noise against a warm accent.
+    const [palette, brightPalette] = useMemo(() => {
+        const base = new THREE.Color(color);
+        const hsl = { h: 0, s: 0, l: 0 };
+        base.getHSL(hsl);
 
-    // Brighter "attracted" versions of each color
-    const brightPalette = useMemo(() => [
-        new THREE.Color('#7B52FF'),
-        new THREE.Color('#6FA8FF'),
-        new THREE.Color('#FF8AB5'),
-        new THREE.Color('#FFCB73'),
-        new THREE.Color('#FFFFFF'),
-    ], []);
+        // Two close analogues plus a lighter tint keep variety within the family.
+        const variant = (dh, ds, dl) =>
+            new THREE.Color().setHSL(
+                (hsl.h + dh + 1) % 1,
+                THREE.MathUtils.clamp(hsl.s + ds, 0, 1),
+                THREE.MathUtils.clamp(hsl.l + dl, 0, 1)
+            );
+
+        const base5 = [
+            base.clone(),               // site accent
+            variant(0.055, -0.10, 0.10), // warm analogue
+            variant(-0.055, -0.05, 0.04), // cool analogue
+            variant(0, -0.30, 0.26),     // desaturated tint
+            new THREE.Color('#FFFFFF'),  // white
+        ];
+        // "Attracted" state: same hues, lifted so they read as highlights.
+        const bright5 = base5.map((c) => {
+            const h = { h: 0, s: 0, l: 0 };
+            c.getHSL(h);
+            return new THREE.Color().setHSL(h.h, h.s, THREE.MathUtils.clamp(h.l + 0.18, 0, 1));
+        });
+
+        return [base5, bright5];
+    }, [color]);
 
     const lastMousePos = useRef({ x: 0, y: 0 });
     const lastMouseMoveTime = useRef(0);
@@ -62,9 +79,9 @@ const AntigravityInner = ({
 
             // Assign random color + store base
             const colorIdx = Math.floor(Math.random() * palette.length);
-            const color = palette[colorIdx];
-            color.toArray(colorArray, i * 3);
-            color.toArray(baseColorArray, i * 3);
+            const particleColor = palette[colorIdx];
+            particleColor.toArray(colorArray, i * 3);
+            particleColor.toArray(baseColorArray, i * 3);
 
             temp.push({
                 t,

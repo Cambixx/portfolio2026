@@ -1,0 +1,93 @@
+/* ═══════════════════════════════════════════════════════════
+   PALETAS
+   ═══════════════════════════════════════════════════════════
+
+   Para cambiar el color de todo el sitio, edita UNA cosa:
+   el atributo data-palette de <html> en index.html.
+
+       <html lang="es" data-palette="cyan">
+
+   Sin atributo se usa la primera (oro), que es la activa.
+
+   Tokens de cada paleta:
+     --accent        color principal: bordes, barras, rellenos sólidos
+     --accent-soft   variante clara para TEXTO pequeño (min. 4.5:1 sobre --bg)
+     --accent-light  extremo claro de los degradados del título
+     --accent-dim    versión apagada para fondos (rejilla de puntos)
+     --accent-ink    color de texto legible ENCIMA del acento sólido
+     --accent-rgb    canales sueltos, para alphas: rgb(var(--accent-rgb) / .35)
+
+   Los tres últimos se derivan del principal; si añades una paleta nueva
+   mantén el mismo juego de seis tokens.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Oro Editorial */
+:root,
+:root[data-palette="gold"] {
+    --accent: #D9A441;
+    --accent-soft: #EBC97F;
+    --accent-light: #E9CA91;
+    --accent-dim: #342812;
+    --accent-ink: #050505;
+    --accent-rgb: 217 164 65;
+}
+
+/* Violeta */
+:root[data-palette="violet"] {
+    --accent: #5227FF;
+    --accent-soft: #9d87ff;
+    --accent-light: #9B82FF;
+    --accent-dim: #160C3C;
+    --accent-ink: #FFFFFF;
+    --accent-rgb: 82 39 255;
+}
+
+/* Cian Ártico */
+:root[data-palette="cyan"] {
+    --accent: #00B4E6;
+    --accent-soft: #6FDCFF;
+    --accent-light: #6BD4F0;
+    --accent-dim: #042C36;
+    --accent-ink: #050505;
+    --accent-rgb: 0 180 230;
+}
+
+/* Lima Terminal */
+:root[data-palette="lime"] {
+    --accent: #A8E80C;
+    --accent-soft: #C9F55F;
+    --accent-light: #CDF272;
+    --accent-dim: #293707;
+    --accent-ink: #050505;
+    --accent-rgb: 168 232 12;
+}
+
+/* Ámbar Solar */
+:root[data-palette="amber"] {
+    --accent: #FF9F1C;
+    --accent-soft: #FFC266;
+    --accent-light: #FFC77B;
+    --accent-dim: #3C270A;
+    --accent-ink: #050505;
+    --accent-rgb: 255 159 28;
+}
+
+/* Coral Vivo */
+:root[data-palette="coral"] {
+    --accent: #FF5A5F;
+    --accent-soft: #FF9098;
+    --accent-light: #FF9FA2;
+    --accent-dim: #3C1819;
+    --accent-ink: #050505;
+    --accent-rgb: 255 90 95;
+}
+
+/* Esmeralda */
+:root[data-palette="emerald"] {
+    --accent: #00C88A;
+    --accent-soft: #5CE8BA;
+    --accent-light: #6BDFBB;
+    --accent-dim: #043022;
+    --accent-ink: #050505;
+    --accent-rgb: 0 200 138;
+}

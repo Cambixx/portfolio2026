@@ -40,8 +40,8 @@
     position: absolute;
     inset: 0;
     border-radius: calc(var(--radius-sm) - 2px);
-    background: rgba(82, 39, 255, 0.28);
-    border: 1px solid rgba(82, 39, 255, 0.5);
+    background: rgb(var(--accent-rgb) / 0.28);
+    border: 1px solid rgb(var(--accent-rgb) / 0.5);
     box-shadow: 0 0 14px var(--accent-glow);
 }
 

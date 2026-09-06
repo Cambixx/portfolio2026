@@ -65,7 +65,7 @@ export const ScreenSlide = ({
                 position: 'absolute',
                 width: '600px',
                 height: '600px',
-                background: 'rgba(82, 39, 255, 0.15)',
+                background: 'rgb(var(--accent-rgb) / 0.15)',
                 filter: 'blur(150px)',
                 borderRadius: '50%',
                 opacity: entrance
@@ -176,7 +176,7 @@ export const ScreenSlide = ({
                     <div style={{
                         position: 'absolute',
                         inset: 0,
-                        background: 'linear-gradient(135deg, rgba(82,39,255,0.1), transparent)',
+                        background: 'linear-gradient(135deg, rgb(var(--accent-rgb) / 0.1), transparent)',
                         pointerEvents: 'none'
                     }} />
                 </div>

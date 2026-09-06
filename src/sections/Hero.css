@@ -37,8 +37,8 @@
     align-items: center;
     gap: 10px;
     padding: 7px 14px 7px 10px;
-    background: rgba(82, 39, 255, 0.08);
-    border: 1px solid rgba(82, 39, 255, 0.35);
+    background: rgb(var(--accent-rgb) / 0.08);
+    border: 1px solid rgb(var(--accent-rgb) / 0.35);
     border-radius: var(--radius-pill);
     font-size: 0.68rem;
     color: var(--accent-soft);
@@ -90,7 +90,7 @@
 .hero-title__line--accent .hero-title__inner {
     /* Lifted off --accent: at weight 300 the darker violet drops to ~3:1 on the
        near-black ground, which reads as muddy on thin strokes. */
-    background: linear-gradient(100deg, #8f74ff 0%, #6f4dff 45%, #c2b0ff 100%);
+    background: linear-gradient(100deg, var(--accent-soft) 0%, var(--accent) 45%, var(--accent-light) 100%);
     background-size: 200% 100%;
     -webkit-background-clip: text;
     background-clip: text;
@@ -159,8 +159,8 @@
 }
 
 .hero-secondary-btn:hover {
-    background: rgba(82, 39, 255, 0.12);
-    border-color: rgba(82, 39, 255, 0.5);
+    background: rgb(var(--accent-rgb) / 0.12);
+    border-color: rgb(var(--accent-rgb) / 0.5);
     transform: translateY(-2px);
 }
 

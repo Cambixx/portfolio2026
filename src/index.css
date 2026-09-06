@@ -1,3 +1,4 @@
+@import './styles/palettes.css';
 @import '@fontsource-variable/outfit';
 @import '@fontsource/space-mono/400.css';
 @import '@fontsource/space-mono/700.css';
@@ -13,9 +14,8 @@
     --text: rgba(255, 255, 255, 0.92);
     --muted: rgba(255, 255, 255, 0.48);
     --muted-2: rgba(255, 255, 255, 0.28);
-    --accent: #5227FF;
-    --accent-soft: #9d87ff;
-    --accent-glow: rgba(82, 39, 255, 0.35);
+    /* --accent* viven en styles/palettes.css (cambia data-palette en index.html) */
+    --accent-glow: rgb(var(--accent-rgb) / 0.35);
     --success: #22c55e;
     --border: rgba(255, 255, 255, 0.10);
     --border-strong: rgba(255, 255, 255, 0.22);
@@ -108,7 +108,7 @@ a {
     z-index: 1;
     pointer-events: none;
     background:
-        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(82, 39, 255, 0.10), transparent 60%),
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgb(var(--accent-rgb) / 0.10), transparent 60%),
         radial-gradient(ellipse 120% 90% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.55) 100%);
 }
 
@@ -228,8 +228,8 @@ a {
 }
 
 .brutal-tag:hover {
-    border-color: rgba(82, 39, 255, 0.6);
-    background: rgba(82, 39, 255, 0.12);
+    border-color: rgb(var(--accent-rgb) / 0.6);
+    background: rgb(var(--accent-rgb) / 0.12);
     color: var(--white);
 }
 
@@ -497,8 +497,8 @@ a {
 }
 
 .experience-card--current {
-    border-color: rgba(82, 39, 255, 0.35);
-    background: linear-gradient(135deg, rgba(82, 39, 255, 0.08), rgba(255, 255, 255, 0.02) 60%);
+    border-color: rgb(var(--accent-rgb) / 0.35);
+    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.08), rgba(255, 255, 255, 0.02) 60%);
 }
 
 .experience-card--current::before {
@@ -558,7 +558,7 @@ a {
 
 .experience-card--current .experience-period {
     color: var(--accent-soft);
-    border-color: rgba(82, 39, 255, 0.4);
+    border-color: rgb(var(--accent-rgb) / 0.4);
 }
 
 .experience-description {
@@ -635,12 +635,12 @@ a {
 
 .contact-card-main {
     padding: clamp(28px, 5vw, 64px);
-    background: linear-gradient(135deg, rgba(82, 39, 255, 0.10), rgba(255, 255, 255, 0.02) 50%);
-    border-color: rgba(82, 39, 255, 0.25);
+    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.10), rgba(255, 255, 255, 0.02) 50%);
+    border-color: rgb(var(--accent-rgb) / 0.25);
 }
 
 .contact-card-main:hover {
-    background: linear-gradient(135deg, rgba(82, 39, 255, 0.12), rgba(255, 255, 255, 0.03) 50%);
+    background: linear-gradient(135deg, rgb(var(--accent-rgb) / 0.12), rgba(255, 255, 255, 0.03) 50%);
 }
 
 .contact-grid {

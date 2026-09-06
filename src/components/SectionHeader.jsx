@@ -28,7 +28,7 @@ export function SectionHeader({ number, title, description, divider = true }) {
                 <div className="section-title-clip">
                     <h2 className="section-title">
                         {title.map((line, i) => (
-                            <span key={line}>
+                            <span key={i}>
                                 <motion.span
                                     className="section-title-line"
                                     style={{ x: i % 2 === 0 ? xEven : xOdd, opacity }}
