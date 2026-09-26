@@ -12,9 +12,10 @@ import { fieldState, getNamePoints, subscribeNamePoints } from './fieldState';
  * the motion stays smooth however unevenly the page is scrolled. At rest the
  * points breathe in size instead of drifting, and light up around the cursor.
  *
- * The first three formations belong to the intro (a dense core, the core
- * blown apart, then the name); the intro picks them and hands over at the
- * hero grid, from where the section on screen decides.
+ * The first four formations belong to the intro (hanging dust, the dense
+ * core it collapses into, the core blown apart, then the name); the intro
+ * picks them and hands over at the hero grid, from where the section on
+ * screen decides.
  */
 
 // Sections in page order; section N shows formation SITE_OFFSET + N.
@@ -58,7 +59,21 @@ function cloud(n, W, H, rnd) {
     return out;
 }
 
-/** Intro opening: every point packed into a small, dense core. */
+/**
+ * Intro opening: faint dust hanging across the whole space and at every
+ * depth, some of it right in front of the camera.
+ */
+function dust(n, W, H, rnd) {
+    const out = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+        out[i * 3] = (rnd() - 0.5) * W * 1.5;
+        out[i * 3 + 1] = (rnd() - 0.5) * H * 1.5;
+        out[i * 3 + 2] = -30 + rnd() * 65;
+    }
+    return out;
+}
+
+/** Every point collapsed into a small, dense core. */
 function core(n, W, H, rnd) {
     const out = new Float32Array(n * 3);
     const R = Math.min(W, H) * 0.035;
@@ -236,17 +251,19 @@ function wave(n, W, H) {
     return rotate(out, 0.55, 0);
 }
 
-const FORMATIONS = [core, burst, name, grid, sphere, rings, helix, cube, wave];
-const NAME_FORMATION = 2;
+const FORMATIONS = [dust, core, burst, name, grid, sphere, rings, helix, cube, wave];
+const DUST_FORMATION = 0;
+const NAME_FORMATION = 3;
 // Formation shown at the top of the page, where the intro hands over.
-const SITE_OFFSET = 3;
+const SITE_OFFSET = 4;
 // Formations with real depth; they sway gently, the flat ones stay square.
-const DEPTH_FORMATIONS = new Set([4, 5, 6, 7]);
+const DEPTH_FORMATIONS = new Set([5, 6, 7, 8]);
 // Seconds a section change takes.
 const SECTION_TRANSITION = 1.4;
 
 const EASINGS = {
     inOutCubic: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+    inExpo: (t) => (t <= 0 ? 0 : Math.pow(2, 10 * t - 10)),
     outExpo: (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),
     outQuart: (t) => 1 - Math.pow(1 - t, 4),
 };
@@ -268,6 +285,7 @@ const vertexShader = /* glsl */ `
     attribute vec3 p6;
     attribute vec3 p7;
     attribute vec3 p8;
+    attribute vec3 p9;
     attribute vec4 aRnd; // x size + depth lift, y arc offset x, z alpha, w arc offset y + phase
 
     uniform float uTo;
@@ -281,6 +299,7 @@ const vertexShader = /* glsl */ `
     uniform float uFocus;
     uniform float uLit;
     uniform float uDepth;
+    uniform float uCharge;      // pre-blast fizz on the core
     uniform float uSweep;       // world x of the light sweep
     uniform float uSweepOn;
     uniform vec2 uPointer;      // -1 … 1
@@ -303,7 +322,8 @@ const vertexShader = /* glsl */ `
         if (i < 5.5) return p5;
         if (i < 6.5) return p6;
         if (i < 7.5) return p7;
-        return p8;
+        if (i < 8.5) return p8;
+        return p9;
     }
 
     void main() {
@@ -315,6 +335,11 @@ const vertexShader = /* glsl */ `
         // and lands back on the shape, so the field swells and re-gathers.
         pos.xy += (vec2(aRnd.y, aRnd.w) - 0.5) * uScatter * arc;
         pos.z += aRnd.x * uArcZ * arc;
+        // Charge: the core swells into a crackling sphere, each point pulsing
+        // outward along its own direction on its own beat.
+        vec3 dir = normalize(vec3(aRnd.y, aRnd.w, aRnd.x) - 0.5 + 0.0001);
+        float crackle = 0.5 + 0.5 * sin(uTime * 45.0 + aRnd.w * 20.0);
+        pos += dir * uCharge * crackle * mix(1.0, 4.0, aRnd.z);
 
         // Depth parallax: nearer points follow the cursor further.
         pos.xy += uPointer * pos.z * uParallax;
@@ -350,6 +375,8 @@ const fragmentShader = /* glsl */ `
     varying float vIntensity;
     varying float vSweep;
 
+    uniform float uOpacity;
+
     void main() {
         float r = length(gl_PointCoord - 0.5);
         if (r > 0.5) discard;
@@ -357,7 +384,7 @@ const fragmentShader = /* glsl */ `
         vec3 color = mix(uColorDim, uColor, vIntensity);
         // The sweep runs the accent up to a warm white.
         color = mix(color, vec3(1.0, 0.94, 0.82), vSweep * 0.85);
-        gl_FragColor = vec4(color, vAlpha * soft * mix(0.55, 1.0, vIntensity));
+        gl_FragColor = vec4(color, vAlpha * soft * mix(0.55, 1.0, vIntensity) * uOpacity);
         // THREE.Color stores the palette in linear space; without converting
         // back the amber accent renders as a darker red-orange.
         #include <colorspace_fragment>
@@ -461,6 +488,8 @@ function Field({ count, pointSize, color, reduceMotion }) {
             uFocus: { value: 0 },
             uLit: { value: 1 },
             uDepth: { value: 1 },
+            uCharge: { value: 0 },
+            uOpacity: { value: 1 },
             uSweep: { value: 0 },
             uSweepOn: { value: 0 },
             uPointer: { value: new THREE.Vector2() },
@@ -544,11 +573,15 @@ function Field({ count, pointSize, color, reduceMotion }) {
         // Intro-only looks: fully lit, depth-scaled points, a tighter name.
         const inIntro = tr.to < SITE_OFFSET;
         focus.current = THREE.MathUtils.damp(focus.current, tr.to === NAME_FORMATION ? 1 : 0, 3, delta);
-        lit.current = THREE.MathUtils.damp(lit.current, inIntro ? 1 : 0, 2.5, delta);
+        // Dust is faint; points heat up as they gather and stay lit until the grid.
+        const litTarget = tr.to === DUST_FORMATION ? 0.3 : inIntro ? 1 : 0;
+        lit.current = THREE.MathUtils.damp(lit.current, litTarget, 2.5, delta);
         depth.current = THREE.MathUtils.damp(depth.current, inIntro ? 1 : 0, 2, delta);
         u.uFocus.value = focus.current;
         u.uLit.value = lit.current;
         u.uDepth.value = depth.current;
+        u.uCharge.value = fieldState.charge;
+        u.uOpacity.value = fieldState.opacity;
 
         // The light sweep: 0 → 1 carries it from off the left edge to off the right.
         const sweep = fieldState.sweep;

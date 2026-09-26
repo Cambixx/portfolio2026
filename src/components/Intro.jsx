@@ -64,9 +64,10 @@ function sampleName(root) {
  * High-End Cinematic Editorial Preloader
  *
  * The name is drawn by the site's own particle field rather than by HTML.
- * While the counter runs 000% → 100%, every particle starts packed in a
- * single core, blows apart toward the viewer, then finds its way back out
- * of the chaos on its own path and lands as the name; a band of light crosses it, then it breaks toward the viewer and
+ * While the counter runs 000% → 100%, faint dust hanging in the dark is
+ * pulled into a single core, which charges and blows apart toward the
+ * viewer; each particle then finds its way back out of the chaos on its own
+ * path and they land as the name; a band of light crosses it, then it breaks toward the viewer and
  * settles into the hero grid as the page reveals. The heading stays in the DOM, invisible, as the layout guide the
  * particles are sampled from and as the accessible name.
  * - Madrid local time clock HUD + live coordinates
@@ -125,11 +126,15 @@ export default function Intro({ onReveal, onComplete }) {
         fieldState.introActive = true;
         fieldState.sweep = 0;
         fieldState.shake = 0;
+        fieldState.charge = 0;
+        // The field comes up from black once the timeline starts.
+        fieldState.opacity = 0;
         introGoTo(0, 0);
 
         const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduce) {
             fieldState.introActive = false;
+            fieldState.opacity = 1;
             onReveal?.();
             onComplete?.();
             return;
@@ -172,6 +177,10 @@ export default function Intro({ onReveal, onComplete }) {
                     .set(['.intro__hud-item', '.intro__skip-btn'], { opacity: 0, y: 8 })
                     .set('.intro__progress-fill', { scaleX: 0 });
 
+                // Every beat is placed relative to the blast.
+                const BANG = 2.4;
+                const NAME_LANDS = BANG + 1.9;
+
                 // 1. HUD elements fade in
                 tl.to(['.intro__hud-item', '.intro__skip-btn'], {
                     opacity: 1,
@@ -185,7 +194,7 @@ export default function Intro({ onReveal, onComplete }) {
                 // as the name lands.
                 tl.to(counter, {
                     value: 100,
-                    duration: 2.7,
+                    duration: NAME_LANDS - 0.1,
                     ease: 'power2.inOut',
                     onUpdate: () => {
                         const val = Math.round(counter.value);
@@ -201,26 +210,41 @@ export default function Intro({ onReveal, onComplete }) {
                 }, 0.1)
                     .to('.intro__progress-fill', {
                         scaleX: 1,
-                        duration: 2.7,
+                        duration: NAME_LANDS - 0.1,
                         ease: 'power2.inOut',
                     }, 0.1);
 
-                // 2. Singularity: every particle packed into one core, whose
-                //    glow swells as it charges.
-                tl.to('.intro__center-glow', {
-                    opacity: 0.9,
-                    scale: 0.55,
-                    duration: 0.8,
-                    ease: 'power2.in',
-                }, 0.1);
+                // 2. Dust: faint particles hanging in the dark fade up.
+                tl.to(fieldState, { opacity: 1, duration: 1.2, ease: 'power1.out' }, 0);
 
-                // 3. Big bang: the core blows apart, in every direction and
-                //    toward the viewer, with a flash and a short shake.
-                tl.addLabel('bang', 0.9)
-                    .call(introGoTo, [1, 0.9, { ease: 'outExpo', scatter: 0 }], 'bang')
+                // 3. Implosion: gravity takes hold, slowly at first and then
+                //    ever faster, pulling everything into one core; the points
+                //    heat up as they gather.
+                tl.call(introGoTo, [1, 1.7, { ease: 'inExpo', scatter: 0.06 }], 0.35)
+                    .to('.intro__center-glow', {
+                        opacity: 0.5,
+                        scale: 0.3,
+                        duration: 1.7,
+                        ease: 'power3.in',
+                    }, 0.35);
+
+                // 4. Charge: the new core swells and fizzes, and the shake
+                //    builds toward the blast.
+                tl.to(fieldState, { charge: 1, shake: 0.45, duration: 0.7, ease: 'power2.in' }, BANG - 0.7)
+                    .to('.intro__center-glow', {
+                        opacity: 1,
+                        scale: 0.7,
+                        duration: 0.7,
+                        ease: 'power2.in',
+                    }, BANG - 0.7);
+
+                // 5. Big bang: the core blows apart, in every direction and
+                //    toward the viewer, with a flash and a hard shake.
+                tl.addLabel('bang', BANG)
+                    .set(fieldState, { charge: 0, shake: 1 }, 'bang')
+                    .call(introGoTo, [2, 0.9, { ease: 'outExpo', scatter: 0 }], 'bang')
                     .to('.intro__flash', { opacity: 1, duration: 0.06, ease: 'none' }, 'bang')
                     .to('.intro__flash', { opacity: 0, duration: 0.8, ease: 'power2.out' }, 'bang+=0.06')
-                    .set(fieldState, { shake: 1 }, 'bang')
                     .to(fieldState, { shake: 0, duration: 0.7, ease: 'power2.out' }, 'bang')
                     .to('.intro__center-glow', {
                         opacity: 0.35,
@@ -229,10 +253,10 @@ export default function Intro({ onReveal, onComplete }) {
                         ease: 'power3.out',
                     }, 'bang');
 
-                // 4. Chaos to order: before the blast settles, every particle
+                // 6. Chaos to order: before the blast settles, every particle
                 //    takes its own wide, crossing path back — some swinging
                 //    past the camera — and they all land as the name.
-                tl.call(introGoTo, [2, 1.5, { scatter: 0.3, arcZ: 10 }], 'bang+=0.4')
+                tl.call(introGoTo, [3, 1.5, { scatter: 0.3, arcZ: 10 }], 'bang+=0.4')
                     .to('.intro__center-glow', {
                         opacity: 0.8,
                         scale: 1,
@@ -240,44 +264,44 @@ export default function Intro({ onReveal, onComplete }) {
                         ease: 'power2.out',
                     }, 'bang+=0.7');
 
-                // 5. A band of light crosses the finished name
+                // 7. A band of light crosses the finished name
                 tl.to(fieldState, {
                     sweep: 1,
                     duration: 0.85,
                     ease: 'power1.inOut',
-                }, 2.65);
+                }, NAME_LANDS - 0.15);
 
-                // 6. Center Hairline & Role Pill
+                // 8. Center Hairline & Role Pill
                 tl.to('.intro__rule-wrap', {
                     opacity: 1,
                     scaleX: 1,
                     duration: 0.8,
                     ease: 'expo.inOut',
-                }, 2.8)
+                }, NAME_LANDS)
                     .to('.intro__role-pill', {
                         opacity: 1,
                         y: 0,
                         duration: 0.7,
                         ease: 'power3.out',
-                    }, 2.95);
+                    }, NAME_LANDS + 0.15);
 
-                // 7. Hold on the name, then clear the HUD
+                // 9. Hold on the name, then clear the HUD
                 tl.to(['.intro__role-pill', '.intro__rule-wrap', '.intro__center-glow'], {
                     opacity: 0,
                     duration: 0.35,
                     ease: 'power2.in',
-                }, 3.5)
+                }, NAME_LANDS + 0.7)
                     .to(['.intro__hud-item', '.intro__skip-btn', '.intro__progress'], {
                         opacity: 0,
                         duration: 0.3,
                         ease: 'power2.in',
-                    }, 3.55);
+                    }, NAME_LANDS + 0.75);
 
-                // 8. Warp: the name breaks toward the viewer and settles into
-                //    the hero grid as the page reveals.
-                tl.addLabel('curtain', 3.7)
+                // 10. Warp: the name breaks toward the viewer and settles into
+                //     the hero grid as the page reveals.
+                tl.addLabel('curtain', NAME_LANDS + 0.9)
                     .call(fireReveal, null, 'curtain')
-                    .call(introGoTo, [3, 1.4, { scatter: 0.25, arcZ: 38 }], 'curtain')
+                    .call(introGoTo, [4, 1.4, { scatter: 0.25, arcZ: 38 }], 'curtain')
                     .call(fireComplete, null, 'curtain+=1.4');
             }, rootRef);
         };
@@ -320,6 +344,10 @@ export default function Intro({ onReveal, onComplete }) {
             window.removeEventListener('keydown', onKey);
             cancelled = true;
             ctx?.revert();
+            // Reverting also rewinds the timeline's tweens on the shared field
+            // state — opacity back to 0 among them — so hand the field to the
+            // page fully visible and at rest.
+            Object.assign(fieldState, { opacity: 1, charge: 0, shake: 0, sweep: 0 });
         };
     }, [onReveal, onComplete]);
 
