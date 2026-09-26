@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useContent } from '../i18n/useLanguage';
+import { fieldState, introGoTo, setNamePoints } from './fieldState';
 import './Intro.css';
 
 const NAME = 'CARLOS RÁBAGO';
@@ -10,14 +11,65 @@ const COORDS = '40.4168° N, 3.7038° W';
 const STEP_THRESHOLDS = [0, 30, 65, 90];
 
 /**
+ * Renders the laid-out name characters into an offscreen canvas and returns
+ * every filled pixel, normalised to the background canvas and shuffled, as
+ * [x, y, …] pairs. The particle field turns these into the name formation.
+ */
+function sampleName(root) {
+    const chars = root.querySelectorAll('.intro__char');
+    const bg = document.querySelector('.app-bg')?.getBoundingClientRect();
+    if (!chars.length || !bg?.width) return null;
+
+    // Half resolution: one sample per 2×2 CSS px is dense enough for the points.
+    const scale = 0.5;
+    const w = Math.ceil(bg.width * scale);
+    const h = Math.ceil(bg.height * scale);
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    ctx.fillStyle = '#fff';
+    ctx.textBaseline = 'alphabetic';
+
+    chars.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        const cs = getComputedStyle(el);
+        ctx.font = `${cs.fontWeight} ${parseFloat(cs.fontSize) * scale}px ${cs.fontFamily}`;
+        const m = ctx.measureText(el.textContent);
+        // The glyph's content box sits centred in the line box the span reports.
+        const ascent = m.fontBoundingBoxAscent;
+        const descent = m.fontBoundingBoxDescent;
+        const baseline = (r.top - bg.top) * scale + ((r.height * scale) - (ascent + descent)) / 2 + ascent;
+        ctx.fillText(el.textContent, (r.left - bg.left) * scale, baseline);
+    });
+
+    const { data } = ctx.getImageData(0, 0, w, h);
+    const points = [];
+    for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+            if (data[(y * w + x) * 4 + 3] > 128) points.push(x / w, y / h);
+        }
+    }
+
+    // Shuffle pairs so any prefix is an even spread over the whole name.
+    for (let i = points.length / 2 - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [points[i * 2], points[j * 2]] = [points[j * 2], points[i * 2]];
+        [points[i * 2 + 1], points[j * 2 + 1]] = [points[j * 2 + 1], points[i * 2 + 1]];
+    }
+    return Float32Array.from(points);
+}
+
+/**
  * High-End Cinematic Editorial Preloader
  *
- * Designed for creative technologists and luxury digital experiences.
- * - Smooth 000% → 100% tabular progression with phase indicators
- * - Character blur-fade typographic staging
+ * The name is drawn by the site's own particle field rather than by HTML:
+ * the particles gather from a scattered cloud into the name while the counter
+ * runs 000% → 100%, hold, then dissolve into the hero grid as the page
+ * reveals. The heading stays in the DOM, invisible, as the layout guide the
+ * particles are sampled from and as the accessible name.
  * - Madrid local time clock HUD + live coordinates
  * - Precision hairline crosshairs & specialization badge
- * - Laser scanline curtain unveil into 3D particle hero
  */
 export default function Intro({ onReveal, onComplete }) {
     const ui = useContent('ui');
@@ -69,133 +121,129 @@ export default function Intro({ onReveal, onComplete }) {
     }, []);
 
     useEffect(() => {
+        fieldState.introActive = true;
+        introGoTo(0, 0);
+
         const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
         if (reduce) {
+            fieldState.introActive = false;
             onReveal?.();
             onComplete?.();
             return;
         }
 
-        const ctx = gsap.context(() => {
-            const counter = { value: 0 };
-            const counterEl = rootRef.current.querySelector('.intro__counter-num');
+        let cancelled = false;
+        let ctx;
 
-            const fireReveal = () => {
-                if (revealed.current) return;
-                revealed.current = true;
-                onReveal?.();
-            };
+        const start = () => {
+            if (cancelled || !rootRef.current) return;
+            setNamePoints(sampleName(rootRef.current));
 
-            const fireComplete = () => {
-                if (completed.current) return;
-                completed.current = true;
-                onComplete?.();
-            };
+            ctx = gsap.context(() => {
+                const counter = { value: 0 };
+                const counterEl = rootRef.current.querySelector('.intro__counter-num');
 
-            const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-            tlRef.current = tl;
-            if (import.meta.env.DEV) window.__introTimeline = tl;
+                const fireReveal = () => {
+                    if (revealed.current) return;
+                    revealed.current = true;
+                    onReveal?.();
+                };
 
-            // Initial positions
-            tl.set('.intro__char', { yPercent: 120, opacity: 0, filter: 'blur(10px)' })
-                .set('.intro__center-glow', { scale: 0.6, opacity: 0 })
-                .set('.intro__role-pill', { opacity: 0, y: 14 })
-                .set('.intro__rule-wrap', { opacity: 0, scaleX: 0 })
-                .set(['.intro__hud-item', '.intro__skip-btn'], { opacity: 0, y: 8 })
-                .set('.intro__progress-fill', { scaleX: 0 });
+                const fireComplete = () => {
+                    if (completed.current) return;
+                    completed.current = true;
+                    // The field is on the hero grid now; hand it to the scroll.
+                    fieldState.introActive = false;
+                    onComplete?.();
+                };
 
-            // 1. HUD elements fade in
-            tl.to(['.intro__hud-item', '.intro__skip-btn'], {
-                opacity: 1,
-                y: 0,
-                duration: 0.7,
-                stagger: 0.04,
-                ease: 'power2.out',
-            }, 0.05);
+                const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
+                tlRef.current = tl;
+                if (import.meta.env.DEV) window.__introTimeline = tl;
 
-            // 2. Counter progression (000 → 100) & Progress bar
-            tl.to(counter, {
-                value: 100,
-                duration: 1.6,
-                ease: 'power2.inOut',
-                onUpdate: () => {
-                    const val = Math.round(counter.value);
-                    if (counterEl) {
-                        counterEl.textContent = String(val).padStart(3, '0');
-                    }
-                    let next = 0;
-                    STEP_THRESHOLDS.forEach((threshold, i) => {
-                        if (val >= threshold) next = i;
-                    });
-                    setStepIndex(next);
-                },
-            }, 0.1)
-                .to('.intro__progress-fill', {
-                    scaleX: 1,
-                    duration: 1.6,
-                    ease: 'power2.inOut',
-                }, 0.1)
-                .to('.intro__center-glow', {
-                    opacity: 1,
-                    scale: 1,
-                    duration: 1.2,
-                    ease: 'power2.out',
-                }, 0.15);
+                // Initial positions
+                tl.set('.intro__center-glow', { scale: 0.6, opacity: 0 })
+                    .set('.intro__role-pill', { opacity: 0, y: 14 })
+                    .set('.intro__rule-wrap', { opacity: 0, scaleX: 0 })
+                    .set(['.intro__hud-item', '.intro__skip-btn'], { opacity: 0, y: 8 })
+                    .set('.intro__progress-fill', { scaleX: 0 });
 
-            // 3. Typographic Reveal: Letters rise with soft blur-fade
-            tl.to('.intro__char', {
-                yPercent: 0,
-                opacity: 1,
-                filter: 'blur(0px)',
-                duration: 0.95,
-                stagger: 0.028,
-                ease: 'power4.out',
-            }, 0.25);
-
-            // 4. Center Hairline & Role Pill
-            tl.to('.intro__rule-wrap', {
-                opacity: 1,
-                scaleX: 1,
-                duration: 0.8,
-                ease: 'expo.inOut',
-            }, 0.65)
-                .to('.intro__role-pill', {
+                // 1. HUD elements fade in
+                tl.to(['.intro__hud-item', '.intro__skip-btn'], {
                     opacity: 1,
                     y: 0,
                     duration: 0.7,
-                    ease: 'power3.out',
-                }, 0.75);
+                    stagger: 0.04,
+                    ease: 'power2.out',
+                }, 0.05);
 
-            // 5. Exit Transition: Refined hold then dissolve upward
-            tl.to('.intro__char', {
-                yPercent: -120,
-                opacity: 0,
-                filter: 'blur(8px)',
-                duration: 0.55,
-                stagger: 0.015,
-                ease: 'power3.in',
-            }, 1.95)
-                .to(['.intro__role-pill', '.intro__rule-wrap', '.intro__center-glow'], {
+                // 2. Particles gather into the name while the counter runs,
+                //    so 100% is the moment the name is complete.
+                tl.call(introGoTo, [1, 1.8], 0.1)
+                    .to(counter, {
+                        value: 100,
+                        duration: 1.8,
+                        ease: 'power3.inOut',
+                        onUpdate: () => {
+                            const val = Math.round(counter.value);
+                            if (counterEl) {
+                                counterEl.textContent = String(val).padStart(3, '0');
+                            }
+                            let next = 0;
+                            STEP_THRESHOLDS.forEach((threshold, i) => {
+                                if (val >= threshold) next = i;
+                            });
+                            setStepIndex(next);
+                        },
+                    }, 0.1)
+                    .to('.intro__progress-fill', {
+                        scaleX: 1,
+                        duration: 1.8,
+                        ease: 'power3.inOut',
+                    }, 0.1)
+                    .to('.intro__center-glow', {
+                        opacity: 1,
+                        scale: 1,
+                        duration: 1.2,
+                        ease: 'power2.out',
+                    }, 0.4);
+
+                // 3. Center Hairline & Role Pill, once the name has settled
+                tl.to('.intro__rule-wrap', {
+                    opacity: 1,
+                    scaleX: 1,
+                    duration: 0.8,
+                    ease: 'expo.inOut',
+                }, 1.35)
+                    .to('.intro__role-pill', {
+                        opacity: 1,
+                        y: 0,
+                        duration: 0.7,
+                        ease: 'power3.out',
+                    }, 1.5);
+
+                // 4. Hold on the name, then clear the HUD
+                tl.to(['.intro__role-pill', '.intro__rule-wrap', '.intro__center-glow'], {
                     opacity: 0,
                     duration: 0.35,
                     ease: 'power2.in',
-                }, 2.0)
-                .to(['.intro__hud-item', '.intro__skip-btn', '.intro__progress'], {
-                    opacity: 0,
-                    duration: 0.3,
-                    ease: 'power2.in',
-                }, 2.05);
+                }, 2.55)
+                    .to(['.intro__hud-item', '.intro__skip-btn', '.intro__progress'], {
+                        opacity: 0,
+                        duration: 0.3,
+                        ease: 'power2.in',
+                    }, 2.6);
 
-            // 6. Laser Curtain Lift Unveiling Hero
-            tl.addLabel('curtain', 2.2)
-                .call(fireReveal, null, 'curtain')
-                .to('.intro__panel--dark', {
-                    yPercent: -100,
-                    duration: 0.95,
-                    ease: 'expo.inOut',
-                }, 'curtain')
-                .call(fireComplete, null, 'curtain+=0.95');
-        }, rootRef);
+                // 5. The name dissolves into the hero grid as the page reveals
+                tl.addLabel('curtain', 2.7)
+                    .call(fireReveal, null, 'curtain')
+                    .call(introGoTo, [2, 1.3], 'curtain')
+                    .call(fireComplete, null, 'curtain+=1.3');
+            }, rootRef);
+        };
+
+        // The name has to be laid out in its final font before it is sampled.
+        document.fonts.ready.then(start);
 
         // Robust skip handling with activation delay to ignore page-load inertia
         let canSkip = false;
@@ -230,7 +278,8 @@ export default function Intro({ onReveal, onComplete }) {
             clearTimeout(activationTimer);
             window.removeEventListener('wheel', onWheel);
             window.removeEventListener('keydown', onKey);
-            ctx.revert();
+            cancelled = true;
+            ctx?.revert();
         };
     }, [onReveal, onComplete]);
 
@@ -245,7 +294,6 @@ export default function Intro({ onReveal, onComplete }) {
             <div className="intro__panel intro__panel--dark">
                 {/* Visual backdrops */}
                 <div className="intro__spotlight" aria-hidden="true" />
-                <div className="intro__grid" aria-hidden="true" />
                 <div className="intro__center-glow" aria-hidden="true" />
 
                 {/* Top HUD: Brand & Skip */}
@@ -325,9 +373,6 @@ export default function Intro({ onReveal, onComplete }) {
                         <div className="intro__progress-spark" />
                     </div>
                 </div>
-
-                {/* Laser Scanline at Curtain Lift Edge */}
-                <div className="intro__laser-edge" aria-hidden="true" />
             </div>
         </aside>
     );

@@ -88,7 +88,7 @@ function App() {
     );
 
     return (
-        <main className="app">
+        <main className={`app${revealed ? '' : ' app--intro'}`}>
             {showIntro && (
                 <Intro onReveal={handleReveal} onComplete={handleIntroComplete} />
             )}
@@ -110,7 +110,7 @@ function App() {
                 ) : (
                     <ScrollField
                         count={isMobile ? 1800 : 4000}
-                        pointSize={isMobile ? 2.6 : 3.2}
+                        pointSize={isMobile ? 3.2 : 4}
                         color={palette.accent}
                     />
                 )}

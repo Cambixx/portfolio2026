@@ -12,9 +12,17 @@
     width: 100%;
     height: 100vh;
     z-index: 0;
-    /* El campo es ambiente, no protagonista: a plena opacidad las partículas
-       cruzan por detrás del texto y compiten con la lectura. */
-    opacity: 0.55;
+    /* El campo es ambiente, no protagonista. Solo se enciende alrededor del
+       cursor y el resto queda en un tono apagado, así que compite poco con el
+       texto; aun así no va a plena opacidad. */
+    opacity: 0.85;
+    transition: opacity 1.3s var(--ease-in-out);
+}
+
+/* During the intro the field draws the name, so it runs at full strength and
+   eases back to ambient as the name dissolves into the hero grid. */
+.app--intro .app-bg {
+    opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {

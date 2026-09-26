@@ -1,16 +1,23 @@
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
 import * as THREE from 'three';
 import { DEFAULT_PALETTE } from '../config/palette';
+import { fieldState, getNamePoints, subscribeNamePoints } from './fieldState';
 
 /**
- * Fixed particle field that re-forms into a different shape for each section
- * as the page scrolls. Every point carries one target position per formation;
- * the shader blends between the two formations either side of the current
- * scroll stage, so the CPU only updates a handful of uniforms per frame.
+ * Fixed particle field that re-forms into a different shape for each section.
+ * Every point carries one target position per formation. Moving to a new
+ * formation is a timed, eased transition rather than a scroll scrub: all
+ * points travel together along a shared arc from wherever they are now, so
+ * the motion stays smooth however unevenly the page is scrolled. At rest the
+ * points breathe in size instead of drifting, and light up around the cursor.
+ *
+ * The first two formations belong to the intro (a scattered cloud, then the
+ * name); the intro picks them and hands over at the hero grid, from where
+ * the section on screen decides.
  */
 
-// Sections in page order; formation N is shown while section N is on screen.
+// Sections in page order; section N shows formation SITE_OFFSET + N.
 const SECTION_IDS = ['hero', 'projects', 'experience', 'education', 'stack', 'contact'];
 
 // Seeded so a resize rebuilds the same layout instead of reshuffling every point.
@@ -40,6 +47,36 @@ function rotate(out, rx, ry) {
 
 // ── Formations ── each returns count*3 positions in world units at z≈0,
 // sized from the visible viewport (W × H) so they frame on any screen.
+
+function cloud(n, W, H, rnd) {
+    const out = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+        out[i * 3] = (rnd() - 0.5) * W * 1.6;
+        out[i * 3 + 1] = (rnd() - 0.5) * H * 1.6;
+        out[i * 3 + 2] = (rnd() - 0.5) * 30;
+    }
+    return out;
+}
+
+/**
+ * The intro name, from pixels sampled off the real DOM text so the particles
+ * land exactly where the heading is laid out. Until those arrive (or if the
+ * intro never ran) it falls back to the cloud.
+ */
+function name(n, W, H, rnd, points) {
+    if (!points?.length) return cloud(n, W, H, rnd);
+    const out = new Float32Array(n * 3);
+    const m = points.length / 2;
+    for (let i = 0; i < n; i++) {
+        const j = i % m;
+        // Points beyond the sample count reuse a pixel; nudge them off it.
+        const spread = i < m ? 0 : 0.06;
+        out[i * 3] = (points[j * 2] - 0.5) * W + (rnd() - 0.5) * spread;
+        out[i * 3 + 1] = (0.5 - points[j * 2 + 1]) * H + (rnd() - 0.5) * spread;
+        out[i * 3 + 2] = (rnd() - 0.5) * 0.4;
+    }
+    return out;
+}
 
 function grid(n, W, H, rnd) {
     const out = new Float32Array(n * 3);
@@ -163,25 +200,46 @@ function wave(n, W, H) {
     return rotate(out, 0.55, 0);
 }
 
-const FORMATIONS = [grid, sphere, rings, helix, cube, wave];
+const FORMATIONS = [cloud, name, grid, sphere, rings, helix, cube, wave];
+// Formation shown at the top of the page, where the intro hands over.
+const SITE_OFFSET = 2;
+// Formations with real depth; they sway gently, the flat ones stay square.
+const DEPTH_FORMATIONS = new Set([3, 4, 5, 6]);
+const NAME_FORMATION = 1;
+// Seconds a section change takes.
+const SECTION_TRANSITION = 1.4;
+
+const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 const vertexShader = /* glsl */ `
+    attribute vec3 aStart; // where each point set off from, rewritten on every retarget
     attribute vec3 p0;
     attribute vec3 p1;
     attribute vec3 p2;
     attribute vec3 p3;
     attribute vec3 p4;
     attribute vec3 p5;
-    attribute vec4 aRnd; // x size, y delay, z alpha, w phase
+    attribute vec3 p6;
+    attribute vec3 p7;
+    attribute vec4 aRnd; // x size, y arc offset x, z alpha, w arc offset y + phase
 
-    uniform float uStage;
+    uniform float uTo;
+    uniform float uTransition; // eased 0 → 1
+    uniform float uScatter;
     uniform float uTime;
     uniform float uSize;
     uniform float uPixelRatio;
     uniform float uMotion;
+    uniform float uFocus;
+    uniform vec2 uPointer;      // -1 … 1
+    uniform vec2 uMouse;        // pointer in world units at z = 0
+    uniform float uParallax;
+    uniform float uHighlightRadius;
 
     varying float vAlpha;
-    varying float vEdge;
+    varying float vIntensity;
+
+    const float PI = 3.141592653589793;
 
     vec3 pick(float i) {
         if (i < 0.5) return p0;
@@ -189,41 +247,35 @@ const vertexShader = /* glsl */ `
         if (i < 2.5) return p2;
         if (i < 3.5) return p3;
         if (i < 4.5) return p4;
-        return p5;
+        if (i < 5.5) return p5;
+        if (i < 6.5) return p6;
+        return p7;
     }
 
     void main() {
-        float i = floor(uStage);
-        float f = uStage - i;
+        vec3 pos = mix(aStart, pick(uTo), uTransition);
 
-        // Each point leaves on its own delay so the shape dissolves and
-        // re-forms instead of sliding across as one rigid block.
-        float delay = aRnd.y * 0.45;
-        float t = clamp((f - delay) / 0.55, 0.0, 1.0);
-        t = t * t * (3.0 - 2.0 * t);
+        // Travel as one body: each point bows out by its own offset mid-flight
+        // and lands back on the shape, so the field swells and re-gathers.
+        pos.xy += (vec2(aRnd.y, aRnd.w) - 0.5) * uScatter * sin(uTransition * PI);
 
-        vec3 pos = mix(pick(i), pick(min(i + 1.0, 5.0)), t);
+        // Depth parallax: nearer points follow the cursor further.
+        pos.xy += uPointer * pos.z * uParallax;
 
-        // Lift off the path mid-flight, so the transition reads as scatter.
-        vec3 dir = vec3(sin(aRnd.w * 6.283), cos(aRnd.w * 5.1), sin(aRnd.w * 3.7));
-        pos += dir * sin(t * 3.14159) * 1.6;
+        vec4 world = modelMatrix * vec4(pos, 1.0);
+        gl_Position = projectionMatrix * viewMatrix * world;
 
-        // Idle drift keeps a settled formation alive.
-        pos += uMotion * 0.12 * vec3(
-            sin(uTime * 0.6 + aRnd.w * 10.0),
-            cos(uTime * 0.5 + aRnd.w * 8.0),
-            sin(uTime * 0.4 + aRnd.w * 6.0)
-        );
+        // At rest the points breathe in size, each on its own phase.
+        float pulse = sin(uTime * 2.0 + aRnd.w * 2.0 * PI) * 0.5 + 0.5;
+        float breathe = mix(1.0, mix(0.45, 1.15, pulse), uMotion);
+        // Smaller points on the name: large ones blur the letter strokes.
+        // Mostly fine points with a few large ones, which carry the glow.
+        float size = uSize * mix(0.45, 1.9, aRnd.x * aRnd.x * aRnd.x) * breathe * mix(1.0, 0.5, uFocus);
+        gl_PointSize = size * uPixelRatio;
 
-        vec4 mv = modelViewMatrix * vec4(pos, 1.0);
-        gl_Position = projectionMatrix * mv;
-
-        float size = uSize * mix(0.35, 1.6, aRnd.x * aRnd.x);
-        gl_PointSize = size * uPixelRatio * (50.0 / -mv.z);
-
-        // 0 at screen centre, 1 at the edges: drives the hot-to-dim falloff.
-        vEdge = smoothstep(0.15, 1.05, length(gl_Position.xy / gl_Position.w));
-        vAlpha = mix(0.35, 1.0, aRnd.z);
+        // Lit near the cursor, dim beyond it; the whole name stays lit.
+        vIntensity = max(smoothstep(uHighlightRadius, 0.0, distance(world.xy, uMouse)), uFocus);
+        vAlpha = mix(mix(0.5, 0.75, uFocus), 1.0, aRnd.z);
     }
 `;
 
@@ -232,14 +284,14 @@ const fragmentShader = /* glsl */ `
     uniform vec3 uColorDim;
 
     varying float vAlpha;
-    varying float vEdge;
+    varying float vIntensity;
 
     void main() {
         float r = length(gl_PointCoord - 0.5);
         if (r > 0.5) discard;
         float soft = smoothstep(0.5, 0.38, r);
-        vec3 color = mix(uColor, uColorDim, vEdge);
-        gl_FragColor = vec4(color, vAlpha * soft * mix(1.0, 0.55, vEdge));
+        vec3 color = mix(uColorDim, uColor, vIntensity);
+        gl_FragColor = vec4(color, vAlpha * soft * mix(0.55, 1.0, vIntensity));
         // THREE.Color stores the palette in linear space; without converting
         // back the amber accent renders as a darker red-orange.
         #include <colorspace_fragment>
@@ -292,16 +344,26 @@ function useSectionBoundaries() {
 function Field({ count, pointSize, color, reduceMotion }) {
     const pointsRef = useRef(null);
     const materialRef = useRef(null);
-    const stage = useRef(0);
+    // The running transition: target formation, start time, length, and the
+    // eased progress last drawn (needed to capture positions on a retarget).
+    const transition = useRef({ geometry: null, to: 0, start: 0, duration: 0, eased: 1 });
+    const mouse = useRef(new THREE.Vector2());
+    const sway = useRef(0);
+    const focus = useRef(0);
     const { width, height } = useStableViewport();
     const boundaries = useSectionBoundaries();
     const gl = useThree((s) => s.gl);
+    const namePoints = useSyncExternalStore(subscribeNamePoints, getNamePoints);
 
     const geometry = useMemo(() => {
         const geo = new THREE.BufferGeometry();
         FORMATIONS.forEach((build, i) => {
-            geo.setAttribute(`p${i}`, new THREE.BufferAttribute(build(count, width, height, mulberry32(i + 1)), 3));
+            const positions = build(count, width, height, mulberry32(i + 1), namePoints);
+            geo.setAttribute(`p${i}`, new THREE.BufferAttribute(positions, 3));
         });
+        const start = new THREE.BufferAttribute(new Float32Array(count * 3), 3);
+        start.setUsage(THREE.DynamicDrawUsage);
+        geo.setAttribute('aStart', start);
         // three needs a `position` attribute for bounds; the shader never reads it.
         geo.setAttribute('position', geo.getAttribute('p0'));
 
@@ -310,56 +372,104 @@ function Field({ count, pointSize, color, reduceMotion }) {
         for (let i = 0; i < extra.length; i++) extra[i] = rnd();
         geo.setAttribute('aRnd', new THREE.BufferAttribute(extra, 4));
         return geo;
-    }, [count, width, height]);
+    }, [count, width, height, namePoints]);
 
     useEffect(() => () => geometry.dispose(), [geometry]);
 
     const uniforms = useMemo(() => {
         const hot = new THREE.Color(color);
-        // Edge colour: the accent pulled most of the way to a warm grey, so the
-        // outer field stays visible without competing with the centre.
-        const dim = hot.clone().lerp(new THREE.Color('#5c574a'), 0.72);
+        // Dim colour: the accent pulled most of the way to a warm grey, so the
+        // field away from the cursor stays visible without competing.
+        const dim = hot.clone().lerp(new THREE.Color('#5c574a'), 0.6);
         return {
-            uStage: { value: 0 },
+            uTo: { value: 0 },
+            uTransition: { value: 1 },
+            uScatter: { value: 0 },
             uTime: { value: 0 },
             uSize: { value: pointSize },
             uPixelRatio: { value: gl.getPixelRatio() },
             uMotion: { value: reduceMotion ? 0 : 1 },
+            uFocus: { value: 0 },
+            uPointer: { value: new THREE.Vector2() },
+            uMouse: { value: new THREE.Vector2() },
+            uParallax: { value: reduceMotion ? 0 : 0.06 },
+            uHighlightRadius: { value: 1 },
             uColor: { value: hot },
             uColorDim: { value: dim },
         };
     }, [color, pointSize, reduceMotion, gl]);
 
     useFrame((state, delta) => {
-        const vh = window.innerHeight;
-        const centre = window.scrollY + vh * 0.5;
-
-        // Each boundary contributes one full stage, ramped over 0.8 of a
-        // viewport: it starts as the next section's top enters the bottom of
-        // the screen and completes once that top is near the top of it.
-        let target = 0;
-        for (const top of boundaries.current) {
-            target += THREE.MathUtils.clamp((centre - (top - vh * 0.5)) / (vh * 0.8), 0, 1);
-        }
-        target = Math.min(target, FORMATIONS.length - 1);
-
-        stage.current = THREE.MathUtils.damp(stage.current, target, 5, delta);
-
         const points = pointsRef.current;
         const material = materialRef.current;
         if (!points || !material) return;
-        material.uniforms.uStage.value = stage.current;
-        material.uniforms.uTime.value = state.clock.elapsedTime;
+        const now = state.clock.elapsedTime;
+        const tr = transition.current;
+        const start = geometry.getAttribute('aStart');
+        const scatter = width * 0.2;
 
-        // Gentle sway for the 3D shapes; the flat grid and wave stay square
-        // to the screen at either end of the page.
-        const s = stage.current;
-        const sway = reduceMotion ? 0 : Math.min(s, 1) * Math.min(FORMATIONS.length - 1 - s, 1);
-        const t = state.clock.elapsedTime;
-        const ry = sway * Math.sin(t * 0.15) * 0.3 + state.pointer.x * 0.12;
-        const rx = sway * Math.sin(t * 0.11) * 0.12 - state.pointer.y * 0.08;
-        points.rotation.y = THREE.MathUtils.damp(points.rotation.y, ry, 3, delta);
-        points.rotation.x = THREE.MathUtils.damp(points.rotation.x, rx, 3, delta);
+        // A rebuilt geometry starts settled on the current formation.
+        if (tr.geometry !== geometry) {
+            start.array.set(geometry.getAttribute(`p${tr.to}`).array);
+            start.needsUpdate = true;
+            Object.assign(tr, { geometry, eased: 1, duration: 0 });
+        }
+
+        // Which formation should be on screen, and how fast to get there.
+        let desired;
+        let duration;
+        if (fieldState.introActive) {
+            desired = fieldState.introTarget;
+            duration = fieldState.introDuration;
+        } else {
+            // The section whose area holds a line 60% down the viewport.
+            const line = window.scrollY + window.innerHeight * 0.6;
+            desired = SITE_OFFSET + boundaries.current.filter((top) => top <= line).length;
+            duration = SECTION_TRANSITION;
+        }
+        if (reduceMotion) duration = 0;
+
+        if (desired !== tr.to) {
+            // Capture where every point is right now (arc included) as the new
+            // start, so a change mid-flight carries on without a jump.
+            const s = start.array;
+            const to = geometry.getAttribute(`p${tr.to}`).array;
+            const rnd = geometry.getAttribute('aRnd').array;
+            const arc = Math.sin(tr.eased * Math.PI) * scatter;
+            for (let i = 0; i < count; i++) {
+                const k = i * 3;
+                s[k] += (to[k] - s[k]) * tr.eased + (rnd[i * 4 + 1] - 0.5) * arc;
+                s[k + 1] += (to[k + 1] - s[k + 1]) * tr.eased + (rnd[i * 4 + 3] - 0.5) * arc;
+                s[k + 2] += (to[k + 2] - s[k + 2]) * tr.eased;
+            }
+            start.needsUpdate = true;
+            Object.assign(tr, { to: desired, start: now, duration });
+        }
+
+        const raw = tr.duration > 0 ? THREE.MathUtils.clamp((now - tr.start) / tr.duration, 0, 1) : 1;
+        tr.eased = easeInOutCubic(raw);
+
+        const u = material.uniforms;
+        u.uTo.value = tr.to;
+        u.uTransition.value = tr.eased;
+        u.uScatter.value = scatter;
+        u.uTime.value = now;
+        u.uHighlightRadius.value = Math.min(width, height) * 0.65;
+
+        // The cursor, eased, drives both the highlight and the parallax.
+        mouse.current.x = THREE.MathUtils.damp(mouse.current.x, state.pointer.x, 4, delta);
+        mouse.current.y = THREE.MathUtils.damp(mouse.current.y, state.pointer.y, 4, delta);
+        u.uPointer.value.copy(mouse.current);
+        u.uMouse.value.set((mouse.current.x * width) / 2, (mouse.current.y * height) / 2);
+
+        focus.current = THREE.MathUtils.damp(focus.current, tr.to === NAME_FORMATION ? 1 : 0, 3, delta);
+        u.uFocus.value = focus.current;
+
+        // Gentle sway for the shapes with depth; the flat ones stay square.
+        const swayTarget = !reduceMotion && DEPTH_FORMATIONS.has(tr.to) ? 1 : 0;
+        sway.current = THREE.MathUtils.damp(sway.current, swayTarget, 2, delta);
+        points.rotation.y = sway.current * Math.sin(now * 0.15) * 0.3;
+        points.rotation.x = sway.current * Math.sin(now * 0.11) * 0.12;
     });
 
     return (
@@ -378,7 +488,7 @@ function Field({ count, pointSize, color, reduceMotion }) {
 
 export default function ScrollField({
     count = 4000,
-    pointSize = 3.2,
+    pointSize = 4,
     color = DEFAULT_PALETTE.accent,
 }) {
     const reduceMotion = useMemo(
