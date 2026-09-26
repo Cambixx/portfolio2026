@@ -12,9 +12,9 @@ import { fieldState, getNamePoints, subscribeNamePoints } from './fieldState';
  * the motion stays smooth however unevenly the page is scrolled. At rest the
  * points breathe in size instead of drifting, and light up around the cursor.
  *
- * The first two formations belong to the intro (a scattered cloud, then the
- * name); the intro picks them and hands over at the hero grid, from where
- * the section on screen decides.
+ * The first three formations belong to the intro (a dense core, the core
+ * blown apart, then the name); the intro picks them and hands over at the
+ * hero grid, from where the section on screen decides.
  */
 
 // Sections in page order; section N shows formation SITE_OFFSET + N.
@@ -54,6 +54,42 @@ function cloud(n, W, H, rnd) {
         out[i * 3] = (rnd() - 0.5) * W * 1.6;
         out[i * 3 + 1] = (rnd() - 0.5) * H * 1.6;
         out[i * 3 + 2] = (rnd() - 0.5) * 30;
+    }
+    return out;
+}
+
+/** Intro opening: every point packed into a small, dense core. */
+function core(n, W, H, rnd) {
+    const out = new Float32Array(n * 3);
+    const R = Math.min(W, H) * 0.035;
+    for (let i = 0; i < n; i++) {
+        // Cubed radius packs the points toward the centre, so the core glows.
+        const r = R * Math.pow(rnd(), 3);
+        const theta = rnd() * Math.PI * 2;
+        const phi = Math.acos(2 * rnd() - 1);
+        out[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        out[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        out[i * 3 + 2] = r * Math.cos(phi);
+    }
+    return out;
+}
+
+/**
+ * The core blown apart: points in every direction and at every depth, many
+ * past the screen edge and some almost at the camera, so they sweep past the
+ * viewer as large out-of-focus embers.
+ */
+function burst(n, W, H, rnd) {
+    const out = new Float32Array(n * 3);
+    const R = Math.max(W, H);
+    for (let i = 0; i < n; i++) {
+        const theta = rnd() * Math.PI * 2;
+        const phi = Math.acos(2 * rnd() - 1);
+        const r = R * (0.25 + 0.75 * Math.sqrt(rnd()));
+        out[i * 3] = r * Math.sin(phi) * Math.cos(theta);
+        out[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta) * 0.7;
+        // The camera sits at z = 50; stop short of it.
+        out[i * 3 + 2] = Math.min(r * Math.cos(phi) * 0.8, 42);
     }
     return out;
 }
@@ -200,16 +236,26 @@ function wave(n, W, H) {
     return rotate(out, 0.55, 0);
 }
 
-const FORMATIONS = [cloud, name, grid, sphere, rings, helix, cube, wave];
+const FORMATIONS = [core, burst, name, grid, sphere, rings, helix, cube, wave];
+const NAME_FORMATION = 2;
 // Formation shown at the top of the page, where the intro hands over.
-const SITE_OFFSET = 2;
+const SITE_OFFSET = 3;
 // Formations with real depth; they sway gently, the flat ones stay square.
-const DEPTH_FORMATIONS = new Set([3, 4, 5, 6]);
-const NAME_FORMATION = 1;
+const DEPTH_FORMATIONS = new Set([4, 5, 6, 7]);
 // Seconds a section change takes.
 const SECTION_TRANSITION = 1.4;
 
-const easeInOutCubic = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const EASINGS = {
+    inOutCubic: (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+    outExpo: (t) => (t >= 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+    outQuart: (t) => 1 - Math.pow(1 - t, 4),
+};
+
+/**
+ * How a transition travels. `scatter` is the sideways bow as a share of the
+ * viewport width, `arcZ` how far points lift toward the camera mid-flight.
+ */
+const SECTION_MOTION = { ease: 'inOutCubic', scatter: 0.2, arcZ: 0 };
 
 const vertexShader = /* glsl */ `
     attribute vec3 aStart; // where each point set off from, rewritten on every retarget
@@ -221,16 +267,22 @@ const vertexShader = /* glsl */ `
     attribute vec3 p5;
     attribute vec3 p6;
     attribute vec3 p7;
-    attribute vec4 aRnd; // x size, y arc offset x, z alpha, w arc offset y + phase
+    attribute vec3 p8;
+    attribute vec4 aRnd; // x size + depth lift, y arc offset x, z alpha, w arc offset y + phase
 
     uniform float uTo;
     uniform float uTransition; // eased 0 → 1
     uniform float uScatter;
+    uniform float uArcZ;
     uniform float uTime;
     uniform float uSize;
     uniform float uPixelRatio;
     uniform float uMotion;
     uniform float uFocus;
+    uniform float uLit;
+    uniform float uDepth;
+    uniform float uSweep;       // world x of the light sweep
+    uniform float uSweepOn;
     uniform vec2 uPointer;      // -1 … 1
     uniform vec2 uMouse;        // pointer in world units at z = 0
     uniform float uParallax;
@@ -238,6 +290,7 @@ const vertexShader = /* glsl */ `
 
     varying float vAlpha;
     varying float vIntensity;
+    varying float vSweep;
 
     const float PI = 3.141592653589793;
 
@@ -249,32 +302,42 @@ const vertexShader = /* glsl */ `
         if (i < 4.5) return p4;
         if (i < 5.5) return p5;
         if (i < 6.5) return p6;
-        return p7;
+        if (i < 7.5) return p7;
+        return p8;
     }
 
     void main() {
-        vec3 pos = mix(aStart, pick(uTo), uTransition);
+        float t = uTransition;
+        float arc = sin(t * PI);
+        vec3 pos = mix(aStart, pick(uTo), t);
 
         // Travel as one body: each point bows out by its own offset mid-flight
         // and lands back on the shape, so the field swells and re-gathers.
-        pos.xy += (vec2(aRnd.y, aRnd.w) - 0.5) * uScatter * sin(uTransition * PI);
+        pos.xy += (vec2(aRnd.y, aRnd.w) - 0.5) * uScatter * arc;
+        pos.z += aRnd.x * uArcZ * arc;
 
         // Depth parallax: nearer points follow the cursor further.
         pos.xy += uPointer * pos.z * uParallax;
 
         vec4 world = modelMatrix * vec4(pos, 1.0);
-        gl_Position = projectionMatrix * viewMatrix * world;
+        vec4 view = viewMatrix * world;
+        gl_Position = projectionMatrix * view;
 
         // At rest the points breathe in size, each on its own phase.
         float pulse = sin(uTime * 2.0 + aRnd.w * 2.0 * PI) * 0.5 + 0.5;
         float breathe = mix(1.0, mix(0.45, 1.15, pulse), uMotion);
-        // Smaller points on the name: large ones blur the letter strokes.
-        // Mostly fine points with a few large ones, which carry the glow.
-        float size = uSize * mix(0.45, 1.9, aRnd.x * aRnd.x * aRnd.x) * breathe * mix(1.0, 0.5, uFocus);
+        // In the intro, points near the camera grow into large embers.
+        float depth = mix(1.0, clamp(50.0 / -view.z, 0.3, 7.0), uDepth);
+        // A band of light crossing the name, lifting size and colour.
+        vSweep = uSweepOn * exp(-pow((world.x - uSweep) / 3.0, 2.0));
+        // Mostly fine points with a few large ones, which carry the glow;
+        // smaller on the name, where large ones blur the letter strokes.
+        float size = uSize * mix(0.45, 1.9, aRnd.x * aRnd.x * aRnd.x) * breathe * depth
+            * mix(1.0, 0.5, uFocus) * (1.0 + vSweep);
         gl_PointSize = size * uPixelRatio;
 
-        // Lit near the cursor, dim beyond it; the whole name stays lit.
-        vIntensity = max(smoothstep(uHighlightRadius, 0.0, distance(world.xy, uMouse)), uFocus);
+        // Lit near the cursor, dim beyond it; the intro stays lit throughout.
+        vIntensity = max(smoothstep(uHighlightRadius, 0.0, distance(world.xy, uMouse)), uLit);
         vAlpha = mix(mix(0.5, 0.75, uFocus), 1.0, aRnd.z);
     }
 `;
@@ -285,12 +348,15 @@ const fragmentShader = /* glsl */ `
 
     varying float vAlpha;
     varying float vIntensity;
+    varying float vSweep;
 
     void main() {
         float r = length(gl_PointCoord - 0.5);
         if (r > 0.5) discard;
         float soft = smoothstep(0.5, 0.38, r);
         vec3 color = mix(uColorDim, uColor, vIntensity);
+        // The sweep runs the accent up to a warm white.
+        color = mix(color, vec3(1.0, 0.94, 0.82), vSweep * 0.85);
         gl_FragColor = vec4(color, vAlpha * soft * mix(0.55, 1.0, vIntensity));
         // THREE.Color stores the palette in linear space; without converting
         // back the amber accent renders as a darker red-orange.
@@ -344,12 +410,14 @@ function useSectionBoundaries() {
 function Field({ count, pointSize, color, reduceMotion }) {
     const pointsRef = useRef(null);
     const materialRef = useRef(null);
-    // The running transition: target formation, start time, length, and the
-    // eased progress last drawn (needed to capture positions on a retarget).
-    const transition = useRef({ geometry: null, to: 0, start: 0, duration: 0, eased: 1 });
+    // The running transition: target formation, timing, how it travels, and
+    // the eased progress last drawn (needed to capture positions on a retarget).
+    const transition = useRef({ geometry: null, to: 0, start: 0, duration: 0, eased: 1, motion: SECTION_MOTION });
     const mouse = useRef(new THREE.Vector2());
     const sway = useRef(0);
     const focus = useRef(0);
+    const lit = useRef(1);
+    const depth = useRef(1);
     const { width, height } = useStableViewport();
     const boundaries = useSectionBoundaries();
     const gl = useThree((s) => s.gl);
@@ -385,11 +453,16 @@ function Field({ count, pointSize, color, reduceMotion }) {
             uTo: { value: 0 },
             uTransition: { value: 1 },
             uScatter: { value: 0 },
+            uArcZ: { value: 0 },
             uTime: { value: 0 },
             uSize: { value: pointSize },
             uPixelRatio: { value: gl.getPixelRatio() },
             uMotion: { value: reduceMotion ? 0 : 1 },
             uFocus: { value: 0 },
+            uLit: { value: 1 },
+            uDepth: { value: 1 },
+            uSweep: { value: 0 },
+            uSweepOn: { value: 0 },
             uPointer: { value: new THREE.Vector2() },
             uMouse: { value: new THREE.Vector2() },
             uParallax: { value: reduceMotion ? 0 : 0.06 },
@@ -406,7 +479,6 @@ function Field({ count, pointSize, color, reduceMotion }) {
         const now = state.clock.elapsedTime;
         const tr = transition.current;
         const start = geometry.getAttribute('aStart');
-        const scatter = width * 0.2;
 
         // A rebuilt geometry starts settled on the current formation.
         if (tr.geometry !== geometry) {
@@ -415,12 +487,14 @@ function Field({ count, pointSize, color, reduceMotion }) {
             Object.assign(tr, { geometry, eased: 1, duration: 0 });
         }
 
-        // Which formation should be on screen, and how fast to get there.
+        // Which formation should be on screen, how fast, and how to travel.
         let desired;
         let duration;
+        let motion = SECTION_MOTION;
         if (fieldState.introActive) {
             desired = fieldState.introTarget;
             duration = fieldState.introDuration;
+            motion = { ...SECTION_MOTION, ...fieldState.introMotion };
         } else {
             // The section whose area holds a line 60% down the viewport.
             const line = window.scrollY + window.innerHeight * 0.6;
@@ -430,29 +504,34 @@ function Field({ count, pointSize, color, reduceMotion }) {
         if (reduceMotion) duration = 0;
 
         if (desired !== tr.to) {
-            // Capture where every point is right now (arc included) as the new
-            // start, so a change mid-flight carries on without a jump.
+            // Capture where every point is right now, with the same offsets
+            // the shader applies, as the new start: a change mid-flight then
+            // carries on without a jump.
             const s = start.array;
             const to = geometry.getAttribute(`p${tr.to}`).array;
             const rnd = geometry.getAttribute('aRnd').array;
-            const arc = Math.sin(tr.eased * Math.PI) * scatter;
+            const e = tr.eased;
+            const arc = Math.sin(e * Math.PI);
+            const scatter = tr.motion.scatter * width * arc;
+            const lift = tr.motion.arcZ * arc;
             for (let i = 0; i < count; i++) {
                 const k = i * 3;
-                s[k] += (to[k] - s[k]) * tr.eased + (rnd[i * 4 + 1] - 0.5) * arc;
-                s[k + 1] += (to[k + 1] - s[k + 1]) * tr.eased + (rnd[i * 4 + 3] - 0.5) * arc;
-                s[k + 2] += (to[k + 2] - s[k + 2]) * tr.eased;
+                s[k] += (to[k] - s[k]) * e + (rnd[i * 4 + 1] - 0.5) * scatter;
+                s[k + 1] += (to[k + 1] - s[k + 1]) * e + (rnd[i * 4 + 3] - 0.5) * scatter;
+                s[k + 2] += (to[k + 2] - s[k + 2]) * e + rnd[i * 4] * lift;
             }
             start.needsUpdate = true;
-            Object.assign(tr, { to: desired, start: now, duration });
+            Object.assign(tr, { to: desired, start: now, duration, motion });
         }
 
         const raw = tr.duration > 0 ? THREE.MathUtils.clamp((now - tr.start) / tr.duration, 0, 1) : 1;
-        tr.eased = easeInOutCubic(raw);
+        tr.eased = (EASINGS[tr.motion.ease] ?? EASINGS.inOutCubic)(raw);
 
         const u = material.uniforms;
         u.uTo.value = tr.to;
         u.uTransition.value = tr.eased;
-        u.uScatter.value = scatter;
+        u.uScatter.value = tr.motion.scatter * width;
+        u.uArcZ.value = tr.motion.arcZ;
         u.uTime.value = now;
         u.uHighlightRadius.value = Math.min(width, height) * 0.65;
 
@@ -462,14 +541,29 @@ function Field({ count, pointSize, color, reduceMotion }) {
         u.uPointer.value.copy(mouse.current);
         u.uMouse.value.set((mouse.current.x * width) / 2, (mouse.current.y * height) / 2);
 
+        // Intro-only looks: fully lit, depth-scaled points, a tighter name.
+        const inIntro = tr.to < SITE_OFFSET;
         focus.current = THREE.MathUtils.damp(focus.current, tr.to === NAME_FORMATION ? 1 : 0, 3, delta);
+        lit.current = THREE.MathUtils.damp(lit.current, inIntro ? 1 : 0, 2.5, delta);
+        depth.current = THREE.MathUtils.damp(depth.current, inIntro ? 1 : 0, 2, delta);
         u.uFocus.value = focus.current;
+        u.uLit.value = lit.current;
+        u.uDepth.value = depth.current;
+
+        // The light sweep: 0 → 1 carries it from off the left edge to off the right.
+        const sweep = fieldState.sweep;
+        u.uSweepOn.value = sweep > 0 && sweep < 1 ? 1 : 0;
+        u.uSweep.value = (sweep * 1.3 - 0.65) * width;
 
         // Gentle sway for the shapes with depth; the flat ones stay square.
         const swayTarget = !reduceMotion && DEPTH_FORMATIONS.has(tr.to) ? 1 : 0;
         sway.current = THREE.MathUtils.damp(sway.current, swayTarget, 2, delta);
         points.rotation.y = sway.current * Math.sin(now * 0.15) * 0.3;
         points.rotation.x = sway.current * Math.sin(now * 0.11) * 0.12;
+
+        // Impact shake, decayed by the intro.
+        const shake = fieldState.shake * 0.5;
+        points.position.set((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake, 0);
     });
 
     return (

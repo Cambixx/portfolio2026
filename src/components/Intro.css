@@ -66,6 +66,23 @@
     pointer-events: none;
 }
 
+/* Big-bang flash: a hot white core bleeding into the accent. */
+.intro__flash {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    background: radial-gradient(
+        circle at 50% 50%,
+        rgba(255, 244, 222, 0.95) 0%,
+        rgb(var(--accent-rgb) / 0.45) 18%,
+        rgb(var(--accent-rgb) / 0.08) 45%,
+        transparent 70%
+    );
+    mix-blend-mode: screen;
+    opacity: 0;
+    pointer-events: none;
+}
+
 /* ── Top Header HUD ── */
 
 .intro__header {

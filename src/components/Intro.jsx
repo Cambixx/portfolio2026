@@ -63,10 +63,11 @@ function sampleName(root) {
 /**
  * High-End Cinematic Editorial Preloader
  *
- * The name is drawn by the site's own particle field rather than by HTML:
- * the particles gather from a scattered cloud into the name while the counter
- * runs 000% → 100%, hold, then dissolve into the hero grid as the page
- * reveals. The heading stays in the DOM, invisible, as the layout guide the
+ * The name is drawn by the site's own particle field rather than by HTML.
+ * While the counter runs 000% → 100%, every particle starts packed in a
+ * single core, blows apart toward the viewer, then finds its way back out
+ * of the chaos on its own path and lands as the name; a band of light crosses it, then it breaks toward the viewer and
+ * settles into the hero grid as the page reveals. The heading stays in the DOM, invisible, as the layout guide the
  * particles are sampled from and as the accessible name.
  * - Madrid local time clock HUD + live coordinates
  * - Precision hairline crosshairs & specialization badge
@@ -122,6 +123,8 @@ export default function Intro({ onReveal, onComplete }) {
 
     useEffect(() => {
         fieldState.introActive = true;
+        fieldState.sweep = 0;
+        fieldState.shake = 0;
         introGoTo(0, 0);
 
         const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -162,7 +165,8 @@ export default function Intro({ onReveal, onComplete }) {
                 if (import.meta.env.DEV) window.__introTimeline = tl;
 
                 // Initial positions
-                tl.set('.intro__center-glow', { scale: 0.6, opacity: 0 })
+                tl.set('.intro__center-glow', { scale: 0.2, opacity: 0 })
+                    .set('.intro__flash', { opacity: 0 })
                     .set('.intro__role-pill', { opacity: 0, y: 14 })
                     .set('.intro__rule-wrap', { opacity: 0, scaleX: 0 })
                     .set(['.intro__hud-item', '.intro__skip-btn'], { opacity: 0, y: 8 })
@@ -177,68 +181,104 @@ export default function Intro({ onReveal, onComplete }) {
                     ease: 'power2.out',
                 }, 0.05);
 
-                // 2. Particles gather into the name while the counter runs,
-                //    so 100% is the moment the name is complete.
-                tl.call(introGoTo, [1, 1.8], 0.1)
-                    .to(counter, {
-                        value: 100,
-                        duration: 1.8,
-                        ease: 'power3.inOut',
-                        onUpdate: () => {
-                            const val = Math.round(counter.value);
-                            if (counterEl) {
-                                counterEl.textContent = String(val).padStart(3, '0');
-                            }
-                            let next = 0;
-                            STEP_THRESHOLDS.forEach((threshold, i) => {
-                                if (val >= threshold) next = i;
-                            });
-                            setStepIndex(next);
-                        },
-                    }, 0.1)
+                // The counter runs across the whole build-up and reaches 100%
+                // as the name lands.
+                tl.to(counter, {
+                    value: 100,
+                    duration: 2.7,
+                    ease: 'power2.inOut',
+                    onUpdate: () => {
+                        const val = Math.round(counter.value);
+                        if (counterEl) {
+                            counterEl.textContent = String(val).padStart(3, '0');
+                        }
+                        let next = 0;
+                        STEP_THRESHOLDS.forEach((threshold, i) => {
+                            if (val >= threshold) next = i;
+                        });
+                        setStepIndex(next);
+                    },
+                }, 0.1)
                     .to('.intro__progress-fill', {
                         scaleX: 1,
-                        duration: 1.8,
-                        ease: 'power3.inOut',
-                    }, 0.1)
+                        duration: 2.7,
+                        ease: 'power2.inOut',
+                    }, 0.1);
+
+                // 2. Singularity: every particle packed into one core, whose
+                //    glow swells as it charges.
+                tl.to('.intro__center-glow', {
+                    opacity: 0.9,
+                    scale: 0.55,
+                    duration: 0.8,
+                    ease: 'power2.in',
+                }, 0.1);
+
+                // 3. Big bang: the core blows apart, in every direction and
+                //    toward the viewer, with a flash and a short shake.
+                tl.addLabel('bang', 0.9)
+                    .call(introGoTo, [1, 0.9, { ease: 'outExpo', scatter: 0 }], 'bang')
+                    .to('.intro__flash', { opacity: 1, duration: 0.06, ease: 'none' }, 'bang')
+                    .to('.intro__flash', { opacity: 0, duration: 0.8, ease: 'power2.out' }, 'bang+=0.06')
+                    .set(fieldState, { shake: 1 }, 'bang')
+                    .to(fieldState, { shake: 0, duration: 0.7, ease: 'power2.out' }, 'bang')
                     .to('.intro__center-glow', {
-                        opacity: 1,
+                        opacity: 0.35,
+                        scale: 1.4,
+                        duration: 0.8,
+                        ease: 'power3.out',
+                    }, 'bang');
+
+                // 4. Chaos to order: before the blast settles, every particle
+                //    takes its own wide, crossing path back — some swinging
+                //    past the camera — and they all land as the name.
+                tl.call(introGoTo, [2, 1.5, { scatter: 0.3, arcZ: 10 }], 'bang+=0.4')
+                    .to('.intro__center-glow', {
+                        opacity: 0.8,
                         scale: 1,
                         duration: 1.2,
                         ease: 'power2.out',
-                    }, 0.4);
+                    }, 'bang+=0.7');
 
-                // 3. Center Hairline & Role Pill, once the name has settled
+                // 5. A band of light crosses the finished name
+                tl.to(fieldState, {
+                    sweep: 1,
+                    duration: 0.85,
+                    ease: 'power1.inOut',
+                }, 2.65);
+
+                // 6. Center Hairline & Role Pill
                 tl.to('.intro__rule-wrap', {
                     opacity: 1,
                     scaleX: 1,
                     duration: 0.8,
                     ease: 'expo.inOut',
-                }, 1.35)
+                }, 2.8)
                     .to('.intro__role-pill', {
                         opacity: 1,
                         y: 0,
                         duration: 0.7,
                         ease: 'power3.out',
-                    }, 1.5);
+                    }, 2.95);
 
-                // 4. Hold on the name, then clear the HUD
+                // 7. Hold on the name, then clear the HUD
                 tl.to(['.intro__role-pill', '.intro__rule-wrap', '.intro__center-glow'], {
                     opacity: 0,
                     duration: 0.35,
                     ease: 'power2.in',
-                }, 2.55)
+                }, 3.5)
                     .to(['.intro__hud-item', '.intro__skip-btn', '.intro__progress'], {
                         opacity: 0,
                         duration: 0.3,
                         ease: 'power2.in',
-                    }, 2.6);
+                    }, 3.55);
 
-                // 5. The name dissolves into the hero grid as the page reveals
-                tl.addLabel('curtain', 2.7)
+                // 8. Warp: the name breaks toward the viewer and settles into
+                //    the hero grid as the page reveals.
+                tl.addLabel('curtain', 3.7)
                     .call(fireReveal, null, 'curtain')
-                    .call(introGoTo, [2, 1.3], 'curtain')
-                    .call(fireComplete, null, 'curtain+=1.3');
+                    .call(introGoTo, [3, 1.4, { scatter: 0.25, arcZ: 38 }], 'curtain')
+                    .call(fireComplete, null, 'curtain+=1.4');
             }, rootRef);
         };
 
@@ -295,6 +335,7 @@ export default function Intro({ onReveal, onComplete }) {
                 {/* Visual backdrops */}
                 <div className="intro__spotlight" aria-hidden="true" />
                 <div className="intro__center-glow" aria-hidden="true" />
+                <div className="intro__flash" aria-hidden="true" />
 
                 {/* Top HUD: Brand & Skip */}
                 <header className="intro__header">
