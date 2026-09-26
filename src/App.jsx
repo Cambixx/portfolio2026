@@ -6,7 +6,7 @@ import { Nav } from './components/Nav';
 import { StatusBar } from './components/StatusBar';
 import ScrollCompanion from './components/ScrollCompanion';
 import DotGrid from './components/DotGrid';
-import Antigravity from './components/Antigravity';
+import ScrollField from './components/ScrollField';
 import { readPalette } from './config/palette';
 
 import { Hero } from './sections/Hero';
@@ -33,7 +33,7 @@ function App() {
     const isMobile = useIsMobile();
     // Los fondos 3D toman su color de la paleta CSS activa.
     const palette = useMemo(() => readPalette(), []);
-    const [bgType, setBgType] = useState('antigravity');
+    const [bgType, setBgType] = useState('field');
     const [showIntro, setShowIntro] = useState(true);
     // `revealed` flips when the intro curtain starts lifting so the hero can
     // animate in behind it; `showIntro` flips once the curtain has fully left.
@@ -83,7 +83,7 @@ function App() {
     }, []);
 
     const toggleBg = useCallback(
-        () => setBgType((prev) => (prev === 'dotgrid' ? 'antigravity' : 'dotgrid')),
+        () => setBgType((prev) => (prev === 'dotgrid' ? 'field' : 'dotgrid')),
         []
     );
 
@@ -108,22 +108,10 @@ function App() {
                         returnDuration={1.5}
                     />
                 ) : (
-                    <Antigravity
-                        count={isMobile ? 100 : 300}
-                        magnetRadius={6}
-                        ringRadius={7}
-                        waveSpeed={0.4}
-                        waveAmplitude={1}
-                        particleSize={1.5}
-                        lerpSpeed={0.05}
+                    <ScrollField
+                        count={isMobile ? 1800 : 4000}
+                        pointSize={isMobile ? 2.6 : 3.2}
                         color={palette.accent}
-                        autoAnimate
-                        particleVariance={1}
-                        rotationSpeed={0}
-                        depthFactor={1}
-                        pulseSpeed={3}
-                        particleShape="capsule"
-                        fieldStrength={10}
                     />
                 )}
             </div>
