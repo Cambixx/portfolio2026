@@ -28,7 +28,8 @@
         "copied": "✓ COPIADO",
         "copyTitle": "Copiar email al portapapeles",
         "linkedinTitle": "Perfil de LinkedIn",
-        "phoneTitle": "Llamar al +34 603 728 243"
+        "phoneTitle": "Llamar al +34 603 728 243",
+        "cvTitle": "Descargar CV en PDF"
     },
     "statusBar": {
         "backgroundTitle": "Cambiar fondo",
@@ -37,7 +38,9 @@
         "field": "CAMPO"
     },
     "projects": {
-        "categoriesAria": "Categorías de proyectos"
+        "categoriesAria": "Categorías de proyectos",
+        "showreelPrev": "Proyecto anterior",
+        "showreelNext": "Proyecto siguiente"
     },
     "contact": {
         "lastUpdated": "ÚLTIMA ACTUALIZACIÓN"

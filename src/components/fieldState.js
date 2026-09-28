@@ -48,3 +48,9 @@ export function introGoTo(target, duration, motion = {}) {
     fieldState.introDuration = duration;
     fieldState.introMotion = motion;
 }
+
+/** Hands the field straight to the page, for visits that play no intro. */
+export function skipIntro() {
+    fieldState.introActive = false;
+    fieldState.opacity = 1;
+}

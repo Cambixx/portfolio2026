@@ -1,10 +1,16 @@
-import { useState, useMemo } from 'react';
+import { lazy, Suspense, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { RemotionHero } from '../components/RemotionHero';
 import { SectionHeader } from '../components/SectionHeader';
 import { useContent } from '../i18n/useLanguage';
 
-export function Projects({ isMobile }) {
+// The Remotion player is the heaviest dependency on the page and sits below
+// the fold, so it loads on its own once the rest of the page is up. The
+// wrapper keeps its aspect ratio meanwhile, so nothing shifts when it lands.
+const RemotionHero = lazy(() =>
+    import('../components/RemotionHero').then((m) => ({ default: m.RemotionHero }))
+);
+
+export function Projects() {
     const data = useContent('projects');
     const ui = useContent('ui');
 
@@ -33,7 +39,9 @@ export function Projects({ isMobile }) {
             {/* Showreel */}
             <div className="showreel-container">
                 <div className="showreel-video-wrapper">
-                    <RemotionHero />
+                    <Suspense fallback={null}>
+                        <RemotionHero />
+                    </Suspense>
                 </div>
                 <div className="showreel-footer">
                     <span className="mono showreel-label">{data.showreel.label}</span>

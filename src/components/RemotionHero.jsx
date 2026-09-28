@@ -5,6 +5,7 @@ import { useContent } from '../i18n/useLanguage';
 
 export function RemotionHero() {
     const showreelData = useContent('showreel');
+    const ui = useContent('ui');
     const playerRef = useRef(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
@@ -162,19 +163,23 @@ export function RemotionHero() {
                     backdropFilter: 'blur(10px)'
                 }}>
                     <button
+                        type="button"
                         onClick={handlePrev}
+                        aria-label={ui.projects.showreelPrev}
                         className="brutal-nav-btn"
                         style={{ borderRight: '1px solid var(--border)' }}
                     >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                             <path d="M19 12H5M12 19l-7-7 7-7" />
                         </svg>
                     </button>
                     <button
+                        type="button"
                         onClick={handleNext}
+                        aria-label={ui.projects.showreelNext}
                         className="brutal-nav-btn"
                     >
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                             <path d="M5 12h14M12 5l7 7-7 7" />
                         </svg>
                     </button>

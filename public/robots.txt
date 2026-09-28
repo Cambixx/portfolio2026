@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://carlos-rabago-portfolio.netlify.app/sitemap.xml

@@ -1,13 +1,14 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { lazy, Suspense, useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import Lenis from 'lenis';
 
 import Intro from './components/Intro';
 import { Nav } from './components/Nav';
 import { StatusBar } from './components/StatusBar';
 import ScrollCompanion from './components/ScrollCompanion';
-import DotGrid from './components/DotGrid';
 import ScrollField from './components/ScrollField';
+import { skipIntro } from './components/fieldState';
 import { readPalette } from './config/palette';
+import { getIntroMode } from './config/introMode';
 
 import { Hero } from './sections/Hero';
 import { Projects } from './sections/Projects';
@@ -15,6 +16,10 @@ import { Experience } from './sections/Experience';
 import { Education } from './sections/Education';
 import { Stack } from './sections/Stack';
 import { Contact } from './sections/Contact';
+
+// The dot grid is only the alternative background behind the toggle, so it
+// is fetched the first time someone switches to it.
+const DotGrid = lazy(() => import('./components/DotGrid'));
 
 function useIsMobile(breakpoint = 768) {
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint);
@@ -34,10 +39,16 @@ function App() {
     // Los fondos 3D toman su color de la paleta CSS activa.
     const palette = useMemo(() => readPalette(), []);
     const [bgType, setBgType] = useState('field');
-    const [showIntro, setShowIntro] = useState(true);
+    const [introMode] = useState(() => {
+        const mode = getIntroMode();
+        // With no intro, the particle field starts straight on the page.
+        if (mode === 'none') skipIntro();
+        return mode;
+    });
+    const [showIntro, setShowIntro] = useState(introMode !== 'none');
     // `revealed` flips when the intro curtain starts lifting so the hero can
     // animate in behind it; `showIntro` flips once the curtain has fully left.
-    const [revealed, setRevealed] = useState(false);
+    const [revealed, setRevealed] = useState(introMode === 'none');
     const lenisRef = useRef(null);
 
     // Smooth scroll
@@ -76,6 +87,16 @@ function App() {
         }
     }, [showIntro]);
 
+    // A visit that lands on a section link skips the intro; take it there once
+    // the page has laid out (the browser's own jump runs before React renders).
+    useEffect(() => {
+        if (introMode !== 'none') return;
+        const target = document.getElementById(window.location.hash.slice(1));
+        if (!target) return;
+        const id = requestAnimationFrame(() => lenisRef.current?.scrollTo(target, { immediate: true }));
+        return () => cancelAnimationFrame(id);
+    }, [introMode]);
+
     const handleReveal = useCallback(() => setRevealed(true), []);
     const handleIntroComplete = useCallback(() => {
         setRevealed(true);
@@ -90,23 +111,25 @@ function App() {
     return (
         <main className={`app${revealed ? '' : ' app--intro'}`}>
             {showIntro && (
-                <Intro onReveal={handleReveal} onComplete={handleIntroComplete} />
+                <Intro mode={introMode} onReveal={handleReveal} onComplete={handleIntroComplete} />
             )}
 
             {/* Background layer */}
             <div className="app-bg" aria-hidden="true">
                 {bgType === 'dotgrid' ? (
-                    <DotGrid
-                        dotSize={5}
-                        gap={15}
-                        baseColor={palette.accentDim}
-                        activeColor={palette.accent}
-                        proximity={120}
-                        shockRadius={250}
-                        shockStrength={5}
-                        resistance={750}
-                        returnDuration={1.5}
-                    />
+                    <Suspense fallback={null}>
+                        <DotGrid
+                            dotSize={5}
+                            gap={15}
+                            baseColor={palette.accentDim}
+                            activeColor={palette.accent}
+                            proximity={120}
+                            shockRadius={250}
+                            shockStrength={5}
+                            resistance={750}
+                            returnDuration={1.5}
+                        />
+                    </Suspense>
                 ) : (
                     <ScrollField
                         count={isMobile ? 1800 : 4000}
@@ -123,7 +146,7 @@ function App() {
 
             <div className="app-content">
                 <Hero ready={revealed} />
-                <Projects isMobile={isMobile} />
+                <Projects />
                 <Experience />
                 <Education />
                 <Stack />

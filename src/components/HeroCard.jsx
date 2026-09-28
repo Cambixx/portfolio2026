@@ -70,10 +70,10 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                 <header className="hc-head">
                     <span className="hc-monogram" aria-hidden="true">{MONOGRAM}</span>
                     <div className="hc-id">
-                        <h3 className="hc-name">
+                        <p className="hc-name">
                             Carlos Rábago
                             <span className="hc-tag mono">{ui.heroCard.tag}</span>
-                        </h3>
+                        </p>
                         <p className="hc-role mono">{ui.heroCard.role}</p>
                     </div>
                 </header>
@@ -129,6 +129,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                             rel="noopener noreferrer"
                             className="hc-link mono"
                             title={ui.heroCard.linkedinTitle}
+                            aria-label={ui.heroCard.linkedinTitle}
                         >
                             IN
                         </a>
@@ -136,8 +137,18 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                             href={contact.social[1].url}
                             className="hc-link mono"
                             title={ui.heroCard.phoneTitle}
+                            aria-label={ui.heroCard.phoneTitle}
                         >
                             TEL
+                        </a>
+                        <a
+                            href={contact.cv.url}
+                            download
+                            className="hc-link mono"
+                            title={ui.heroCard.cvTitle}
+                            aria-label={ui.heroCard.cvTitle}
+                        >
+                            CV
                         </a>
                     </div>
                 </footer>

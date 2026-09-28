@@ -28,6 +28,7 @@
         "copied": "✓ COPIED",
         "copyTitle": "Copy email to clipboard",
         "linkedinTitle": "LinkedIn profile",
+        "cvTitle": "Download CV (PDF, in Spanish)",
         "phoneTitle": "Call +34 603 728 243"
     },
     "statusBar": {
@@ -37,7 +38,9 @@
         "field": "FIELD"
     },
     "projects": {
-        "categoriesAria": "Project categories"
+        "categoriesAria": "Project categories",
+        "showreelPrev": "Previous project",
+        "showreelNext": "Next project"
     },
     "contact": {
         "lastUpdated": "LAST UPDATED"

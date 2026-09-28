@@ -54,6 +54,14 @@ export function Contact() {
                                     {link.path}
                                 </a>
                             ))}
+                            <a
+                                href={data.cv.url}
+                                download
+                                className="mono brutal-tag contact-social-link"
+                            >
+                                <span aria-hidden="true">↓</span>
+                                {data.cv.label}
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -24,5 +24,9 @@
             "url": "https://maps.google.com/?q=Madrid,Spain",
             "path": "Madrid, España — 28018"
         }
-    ]
+    ],
+    "cv": {
+        "url": "/cv/carlos-rabago-cv-es.pdf",
+        "label": "Download CV (PDF · Spanish)"
+    }
 }

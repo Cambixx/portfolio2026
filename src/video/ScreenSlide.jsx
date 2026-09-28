@@ -166,6 +166,7 @@ export const ScreenSlide = ({
                         no matter what image URL you feed it via showreel.json */}
                     <Img
                         src={imageSrc}
+                        alt={title}
                         style={{
                             width: '100%',
                             height: '100%',
