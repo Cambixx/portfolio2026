@@ -70,10 +70,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
                 <header className="hc-head">
                     <span className="hc-monogram" aria-hidden="true">{MONOGRAM}</span>
                     <div className="hc-id">
-                        <p className="hc-name">
-                            Carlos Rábago
-                            <span className="hc-tag mono">{ui.heroCard.tag}</span>
-                        </p>
+                        <p className="hc-name">Carlos Rábago</p>
                         <p className="hc-role mono">{ui.heroCard.role}</p>
                     </div>
                 </header>

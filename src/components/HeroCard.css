@@ -77,16 +77,6 @@
     line-height: 1.1;
 }
 
-.hc-tag {
-    font-size: 0.54rem;
-    letter-spacing: 0.14em;
-    padding: 3px 7px;
-    border-radius: var(--radius-sm);
-    color: var(--accent-soft);
-    background: rgb(var(--accent-rgb) / 0.12);
-    white-space: nowrap;
-}
-
 .hc-role {
     font-size: 0.7rem;
     line-height: 1.5;
