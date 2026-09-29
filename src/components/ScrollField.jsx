@@ -382,8 +382,8 @@ const fragmentShader = /* glsl */ `
         if (r > 0.5) discard;
         float soft = smoothstep(0.5, 0.38, r);
         vec3 color = mix(uColorDim, uColor, vIntensity);
-        // The sweep runs the accent up to a warm white.
-        color = mix(color, vec3(1.0, 0.94, 0.82), vSweep * 0.85);
+        // The sweep runs the accent up to white, tinted by the accent.
+        color = mix(color, mix(vec3(1.0), uColor, 0.2), vSweep * 0.85);
         gl_FragColor = vec4(color, vAlpha * soft * mix(0.55, 1.0, vIntensity) * uOpacity);
         // THREE.Color stores the palette in linear space; without converting
         // back the amber accent renders as a darker red-orange.
@@ -473,9 +473,10 @@ function Field({ count, pointSize, color, reduceMotion }) {
 
     const uniforms = useMemo(() => {
         const hot = new THREE.Color(color);
-        // Dim colour: the accent pulled most of the way to a warm grey, so the
-        // field away from the cursor stays visible without competing.
-        const dim = hot.clone().lerp(new THREE.Color('#5c574a'), 0.6);
+        // Dim colour: the accent pulled most of the way to a neutral grey, so the
+        // field away from the cursor stays visible without competing. Neutral,
+        // not warm, so it sits under any palette without turning muddy.
+        const dim = hot.clone().lerp(new THREE.Color('#58585c'), 0.6);
         return {
             uTo: { value: 0 },
             uTransition: { value: 1 },

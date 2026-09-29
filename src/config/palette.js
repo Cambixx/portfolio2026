@@ -15,10 +15,10 @@
  * Si cambias `data-palette` en index.html, actualiza también estos valores.
  */
 export const DEFAULT_PALETTE = {
-    accent: '#FF9F1C',
-    accentSoft: '#FFC266',
-    accentLight: '#FFC77B',
-    accentDim: '#3C270A',
+    accent: '#E6E6E6',
+    accentSoft: '#F4F4F4',
+    accentLight: '#FFFFFF',
+    accentDim: '#262626',
 };
 
 export function readPalette() {

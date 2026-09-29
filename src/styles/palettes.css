@@ -7,7 +7,7 @@
 
        <html lang="es" data-palette="cyan">
 
-   Sin atributo se usa la primera (oro), que es la activa.
+   Sin atributo se usa la primera (oro). La activa es la de index.html.
 
    Tokens de cada paleta:
      --accent        color principal: bordes, barras, rellenos sólidos
@@ -19,7 +19,16 @@
 
    Los tres últimos se derivan del principal; si añades una paleta nueva
    mantén el mismo juego de seis tokens.
+
+   Opcional:
+     --title-gradient  relleno de la segunda línea del título del hero.
+                       Por defecto, un degradado del propio acento; una
+                       paleta puede sustituirlo (ver Monocromo).
    ═══════════════════════════════════════════════════════════ */
+
+:root {
+    --title-gradient: linear-gradient(100deg, var(--accent-soft) 0%, var(--accent) 45%, var(--accent-light) 100%);
+}
 
 /* Oro Editorial */
 :root,
@@ -90,4 +99,57 @@
     --accent-dim: #043022;
     --accent-ink: #050505;
     --accent-rgb: 0 200 138;
+}
+
+/* Azul Eléctrico */
+:root[data-palette="blue"] {
+    --accent: #4D7CFF;
+    --accent-soft: #93B2FF;
+    --accent-light: #B8CCFF;
+    --accent-dim: #0E1A3A;
+    --accent-ink: #050505;
+    --accent-rgb: 77 124 255;
+}
+
+/* Lima Ácida */
+:root[data-palette="acid"] {
+    --accent: #D2FF3A;
+    --accent-soft: #E4FF8A;
+    --accent-light: #EEFFB0;
+    --accent-dim: #2A330B;
+    --accent-ink: #050505;
+    --accent-rgb: 210 255 58;
+}
+
+/* Iris */
+:root[data-palette="iris"] {
+    --accent: #8C7BFF;
+    --accent-soft: #B9AEFF;
+    --accent-light: #CFC7FF;
+    --accent-dim: #1D1740;
+    --accent-ink: #050505;
+    --accent-rgb: 140 123 255;
+}
+
+/* Monocromo
+   Sin color de acento: la jerarquía sale del tono y de la textura. El título
+   se rellena con un cromado (grises que suben a blanco) cuyo brillo recorre
+   la palabra despacio, y el verde de "disponible" queda como la única señal
+   de color de todo el sitio. El gris más oscuro del cromado mantiene 6:1
+   sobre el fondo. */
+:root[data-palette="mono"] {
+    --accent: #E6E6E6;
+    --accent-soft: #F4F4F4;
+    --accent-light: #FFFFFF;
+    --accent-dim: #262626;
+    --accent-ink: #050505;
+    --accent-rgb: 230 230 230;
+    --title-gradient: linear-gradient(
+        100deg,
+        #8C8C8C 0%,
+        #FFFFFF 28%,
+        #A8A8A8 52%,
+        #F2F2F2 76%,
+        #8C8C8C 100%
+    );
 }
