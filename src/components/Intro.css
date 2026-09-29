@@ -208,9 +208,9 @@
     row-gap: 0.02em;
     font-family: var(--font-display);
     font-size: clamp(2.8rem, 10.4vw, 8.6rem);
-    /* Invisible layout guide for the particles (see Intro.jsx). A heavy
-       weight gives the sampler enough filled pixels to read as letters. */
-    font-weight: 700;
+    /* Invisible layout guide for the particles (see Intro.jsx). Same light
+       weight as the site's titles, so the name reads as the same typeface. */
+    font-weight: 300;
     opacity: 0;
     line-height: 0.92;
     letter-spacing: -0.035em;

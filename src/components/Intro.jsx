@@ -21,8 +21,9 @@ function sampleName(root) {
     const bg = document.querySelector('.app-bg')?.getBoundingClientRect();
     if (!chars.length || !bg?.width) return null;
 
-    // Half resolution: one sample per 2×2 CSS px is dense enough for the points.
-    const scale = 0.5;
+    // Full resolution: the light weight's thin strokes break up if sampled
+    // any coarser. A one-off pass over the viewport, so the cost is negligible.
+    const scale = 1;
     const w = Math.ceil(bg.width * scale);
     const h = Math.ceil(bg.height * scale);
     const canvas = document.createElement('canvas');

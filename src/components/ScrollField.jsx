@@ -142,110 +142,254 @@ function name(n, W, H, rnd, points) {
     return out;
 }
 
-function grid(n, W, H, rnd) {
+// ── Shape toolkit ── the section formations are assembled from simple parts
+// (strokes, rings, patches, balls). Each part says how big it is and how to
+// draw one random point on it; points are shared out in proportion to size,
+// so every part of a figure reads at the same density.
+
+const TAU = Math.PI * 2;
+
+function jitter(p, t, rnd) {
+    if (!t) return p;
+    return [p[0] + (rnd() - 0.5) * t, p[1] + (rnd() - 0.5) * t, p[2] + (rnd() - 0.5) * t];
+}
+
+/** Straight stroke from a to b, `t` thick. */
+function seg(a, b, t = 0) {
+    return {
+        size: Math.hypot(b[0] - a[0], b[1] - a[1], b[2] - a[2]),
+        at(rnd) {
+            const k = rnd();
+            return jitter([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k], t, rnd);
+        },
+    };
+}
+
+/** Stroke drawn as dashes `dash` long with equal gaps. */
+function dashed(a, b, dash, t = 0) {
+    const line = seg(a, b, t);
+    return {
+        size: line.size / 2,
+        at(rnd) {
+            let k;
+            do k = rnd(); while (((k * line.size) / dash) % 2 > 1);
+            const p = [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k];
+            return jitter(p, t, rnd);
+        },
+    };
+}
+
+/** Ellipse around c, radii rx/ry along the unit vectors u/v. */
+function ellipse(c, rx, ry, u = [1, 0, 0], v = [0, 1, 0], t = 0) {
+    return {
+        // Ramanujan's approximation of the perimeter.
+        size: Math.PI * (3 * (rx + ry) - Math.sqrt((3 * rx + ry) * (rx + 3 * ry))),
+        at(rnd) {
+            const a = rnd() * TAU;
+            const x = Math.cos(a) * rx, y = Math.sin(a) * ry;
+            return jitter([c[0] + u[0] * x + v[0] * y, c[1] + u[1] * x + v[1] * y, c[2] + u[2] * x + v[2] * y], t, rnd);
+        },
+    };
+}
+
+const ring = (c, r, u, v, t) => ellipse(c, r, r, u, v, t);
+
+/** Filled rectangle, sparser than a stroke by `density`. */
+function patch(c, w, h, u = [1, 0, 0], v = [0, 1, 0], density = 0.15) {
+    return {
+        size: w * h * density,
+        at(rnd) {
+            const x = (rnd() - 0.5) * w, y = (rnd() - 0.5) * h;
+            return [c[0] + u[0] * x + v[0] * y, c[1] + u[1] * x + v[1] * y, c[2] + u[2] * x + v[2] * y];
+        },
+    };
+}
+
+/** Solid ball; `size` is given directly, as a stroke length's worth of points. */
+function ball(c, r, size) {
+    return {
+        size,
+        at(rnd) {
+            const d = r * Math.cbrt(rnd());
+            const th = rnd() * TAU, ph = Math.acos(2 * rnd() - 1);
+            return [c[0] + d * Math.sin(ph) * Math.cos(th), c[1] + d * Math.sin(ph) * Math.sin(th), c[2] + d * Math.cos(ph)];
+        },
+    };
+}
+
+/** Rectangle outline in the xy plane. */
+const frame = (cx, cy, w, h, t) => {
+    const x0 = cx - w / 2, x1 = cx + w / 2, y0 = cy - h / 2, y1 = cy + h / 2;
+    return [
+        seg([x0, y0, 0], [x1, y0, 0], t), seg([x1, y0, 0], [x1, y1, 0], t),
+        seg([x1, y1, 0], [x0, y1, 0], t), seg([x0, y1, 0], [x0, y0, 0], t),
+    ];
+};
+
+/** Wraps a part so its points are passed through `f`. */
+const moved = (part, f) => ({ size: part.size, at: (rnd) => f(part.at(rnd)) });
+
+/** Shares `n` points across `parts`; a part with `fraction` takes that share outright. */
+function build(n, rnd, parts) {
     const out = new Float32Array(n * 3);
-    const w = W * 1.08, h = H * 1.08;
-    const rows = Math.max(1, Math.round(Math.sqrt(n / (w / h))));
-    const cols = Math.ceil(n / rows);
-    for (let i = 0; i < n; i++) {
-        const c = i % cols, r = Math.floor(i / cols);
-        out[i * 3] = -w / 2 + ((c + 0.5) / cols) * w;
-        out[i * 3 + 1] = h / 2 - ((r + 0.5) / rows) * h;
-        out[i * 3 + 2] = (rnd() - 0.5) * 0.6;
-    }
+    const fixed = parts.reduce((sum, p) => sum + (p.fraction ? Math.round(n * p.fraction) : 0), 0);
+    const total = parts.reduce((sum, p) => sum + (p.fraction ? 0 : p.size), 0);
+    let i = 0;
+    parts.forEach((part, index) => {
+        let share = part.fraction ? Math.round(n * part.fraction) : Math.round(((n - fixed) * part.size) / total);
+        if (index === parts.length - 1) share = n - i;
+        for (let k = 0; k < share && i < n; k++, i++) out.set(part.at(rnd), i * 3);
+    });
     return out;
 }
 
-function sphere(n, W, H, rnd) {
-    const out = new Float32Array(n * 3);
-    const R = Math.min(W, H) * 0.36;
-    const golden = Math.PI * (3 - Math.sqrt(5));
-    for (let i = 0; i < n; i++) {
-        const y = 1 - ((i + 0.5) / n) * 2;
-        const r = Math.sqrt(1 - y * y);
-        const phi = i * golden;
-        const k = R * (1 + (rnd() - 0.5) * 0.04);
-        out[i * 3] = Math.cos(phi) * r * k;
-        out[i * 3 + 1] = y * k;
-        out[i * 3 + 2] = Math.sin(phi) * r * k;
-    }
-    return out;
+// ── Section formations ──
+
+/** Hero — `</>`, the frontend mark, with a little ambient dust around it. */
+function codeMark(n, W, H, rnd) {
+    const u = Math.min(H * 0.2, (W * 0.8) / 3.8);
+    const t = u * 0.09;
+    const p = (x, y) => [x * u, y * u, 0];
+    return build(n, rnd, [
+        seg(p(-0.9, 0.85), p(-1.85, 0), t), seg(p(-1.85, 0), p(-0.9, -0.85), t),
+        seg(p(0.4, 1.05), p(-0.4, -1.05), t),
+        seg(p(0.9, 0.85), p(1.85, 0), t), seg(p(1.85, 0), p(0.9, -0.85), t),
+        {
+            fraction: 0.12,
+            at: (r) => [(r() - 0.5) * W * 1.2, (r() - 0.5) * H * 1.2, -12 + r() * 22],
+        },
+    ]);
 }
 
-function rings(n, W, H, rnd) {
-    const out = new Float32Array(n * 3);
-    const R = Math.min(W, H);
-    const L = Math.min(W * 0.55, R * 1.2);
-    const rad = R * 0.22;
-    // Ring count follows the space available: 16 rings on a narrow phone
-    // overlap four deep and read as a cloud. This keeps desktop at 16 and
-    // gives every width the same spacing relative to the ring size.
-    const K = MathUtils.clamp(Math.round(L / (rad * 0.28)) + 1, 6, 16);
-    const perRing = Math.ceil(n / K);
-    for (let i = 0; i < n; i++) {
-        const k = i % K, j = Math.floor(i / K);
-        const theta = (j / perRing) * Math.PI * 2;
-        const r = rad * (1 + (rnd() - 0.5) * 0.04);
-        out[i * 3] = -L / 2 + (k / (K - 1)) * L;
-        out[i * 3 + 1] = Math.cos(theta) * r;
-        out[i * 3 + 2] = Math.sin(theta) * r;
-    }
-    return rotate(out, 0.12, 0.35);
+/** Projects — a fanned gallery of three browser windows. */
+function gallery(n, W, H, rnd) {
+    const portrait = W < H;
+    const ww = portrait ? W * 0.72 : Math.min((W * 0.9) / 2.3, H * 0.55);
+    const wh = ww * 0.62;
+    const t = ww * 0.006;
+    const x0 = -ww / 2, y0 = -wh / 2, y1 = wh / 2;
+    const bar = y1 - wh * 0.13;
+
+    const windowParts = () => [
+        ...frame(0, 0, ww, wh, t),
+        seg([x0, bar, 0], [-x0, bar, 0], t),
+        ...[0, 1, 2].map((k) => ring([x0 + ww * (0.05 + k * 0.045), (bar + y1) / 2, 0], ww * 0.012)),
+        // Page: a hero banner, two lines of copy and a row of cards.
+        patch([0, bar - wh * 0.2, 0], ww * 0.86, wh * 0.22, undefined, undefined, 0.35),
+        seg([x0 + ww * 0.07, bar - wh * 0.42, 0], [x0 + ww * 0.55, bar - wh * 0.42, 0], t),
+        seg([x0 + ww * 0.07, bar - wh * 0.5, 0], [x0 + ww * 0.4, bar - wh * 0.5, 0], t),
+        ...[0, 1, 2].flatMap((k) => frame(x0 + ww * (0.2 + k * 0.3), y0 + wh * 0.17, ww * 0.24, wh * 0.2, t)),
+    ];
+
+    const place = ({ x = 0, y = 0, z = 0, ry = 0, k = 1 }) => ([px, py, pz]) => {
+        const c = Math.cos(ry), s = Math.sin(ry);
+        return [(px * c + pz * s) * k + x, py * k + y, (-px * s + pz * c) * k + z];
+    };
+    const layout = portrait
+        ? // Tall screens: a diagonal cascade, each window a step back.
+          [
+              { x: ww * 0.1, y: wh * 0.75, z: -8, k: 0.85 },
+              { x: 0, y: 0, z: -3, k: 0.92 },
+              { x: -ww * 0.1, y: -wh * 0.75, z: 2 },
+          ]
+        : // Like a carousel: the front window in full, smaller ones set back
+          // and turned toward it on either side, overlapping only at the edges.
+          [
+              { x: -ww * 0.98, z: -8, ry: 0.6, k: 0.78 },
+              { x: ww * 0.98, z: -8, ry: -0.6, k: 0.78 },
+              { x: 0, z: 3 },
+          ];
+    const parts = layout.flatMap((spot) => windowParts().map((part) => moved(part, place(spot))));
+    return rotate(build(n, rnd, parts), 0.08, 0);
 }
 
-function helix(n, W, H, rnd) {
-    const out = new Float32Array(n * 3);
-    const R = Math.min(W, H);
-    const L = Math.min(W * 0.62, R * 1.35);
-    const rad = R * 0.17;
-    const turns = 2.5;
-    const half = Math.ceil(n / 2);
-    for (let i = 0; i < n; i++) {
-        const s = Math.floor(i / 2) / half;
-        const base = s * turns * Math.PI * 2;
-        const x = -L / 2 + s * L;
-        let y, z;
-        if (rnd() < 0.18) {
-            // Rung between the two strands at the same point along the axis.
-            const u = rnd();
-            const ya = Math.cos(base) * rad, za = Math.sin(base) * rad;
-            y = ya + (-ya - ya) * u;
-            z = za + (-za - za) * u;
-        } else {
-            const a = base + (i % 2) * Math.PI;
-            y = Math.cos(a) * rad;
-            z = Math.sin(a) * rad;
-        }
-        out[i * 3] = x;
-        out[i * 3 + 1] = y + (rnd() - 0.5) * 0.4;
-        out[i * 3 + 2] = z + (rnd() - 0.5) * 0.4;
-    }
-    return rotate(out, 0.2, 0.15);
+/** Experience — a rising career line: five milestones, Iberia to Doers DF. */
+function trajectory(n, W, H, rnd) {
+    const L = Math.min(W * (W < H ? 0.82 : 0.62), H * 1.15);
+    const h = L * 0.42;
+    const t = L * 0.004;
+    const base = -0.55 * h;
+    const nodes = [-0.4, -0.28, -0.12, 0.1, 0.42].map((y, i) => [(-0.5 + i * 0.25) * L, y * h, 0]);
+
+    const parts = [seg([-0.54 * L, base, 0], [0.54 * L, base, 0], t)];
+    nodes.forEach((node, i) => {
+        if (i > 0) parts.push(seg(nodes[i - 1], node, t));
+        const last = i === nodes.length - 1;
+        parts.push(ring(node, L * (last ? 0.03 : 0.02), undefined, undefined, t));
+        parts.push(ball(node, L * 0.006, L * 0.03));
+        parts.push(dashed([node[0], node[1] - L * 0.025, 0], [node[0], base, 0], L * 0.012, t));
+        // The current role gets a halo.
+        if (last) parts.push(ring(node, L * 0.055, undefined, undefined, t));
+    });
+    return rotate(build(n, rnd, parts), 0.12, -0.22);
 }
 
-function cube(n, W, H, rnd) {
-    const out = new Float32Array(n * 3);
-    const S = Math.min(W, H) * 0.44;
-    const corners = [];
-    for (const x of [-0.5, 0.5]) for (const y of [-0.5, 0.5]) for (const z of [-0.5, 0.5]) corners.push([x, y, z]);
-    // The 12 edges join corners that differ on exactly one axis.
-    const edges = [];
-    for (let a = 0; a < 8; a++) {
-        for (let b = a + 1; b < 8; b++) {
-            const diff = corners[a].reduce((d, v, k) => d + (v !== corners[b][k]), 0);
-            if (diff === 1) edges.push([corners[a], corners[b]]);
-        }
-    }
-    for (let i = 0; i < n; i++) {
-        const [a, b] = edges[i % 12];
-        // Every third pass along the edges goes to a half-size inner cube.
-        const scale = Math.floor(i / 12) % 3 === 0 ? 0.5 : 1;
-        const u = rnd();
-        for (let k = 0; k < 3; k++) {
-            out[i * 3 + k] = (a[k] + (b[k] - a[k]) * u) * S * scale + (rnd() - 0.5) * 0.25;
-        }
-    }
-    return rotate(out, 0.6, 0.75);
+/** Education — a graduation cap, tassel and all. */
+function gradCap(n, W, H, rnd) {
+    const a = Math.min(H * 0.5, W * 0.5);
+    const hA = a / 2;
+    const t = a * 0.006;
+    const slab = -a * 0.035;
+    const flat = [[1, 0, 0], [0, 0, 1]];
+    const r = a * 0.3;
+    const corner = (y) => [[-hA, y, -hA], [hA, y, -hA], [hA, y, hA], [-hA, y, hA]];
+    const outline = (y) => corner(y).map((c, i, all) => seg(c, all[(i + 1) % 4], t));
+    const knot = [hA * 0.92, a * 0.01, hA * 0.92];
+
+    const parts = [
+        ...outline(0),
+        ...outline(slab),
+        patch([0, 0, 0], a, a, ...flat, 0.04),
+        // Skull: a band under the board and its lower rim. The upper rim is
+        // hidden by the board on a real cap, and drawn here it reads as clutter.
+        ring([0, -a * 0.36, 0], r * 0.95, ...flat, t),
+        {
+            size: TAU * r * a * 0.32 * 0.08,
+            at: (rr) => {
+                const ang = rr() * TAU, y = slab - rr() * a * 0.325;
+                return [Math.cos(ang) * r, y, Math.sin(ang) * r];
+            },
+        },
+        ball([0, a * 0.02, 0], a * 0.03, a * 0.1),
+        // Tassel: cord to the corner, a drop, then the fringe.
+        seg([0, a * 0.02, 0], knot, t),
+        seg(knot, [knot[0], -a * 0.42, knot[2]], t),
+        {
+            size: a * 0.5,
+            at: (rr) => {
+                const k = rr(), ang = rr() * TAU, rad = k * a * 0.065;
+                return [knot[0] + Math.cos(ang) * rad, -a * 0.42 - k * a * 0.16, knot[2] + Math.sin(ang) * rad];
+            },
+        },
+    ];
+
+    const out = build(n, rnd, parts);
+    // Lift it so the cap, not the board, sits at the centre of the screen.
+    for (let i = 1; i < out.length; i += 3) out[i] += a * 0.15;
+    // Turn the board into a diamond, then tip its far edge up just enough to
+    // show the top: seen from higher, the skull shows through the board.
+    return rotate(rotate(out, 0, Math.PI / 4), 0.26, 0);
+}
+
+/** Stack — an atom of three tilted orbits around a nucleus (React's mark). */
+function atom(n, W, H, rnd) {
+    const Ro = Math.min(W * 0.4, H * 0.42);
+    const ro = Ro * 0.36;
+    const t = Ro * 0.008;
+    const tilt = 0.35;
+    const parts = [ball([0, 0, 0], Ro * 0.09, Ro * 1.1)];
+    [0, 1, 2].forEach((k) => {
+        const a = (k * Math.PI) / 3;
+        const u = [Math.cos(a), Math.sin(a), 0];
+        // Each orbit leans a little out of the screen plane, so they cross in depth.
+        const v = [-Math.sin(a) * Math.cos(tilt), Math.cos(a) * Math.cos(tilt), Math.sin(tilt) * (k % 2 ? 1 : -1)];
+        parts.push(ellipse([0, 0, 0], Ro, ro, u, v, t));
+        // An electron riding each orbit.
+        const e = 0.6 + k * 2.1;
+        const pos = [0, 1, 2].map((i) => u[i] * Math.cos(e) * Ro + v[i] * Math.sin(e) * ro);
+        parts.push(ball(pos, Ro * 0.03, Ro * 0.12));
+    });
+    return rotate(build(n, rnd, parts), 0.25, 0.2);
 }
 
 function wave(n, W, H) {
@@ -264,7 +408,7 @@ function wave(n, W, H) {
     return rotate(out, 0.55, 0);
 }
 
-const FORMATIONS = [dust, core, burst, name, grid, sphere, rings, helix, cube, wave];
+const FORMATIONS = [dust, core, burst, name, codeMark, gallery, trajectory, gradCap, atom, wave];
 const DUST_FORMATION = 0;
 const NAME_FORMATION = 3;
 // Formation shown at the top of the page, where the intro hands over.
