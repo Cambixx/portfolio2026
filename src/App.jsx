@@ -111,7 +111,7 @@ function App() {
     return (
         <main className={`app${revealed ? '' : ' app--intro'}`}>
             {showIntro && (
-                <Intro mode={introMode} onReveal={handleReveal} onComplete={handleIntroComplete} />
+                <Intro onReveal={handleReveal} onComplete={handleIntroComplete} />
             )}
 
             {/* Background layer */}

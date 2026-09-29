@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { useContent } from '../i18n/useLanguage';
 import { fieldState, introGoTo, setNamePoints } from './fieldState';
-import { markIntroSeen } from '../config/introMode';
 import './Intro.css';
 
 const NAME = 'CARLOS RÁBAGO';
@@ -75,7 +74,7 @@ function sampleName(root) {
  * - Madrid local time clock HUD + live coordinates
  * - Precision hairline crosshairs & specialization badge
  */
-export default function Intro({ mode = 'full', onReveal, onComplete }) {
+export default function Intro({ onReveal, onComplete }) {
     const ui = useContent('ui');
     const rootRef = useRef(null);
     const tlRef = useRef(null);
@@ -147,8 +146,7 @@ export default function Intro({ mode = 'full', onReveal, onComplete }) {
 
         const start = () => {
             if (cancelled || !rootRef.current) return;
-            // The short intro never shows the name, so there is nothing to sample.
-            if (mode === 'full') setNamePoints(sampleName(rootRef.current));
+            setNamePoints(sampleName(rootRef.current));
 
             ctx = gsap.context(() => {
                 const counter = { value: 0 };
@@ -165,7 +163,6 @@ export default function Intro({ mode = 'full', onReveal, onComplete }) {
                     completed.current = true;
                     // The field is on the hero grid now; hand it to the scroll.
                     fieldState.introActive = false;
-                    markIntroSeen();
                     onComplete?.();
                 };
 
@@ -307,10 +304,6 @@ export default function Intro({ mode = 'full', onReveal, onComplete }) {
                     .call(fireReveal, null, 'curtain')
                     .call(introGoTo, [4, 1.4, { scatter: 0.25, arcZ: 38 }], 'curtain')
                     .call(fireComplete, null, 'curtain+=1.4');
-
-                // Returning visitors go straight to the closing warp: the dust
-                // flies into the hero grid as the page reveals.
-                if (mode === 'short') tl.play('curtain');
             }, rootRef);
         };
 
@@ -357,7 +350,7 @@ export default function Intro({ mode = 'full', onReveal, onComplete }) {
             // page fully visible and at rest.
             Object.assign(fieldState, { opacity: 1, charge: 0, shake: 0, sweep: 0 });
         };
-    }, [mode, onReveal, onComplete]);
+    }, [onReveal, onComplete]);
 
     const handleSkipClick = (e) => {
         e.stopPropagation();
