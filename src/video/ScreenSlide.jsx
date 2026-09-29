@@ -62,14 +62,14 @@ export const ScreenSlide = ({
                 <rect width="100%" height="100%" fill="url(#grid)" />
             </svg>
 
-            {/* Background Accent Gradient */}
+            {/* Background Accent Gradient. A radial gradient rather than a
+                blurred circle: a 150px blur is re-rasterised on every repaint,
+                the gradient gives the same soft halo for free. */}
             <div style={{
                 position: 'absolute',
-                width: '600px',
-                height: '600px',
-                background: 'rgb(var(--accent-rgb) / 0.15)',
-                filter: 'blur(150px)',
-                borderRadius: '50%',
+                width: '1200px',
+                height: '1200px',
+                background: 'radial-gradient(circle, rgb(var(--accent-rgb) / 0.15) 0%, rgb(var(--accent-rgb) / 0.06) 30%, transparent 60%)',
                 opacity: entrance
             }} />
 
@@ -159,6 +159,9 @@ export const ScreenSlide = ({
                     overflow: 'hidden',
                     position: 'relative',
                     transform: `translateY(${translateY}px) scale(${imgScale})`,
+                    // Own layer: the float runs on the compositor instead of
+                    // repainting the filtered image every frame.
+                    willChange: 'transform',
                     // The background helps prevent a blank flash before the image loads
                     background: 'rgba(255,255,255,0.02)',
                 }}>

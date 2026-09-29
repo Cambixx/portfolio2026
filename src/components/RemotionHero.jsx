@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo } from 'react';
 import { Player } from '@remotion/player';
 import { WalkthroughComposition } from '../video/WalkthroughComposition';
 import { useContent } from '../i18n/useLanguage';
@@ -7,10 +7,12 @@ export function RemotionHero() {
     const showreelData = useContent('showreel');
     const ui = useContent('ui');
     const playerRef = useRef(null);
+    const containerRef = useRef(null);
     const [activeIndex, setActiveIndex] = useState(0);
 
-    // Calculate frame mapped data for navigation
-    const projectsWithFrames = showreelData.reduce((acc, current, i) => {
+    // Calculate frame mapped data for navigation. Memoised so the frame
+    // listener below is not re-subscribed on every render.
+    const projectsWithFrames = useMemo(() => showreelData.reduce((acc, current, i) => {
         const startFrame = i === 0 ? 0 : acc[i - 1].endFrame;
         acc.push({
             ...current,
@@ -18,6 +20,24 @@ export function RemotionHero() {
             endFrame: startFrame + current.duration
         });
         return acc;
+    }, []), [showreelData]);
+
+    // Remotion re-renders the player when inputProps changes identity.
+    const inputProps = useMemo(() => ({ slides: showreelData }), [showreelData]);
+
+    // Autoplay would otherwise keep rendering the composition 30 times a
+    // second for the whole visit, on screen or not. Pause it while it is out
+    // of view; it resumes on the same frame.
+    useEffect(() => {
+        const el = containerRef.current;
+        const player = playerRef.current;
+        if (!el || !player) return;
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) player.play();
+            else player.pause();
+        });
+        observer.observe(el);
+        return () => observer.disconnect();
     }, []);
 
     const totalDuration = projectsWithFrames[projectsWithFrames.length - 1]?.endFrame || 360;
@@ -68,6 +88,7 @@ export function RemotionHero() {
 
     return (
         <div
+            ref={containerRef}
             className="showcase-container"
             style={{
                 width: '100%',
@@ -85,7 +106,7 @@ export function RemotionHero() {
                 ref={playerRef}
                 component={WalkthroughComposition}
                 durationInFrames={totalDuration}
-                inputProps={{ slides: showreelData }}
+                inputProps={inputProps}
                 compositionWidth={1920}
                 compositionHeight={1080}
                 fps={30}

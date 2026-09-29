@@ -6,3 +6,11 @@
   from = "/*"
   to = "/index.html"
   status = 200
+
+# Files under /assets carry a content hash in their name, so a given URL never
+# changes: browsers can keep them for a year without revalidating. index.html
+# is left on Netlify's default (always revalidated) so new deploys show up.
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

@@ -1,7 +1,7 @@
 [
     {
         "id": "budweiser",
-        "imageSrc": "/projects/budweiser.jpg",
+        "imageSrc": "/projects/budweiser.webp",
         "title": "BUDWEISER ESPAÑA",
         "client": "Budweiser",
         "year": "2024",
@@ -11,7 +11,7 @@
     },
     {
         "id": "corona",
-        "imageSrc": "/projects/corona-web.jpg",
+        "imageSrc": "/projects/corona-web.webp",
         "title": "CERVEZA CORONA",
         "client": "Corona",
         "year": "2023",
@@ -21,7 +21,7 @@
     },
     {
         "id": "nexho",
-        "imageSrc": "/projects/nexho-web.jpg",
+        "imageSrc": "/projects/nexho-web.webp",
         "title": "NEXHO — MAHOU",
         "client": "Mahou",
         "year": "2023",

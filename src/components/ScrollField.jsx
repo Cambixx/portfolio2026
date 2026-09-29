@@ -1,6 +1,19 @@
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from 'react';
-import * as THREE from 'three';
+import { useEffect, useRef } from 'react';
+// Named imports only: they let the bundler drop the parts of three the field
+// never touches (a namespace import would keep the whole library).
+import {
+    BufferAttribute,
+    BufferGeometry,
+    Color,
+    DynamicDrawUsage,
+    MathUtils,
+    PerspectiveCamera,
+    Points,
+    Scene,
+    ShaderMaterial,
+    Vector2,
+    WebGLRenderer,
+} from 'three';
 import { DEFAULT_PALETTE } from '../config/palette';
 import { fieldState, getNamePoints, subscribeNamePoints } from './fieldState';
 
@@ -167,7 +180,7 @@ function rings(n, W, H, rnd) {
     // Ring count follows the space available: 16 rings on a narrow phone
     // overlap four deep and read as a cloud. This keeps desktop at 16 and
     // gives every width the same spacing relative to the ring size.
-    const K = THREE.MathUtils.clamp(Math.round(L / (rad * 0.28)) + 1, 6, 16);
+    const K = MathUtils.clamp(Math.round(L / (rad * 0.28)) + 1, 6, 16);
     const perRing = Math.ceil(n / K);
     for (let i = 0; i < n; i++) {
         const k = i % K, j = Math.floor(i / K);
@@ -391,100 +404,52 @@ const fragmentShader = /* glsl */ `
     }
 `;
 
+const FOV = 35;
+const CAMERA_Z = 50;
+// Above 1.5× the extra pixels cost fill rate without making points sharper.
+const MAX_PIXEL_RATIO = 1.5;
+
+/** Visible size, in world units, of the plane at z = 0 for a given aspect. */
+function viewportAt(aspect) {
+    const height = 2 * Math.tan(MathUtils.degToRad(FOV / 2)) * CAMERA_Z;
+    return { width: height * aspect, height };
+}
+
 /**
- * Viewport in world units, ignoring small height changes. Mobile browsers
- * resize the viewport as the address bar shows and hides mid-scroll; rebuilding
- * every formation on each of those would stutter.
+ * Builds the particle field inside `host` with three.js directly: a single
+ * points object needs no scene graph library, and a plain render loop keeps
+ * per-frame work to what the field actually does. Returns controls for the
+ * React wrapper below.
  */
-function useStableViewport() {
-    const viewport = useThree((s) => s.viewport);
-    const [stable, setStable] = useState({ width: viewport.width, height: viewport.height });
+function createField(host, { count, pointSize, color, reduceMotion, namePoints: initialNamePoints }) {
+    const renderer = new WebGLRenderer({ antialias: false, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
+    const canvas = renderer.domElement;
+    canvas.style.cssText = 'display:block;width:100%;height:100%;pointer-events:none';
+    host.appendChild(canvas);
 
-    // Adjusted during render rather than in an effect, so a real resize
-    // re-renders once instead of painting a stale frame first.
-    const widthChanged = Math.abs(viewport.width - stable.width) > 0.01;
-    const heightChanged = Math.abs(viewport.height - stable.height) / stable.height > 0.15;
-    if (widthChanged || heightChanged) setStable({ width: viewport.width, height: viewport.height });
+    const scene = new Scene();
+    const camera = new PerspectiveCamera(FOV, 1, 0.1, 1000);
+    camera.position.set(0, 0, CAMERA_Z);
 
-    return stable;
-}
-
-/** Document-space tops of every section after the first, kept current. */
-function useSectionBoundaries() {
-    const boundaries = useRef([]);
-
-    useEffect(() => {
-        const measure = () => {
-            boundaries.current = SECTION_IDS.slice(1)
-                .map((id) => document.getElementById(id))
-                .filter(Boolean)
-                .map((el) => el.getBoundingClientRect().top + window.scrollY);
-        };
-        measure();
-        // Content height shifts with image loads and language switches.
-        const ro = new ResizeObserver(measure);
-        ro.observe(document.body);
-        window.addEventListener('resize', measure);
-        return () => {
-            ro.disconnect();
-            window.removeEventListener('resize', measure);
-        };
-    }, []);
-
-    return boundaries;
-}
-
-function Field({ count, pointSize, color, reduceMotion }) {
-    const pointsRef = useRef(null);
-    const materialRef = useRef(null);
-    // The running transition: target formation, timing, how it travels, and
-    // the eased progress last drawn (needed to capture positions on a retarget).
-    const transition = useRef({ geometry: null, to: 0, start: 0, duration: 0, eased: 1, motion: SECTION_MOTION });
-    const mouse = useRef(new THREE.Vector2());
-    const sway = useRef(0);
-    const focus = useRef(0);
-    const lit = useRef(1);
-    const depth = useRef(1);
-    const { width, height } = useStableViewport();
-    const boundaries = useSectionBoundaries();
-    const gl = useThree((s) => s.gl);
-    const namePoints = useSyncExternalStore(subscribeNamePoints, getNamePoints);
-
-    const geometry = useMemo(() => {
-        const geo = new THREE.BufferGeometry();
-        FORMATIONS.forEach((build, i) => {
-            const positions = build(count, width, height, mulberry32(i + 1), namePoints);
-            geo.setAttribute(`p${i}`, new THREE.BufferAttribute(positions, 3));
-        });
-        const start = new THREE.BufferAttribute(new Float32Array(count * 3), 3);
-        start.setUsage(THREE.DynamicDrawUsage);
-        geo.setAttribute('aStart', start);
-        // three needs a `position` attribute for bounds; the shader never reads it.
-        geo.setAttribute('position', geo.getAttribute('p0'));
-
-        const rnd = mulberry32(99);
-        const extra = new Float32Array(count * 4);
-        for (let i = 0; i < extra.length; i++) extra[i] = rnd();
-        geo.setAttribute('aRnd', new THREE.BufferAttribute(extra, 4));
-        return geo;
-    }, [count, width, height, namePoints]);
-
-    useEffect(() => () => geometry.dispose(), [geometry]);
-
-    const uniforms = useMemo(() => {
-        const hot = new THREE.Color(color);
-        // Dim colour: the accent pulled most of the way to a neutral grey, so the
-        // field away from the cursor stays visible without competing. Neutral,
-        // not warm, so it sits under any palette without turning muddy.
-        const dim = hot.clone().lerp(new THREE.Color('#58585c'), 0.6);
-        return {
+    const hot = new Color(color);
+    // Dim colour: the accent pulled most of the way to a neutral grey, so the
+    // field away from the cursor stays visible without competing. Neutral,
+    // not warm, so it sits under any palette without turning muddy.
+    const dim = hot.clone().lerp(new Color('#58585c'), 0.6);
+    const material = new ShaderMaterial({
+        vertexShader,
+        fragmentShader,
+        transparent: true,
+        depthWrite: false,
+        uniforms: {
             uTo: { value: 0 },
             uTransition: { value: 1 },
             uScatter: { value: 0 },
             uArcZ: { value: 0 },
             uTime: { value: 0 },
             uSize: { value: pointSize },
-            uPixelRatio: { value: gl.getPixelRatio() },
+            uPixelRatio: { value: renderer.getPixelRatio() },
             uMotion: { value: reduceMotion ? 0 : 1 },
             uFocus: { value: 0 },
             uLit: { value: 1 },
@@ -493,42 +458,108 @@ function Field({ count, pointSize, color, reduceMotion }) {
             uOpacity: { value: 1 },
             uSweep: { value: 0 },
             uSweepOn: { value: 0 },
-            uPointer: { value: new THREE.Vector2() },
-            uMouse: { value: new THREE.Vector2() },
+            uPointer: { value: new Vector2() },
+            uMouse: { value: new Vector2() },
             uParallax: { value: reduceMotion ? 0 : 0.06 },
             uHighlightRadius: { value: 1 },
             uColor: { value: hot },
             uColorDim: { value: dim },
-        };
-    }, [color, pointSize, reduceMotion, gl]);
+        },
+    });
+    const u = material.uniforms;
 
-    useFrame((state, delta) => {
-        const points = pointsRef.current;
-        const material = materialRef.current;
-        if (!points || !material) return;
-        const now = state.clock.elapsedTime;
-        const tr = transition.current;
-        const start = geometry.getAttribute('aStart');
+    const points = new Points(new BufferGeometry(), material);
+    points.frustumCulled = false;
+    scene.add(points);
 
+    // ── State ──────────────────────────────────────────────────────────
+    // `view` is the viewport the formations were built for; it only follows
+    // real resizes (see resize()), not the mobile address bar.
+    let view = { width: 1, height: 1 };
+    let namePoints = initialNamePoints;
+    // The running transition: target formation, timing, how it travels, and
+    // the eased progress last drawn (needed to capture positions on a retarget).
+    const tr = { to: 0, start: 0, duration: 0, eased: 1, motion: SECTION_MOTION };
+    const pointer = new Vector2();
+    const mouse = new Vector2();
+    let sway = 0, focus = 0, lit = 1, depth = 1;
+    let boundaries = [];
+
+    // ── Geometry ───────────────────────────────────────────────────────
+    function rebuildGeometry() {
+        const geo = new BufferGeometry();
+        FORMATIONS.forEach((build, i) => {
+            const positions = build(count, view.width, view.height, mulberry32(i + 1), namePoints);
+            geo.setAttribute(`p${i}`, new BufferAttribute(positions, 3));
+        });
         // A rebuilt geometry starts settled on the current formation.
-        if (tr.geometry !== geometry) {
-            start.array.set(geometry.getAttribute(`p${tr.to}`).array);
-            start.needsUpdate = true;
-            Object.assign(tr, { geometry, eased: 1, duration: 0 });
-        }
+        const start = new BufferAttribute(geo.getAttribute(`p${tr.to}`).array.slice(), 3);
+        start.setUsage(DynamicDrawUsage);
+        geo.setAttribute('aStart', start);
+        // three needs a `position` attribute for bounds; the shader never reads it.
+        geo.setAttribute('position', geo.getAttribute('p0'));
 
-        // Which formation should be on screen, how fast, and how to travel.
+        const rnd = mulberry32(99);
+        const extra = new Float32Array(count * 4);
+        for (let i = 0; i < extra.length; i++) extra[i] = rnd();
+        geo.setAttribute('aRnd', new BufferAttribute(extra, 4));
+
+        points.geometry.dispose();
+        points.geometry = geo;
+        tr.eased = 1;
+        tr.duration = 0;
+    }
+
+    // ── Sizing ─────────────────────────────────────────────────────────
+    function resize() {
+        const w = host.clientWidth || window.innerWidth;
+        const h = host.clientHeight || window.innerHeight;
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, MAX_PIXEL_RATIO));
+        renderer.setSize(w, h, false);
+        u.uPixelRatio.value = renderer.getPixelRatio();
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+
+        // Mobile browsers resize the viewport as the address bar shows and
+        // hides mid-scroll; rebuilding every formation on each of those
+        // would stutter, so small height changes are ignored.
+        const next = viewportAt(w / h);
+        const widthChanged = Math.abs(next.width - view.width) > 0.01;
+        const heightChanged = Math.abs(next.height - view.height) / view.height > 0.15;
+        if (widthChanged || heightChanged) {
+            view = next;
+            rebuildGeometry();
+        }
+    }
+
+    // Document-space tops of every section after the first. Content height
+    // shifts with image loads and language switches, hence the observer.
+    function measureSections() {
+        boundaries = SECTION_IDS.slice(1)
+            .map((id) => document.getElementById(id))
+            .filter(Boolean)
+            .map((el) => el.getBoundingClientRect().top + window.scrollY);
+    }
+
+    const onPointerMove = (e) => {
+        pointer.set((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1);
+    };
+
+    // ── Frame ──────────────────────────────────────────────────────────
+    function update(now, delta) {
+        const { width, height } = view;
+
+        // Which formation should be on screen, and how fast.
         let desired;
         let duration;
-        let motion = SECTION_MOTION;
         if (fieldState.introActive) {
             desired = fieldState.introTarget;
             duration = fieldState.introDuration;
-            motion = { ...SECTION_MOTION, ...fieldState.introMotion };
         } else {
             // The section whose area holds a line 60% down the viewport.
             const line = window.scrollY + window.innerHeight * 0.6;
-            desired = SITE_OFFSET + boundaries.current.filter((top) => top <= line).length;
+            desired = SITE_OFFSET;
+            for (const top of boundaries) if (top <= line) desired++;
             duration = SECTION_TRANSITION;
         }
         if (reduceMotion) duration = 0;
@@ -537,9 +568,11 @@ function Field({ count, pointSize, color, reduceMotion }) {
             // Capture where every point is right now, with the same offsets
             // the shader applies, as the new start: a change mid-flight then
             // carries on without a jump.
+            const geo = points.geometry;
+            const start = geo.getAttribute('aStart');
             const s = start.array;
-            const to = geometry.getAttribute(`p${tr.to}`).array;
-            const rnd = geometry.getAttribute('aRnd').array;
+            const to = geo.getAttribute(`p${tr.to}`).array;
+            const rnd = geo.getAttribute('aRnd').array;
             const e = tr.eased;
             const arc = Math.sin(e * Math.PI);
             const scatter = tr.motion.scatter * width * arc;
@@ -551,13 +584,13 @@ function Field({ count, pointSize, color, reduceMotion }) {
                 s[k + 2] += (to[k + 2] - s[k + 2]) * e + rnd[i * 4] * lift;
             }
             start.needsUpdate = true;
+            const motion = fieldState.introActive ? { ...SECTION_MOTION, ...fieldState.introMotion } : SECTION_MOTION;
             Object.assign(tr, { to: desired, start: now, duration, motion });
         }
 
-        const raw = tr.duration > 0 ? THREE.MathUtils.clamp((now - tr.start) / tr.duration, 0, 1) : 1;
+        const raw = tr.duration > 0 ? MathUtils.clamp((now - tr.start) / tr.duration, 0, 1) : 1;
         tr.eased = (EASINGS[tr.motion.ease] ?? EASINGS.inOutCubic)(raw);
 
-        const u = material.uniforms;
         u.uTo.value = tr.to;
         u.uTransition.value = tr.eased;
         u.uScatter.value = tr.motion.scatter * width;
@@ -566,21 +599,21 @@ function Field({ count, pointSize, color, reduceMotion }) {
         u.uHighlightRadius.value = Math.min(width, height) * 0.65;
 
         // The cursor, eased, drives both the highlight and the parallax.
-        mouse.current.x = THREE.MathUtils.damp(mouse.current.x, state.pointer.x, 4, delta);
-        mouse.current.y = THREE.MathUtils.damp(mouse.current.y, state.pointer.y, 4, delta);
-        u.uPointer.value.copy(mouse.current);
-        u.uMouse.value.set((mouse.current.x * width) / 2, (mouse.current.y * height) / 2);
+        mouse.x = MathUtils.damp(mouse.x, pointer.x, 4, delta);
+        mouse.y = MathUtils.damp(mouse.y, pointer.y, 4, delta);
+        u.uPointer.value.copy(mouse);
+        u.uMouse.value.set((mouse.x * width) / 2, (mouse.y * height) / 2);
 
         // Intro-only looks: fully lit, depth-scaled points, a tighter name.
         const inIntro = tr.to < SITE_OFFSET;
-        focus.current = THREE.MathUtils.damp(focus.current, tr.to === NAME_FORMATION ? 1 : 0, 3, delta);
+        focus = MathUtils.damp(focus, tr.to === NAME_FORMATION ? 1 : 0, 3, delta);
         // Dust is faint; points heat up as they gather and stay lit until the grid.
         const litTarget = tr.to === DUST_FORMATION ? 0.3 : inIntro ? 1 : 0;
-        lit.current = THREE.MathUtils.damp(lit.current, litTarget, 2.5, delta);
-        depth.current = THREE.MathUtils.damp(depth.current, inIntro ? 1 : 0, 2, delta);
-        u.uFocus.value = focus.current;
-        u.uLit.value = lit.current;
-        u.uDepth.value = depth.current;
+        lit = MathUtils.damp(lit, litTarget, 2.5, delta);
+        depth = MathUtils.damp(depth, inIntro ? 1 : 0, 2, delta);
+        u.uFocus.value = focus;
+        u.uLit.value = lit;
+        u.uDepth.value = depth;
         u.uCharge.value = fieldState.charge;
         u.uOpacity.value = fieldState.opacity;
 
@@ -591,49 +624,82 @@ function Field({ count, pointSize, color, reduceMotion }) {
 
         // Gentle sway for the shapes with depth; the flat ones stay square.
         const swayTarget = !reduceMotion && DEPTH_FORMATIONS.has(tr.to) ? 1 : 0;
-        sway.current = THREE.MathUtils.damp(sway.current, swayTarget, 2, delta);
-        points.rotation.y = sway.current * Math.sin(now * 0.15) * 0.3;
-        points.rotation.x = sway.current * Math.sin(now * 0.11) * 0.12;
+        sway = MathUtils.damp(sway, swayTarget, 2, delta);
+        points.rotation.y = sway * Math.sin(now * 0.15) * 0.3;
+        points.rotation.x = sway * Math.sin(now * 0.11) * 0.12;
 
         // Impact shake, decayed by the intro.
         const shake = fieldState.shake * 0.5;
         points.position.set((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake, 0);
-    });
+    }
 
-    return (
-        <points ref={pointsRef} geometry={geometry} frustumCulled={false}>
-            <shaderMaterial
-                ref={materialRef}
-                vertexShader={vertexShader}
-                fragmentShader={fragmentShader}
-                uniforms={uniforms}
-                transparent
-                depthWrite={false}
-            />
-        </points>
-    );
+    let rafId = 0;
+    let t0 = -1;
+    let last = 0;
+    function frame(ms) {
+        rafId = requestAnimationFrame(frame);
+        if (t0 < 0) t0 = last = ms;
+        // Capped so a return from a background tab eases in rather than jumps.
+        const delta = Math.min((ms - last) / 1000, 0.1);
+        last = ms;
+        update((ms - t0) / 1000, delta);
+        renderer.render(scene, camera);
+    }
+
+    // ── Start ──────────────────────────────────────────────────────────
+    resize();
+    measureSections();
+    const hostObserver = new ResizeObserver(resize);
+    hostObserver.observe(host);
+    const contentObserver = new ResizeObserver(measureSections);
+    contentObserver.observe(document.body);
+    window.addEventListener('resize', measureSections);
+    window.addEventListener('pointermove', onPointerMove, { passive: true });
+    rafId = requestAnimationFrame(frame);
+
+    return {
+        setNamePoints(next) {
+            namePoints = next;
+            rebuildGeometry();
+        },
+        dispose() {
+            cancelAnimationFrame(rafId);
+            hostObserver.disconnect();
+            contentObserver.disconnect();
+            window.removeEventListener('resize', measureSections);
+            window.removeEventListener('pointermove', onPointerMove);
+            points.geometry.dispose();
+            material.dispose();
+            renderer.dispose();
+            renderer.forceContextLoss();
+            canvas.remove();
+        },
+    };
 }
 
+/** React wrapper: owns the host element and the field's lifetime. */
 export default function ScrollField({
     count = 4000,
     pointSize = 4,
     color = DEFAULT_PALETTE.accent,
 }) {
-    const reduceMotion = useMemo(
-        () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-        []
-    );
+    const hostRef = useRef(null);
 
-    return (
-        <Canvas
-            dpr={[1, 1.5]}
-            camera={{ position: [0, 0, 50], fov: 35 }}
-            gl={{ antialias: false, alpha: true }}
-            style={{ pointerEvents: 'none' }}
-            eventSource={typeof document !== 'undefined' ? document.getElementById('root') : undefined}
-            eventPrefix="client"
-        >
-            <Field count={count} pointSize={pointSize} color={color} reduceMotion={reduceMotion} />
-        </Canvas>
-    );
+    useEffect(() => {
+        const field = createField(hostRef.current, {
+            count,
+            pointSize,
+            color,
+            reduceMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+            namePoints: getNamePoints(),
+        });
+        // The intro publishes the sampled name once its font is ready.
+        const unsubscribe = subscribeNamePoints(() => field.setNamePoints(getNamePoints()));
+        return () => {
+            unsubscribe();
+            field.dispose();
+        };
+    }, [count, pointSize, color]);
+
+    return <div ref={hostRef} style={{ width: '100%', height: '100%' }} />;
 }

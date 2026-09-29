@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState, useMemo } from 'react';
+import { lazy, Suspense, useEffect, useRef, useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { SectionHeader } from '../components/SectionHeader';
 import { useContent } from '../i18n/useLanguage';
@@ -10,7 +10,43 @@ const RemotionHero = lazy(() =>
     import('../components/RemotionHero').then((m) => ({ default: m.RemotionHero }))
 );
 
+/**
+ * When to mount the showreel: as it comes within 300px of the viewport, or
+ * once the browser is idle after the page has loaded, whichever is first.
+ * Its code and images then stay out of the first screen's bandwidth, yet are
+ * usually ready before anyone scrolls to it.
+ */
+function useShowreelMount(ref) {
+    const [mount, setMount] = useState(false);
+    useEffect(() => {
+        const el = ref.current;
+        if (!el || mount) return;
+        const show = () => setMount(true);
+
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) show();
+        }, { rootMargin: '300px' });
+        observer.observe(el);
+
+        const idle = window.requestIdleCallback ?? ((cb) => setTimeout(cb, 1500));
+        const cancelIdle = window.cancelIdleCallback ?? clearTimeout;
+        let idleId;
+        const onLoad = () => { idleId = idle(show); };
+        if (document.readyState === 'complete') onLoad();
+        else window.addEventListener('load', onLoad, { once: true });
+
+        return () => {
+            observer.disconnect();
+            window.removeEventListener('load', onLoad);
+            if (idleId !== undefined) cancelIdle(idleId);
+        };
+    }, [ref, mount]);
+    return mount;
+}
+
 export function Projects() {
+    const showreelRef = useRef(null);
+    const showreelMounted = useShowreelMount(showreelRef);
     const data = useContent('projects');
     const ui = useContent('ui');
 
@@ -38,10 +74,12 @@ export function Projects() {
 
             {/* Showreel */}
             <div className="showreel-container">
-                <div className="showreel-video-wrapper">
-                    <Suspense fallback={null}>
-                        <RemotionHero />
-                    </Suspense>
+                <div className="showreel-video-wrapper" ref={showreelRef}>
+                    {showreelMounted && (
+                        <Suspense fallback={null}>
+                            <RemotionHero />
+                        </Suspense>
+                    )}
                 </div>
                 <div className="showreel-footer">
                     <span className="mono showreel-label">{data.showreel.label}</span>

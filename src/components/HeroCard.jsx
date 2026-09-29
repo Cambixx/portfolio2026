@@ -5,13 +5,20 @@ import './HeroCard.css';
 
 const MONOGRAM = 'CR';
 
+// Resting pose. Constant, so re-renders (clock, copy feedback) never
+// overwrite the tilt written imperatively below.
+const REST_STYLE = {
+    transform: 'perspective(1200px) rotateX(0deg) rotateY(0deg)',
+    transition: 'transform .6s var(--ease-out)',
+};
+
 export default function HeroCard({ stats = [], coreStack = [] }) {
     const ui = useContent('ui');
     const contact = useContent('contact');
     const { lang } = useLanguage();
     const reduce = useReducedMotion();
     const cardRef = useRef(null);
-    const [tilt, setTilt] = useState({ x: 0, y: 0 });
+    const tiltFrame = useRef(0);
     const [copied, setCopied] = useState(false);
     const [currentTime, setCurrentTime] = useState('');
 
@@ -33,15 +40,34 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
     }, [lang]);
 
     // Tilt sutil en perspectiva; se anula si el usuario pide menos movimiento.
-    const handleMouseMove = (e) => {
-        if (!cardRef.current || reduce) return;
-        const rect = cardRef.current.getBoundingClientRect();
-        const rotateX = ((e.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * -4;
-        const rotateY = ((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 4;
-        setTilt({ x: rotateX, y: rotateY });
+    // Se escribe directamente en el estilo, como mucho una vez por frame:
+    // pasar por el estado re-renderizaría la tarjeta en cada mousemove.
+    const applyTilt = (x, y) => {
+        const card = cardRef.current;
+        if (!card) return;
+        card.style.transform = `perspective(1200px) rotateX(${x}deg) rotateY(${y}deg)`;
+        card.style.transition = x === 0 && y === 0 ? REST_STYLE.transition : 'transform .15s ease-out';
     };
 
-    const handleMouseLeave = () => setTilt({ x: 0, y: 0 });
+    const handleMouseMove = (e) => {
+        if (!cardRef.current || reduce) return;
+        const { clientX, clientY } = e;
+        cancelAnimationFrame(tiltFrame.current);
+        tiltFrame.current = requestAnimationFrame(() => {
+            const rect = cardRef.current.getBoundingClientRect();
+            applyTilt(
+                ((clientY - rect.top - rect.height / 2) / (rect.height / 2)) * -4,
+                ((clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 4
+            );
+        });
+    };
+
+    const handleMouseLeave = () => {
+        cancelAnimationFrame(tiltFrame.current);
+        applyTilt(0, 0);
+    };
+
+    useEffect(() => () => cancelAnimationFrame(tiltFrame.current), []);
 
     const copyEmail = () => {
         navigator.clipboard.writeText(contact.email);
@@ -60,12 +86,7 @@ export default function HeroCard({ stats = [], coreStack = [] }) {
             <article
                 ref={cardRef}
                 className="hero-card glass"
-                style={{
-                    transform: `perspective(1200px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
-                    transition: tilt.x === 0 && tilt.y === 0
-                        ? 'transform .6s var(--ease-out)'
-                        : 'transform .15s ease-out',
-                }}
+                style={REST_STYLE}
             >
                 <header className="hc-head">
                     <span className="hc-monogram" aria-hidden="true">{MONOGRAM}</span>
