@@ -371,25 +371,45 @@ function gradCap(n, W, H, rnd) {
     return rotate(rotate(out, 0, Math.PI / 4), 0.26, 0);
 }
 
-/** Stack — an atom of three tilted orbits around a nucleus (React's mark). */
-function atom(n, W, H, rnd) {
-    const Ro = Math.min(W * 0.4, H * 0.42);
-    const ro = Ro * 0.36;
-    const t = Ro * 0.008;
-    const tilt = 0.35;
-    const parts = [ball([0, 0, 0], Ro * 0.09, Ro * 1.1)];
-    [0, 1, 2].forEach((k) => {
-        const a = (k * Math.PI) / 3;
-        const u = [Math.cos(a), Math.sin(a), 0];
-        // Each orbit leans a little out of the screen plane, so they cross in depth.
-        const v = [-Math.sin(a) * Math.cos(tilt), Math.cos(a) * Math.cos(tilt), Math.sin(tilt) * (k % 2 ? 1 : -1)];
-        parts.push(ellipse([0, 0, 0], Ro, ro, u, v, t));
-        // An electron riding each orbit.
-        const e = 0.6 + k * 2.1;
-        const pos = [0, 1, 2].map((i) => u[i] * Math.cos(e) * Ro + v[i] * Math.sin(e) * ro);
-        parts.push(ball(pos, Ro * 0.03, Ro * 0.12));
+/**
+ * Stack — the stack itself: three layers, drawn the way the layers icon is.
+ * Points hide nothing behind them, so the lower layers show only the front
+ * edges the one above would leave in view.
+ */
+function layers(n, W, H, rnd) {
+    const s = Math.min(W, H) * 0.45;
+    const hs = s / 2;
+    const rc = s * 0.1;
+    const e = hs - rc;
+    const t = s * 0.006;
+    const gap = s * 0.28;
+    const Q = Math.PI / 4;
+
+    // Rounded square in the horizontal plane at height y. Seen from its
+    // (-x, +z) corner once turned; the bends run counter-clockwise from +x.
+    const bend = (cx, cz, y, from, to) => ({
+        size: rc * (to - from),
+        at: (r) => {
+            const a = from + r() * (to - from);
+            return jitter([cx + Math.cos(a) * rc, y, cz + Math.sin(a) * rc], t, r);
+        },
     });
-    return rotate(build(n, rnd, parts), 0.25, 0.2);
+    const plate = (y) => [
+        seg([-e, y, -hs], [e, y, -hs], t), seg([hs, y, -e], [hs, y, e], t),
+        seg([e, y, hs], [-e, y, hs], t), seg([-hs, y, e], [-hs, y, -e], t),
+        bend(e, e, y, 0, 2 * Q), bend(-e, e, y, 2 * Q, 4 * Q),
+        bend(-e, -e, y, 4 * Q, 6 * Q), bend(e, -e, y, 6 * Q, 8 * Q),
+        patch([0, y, 0], s, s, [1, 0, 0], [0, 0, 1], 0.05),
+    ];
+    // Front half only: from the right-hand bend, round the near corner, to the left-hand one.
+    const chevron = (y) => [
+        bend(e, e, y, Q, 2 * Q), seg([e, y, hs], [-e, y, hs], t),
+        bend(-e, e, y, 2 * Q, 4 * Q),
+        seg([-hs, y, e], [-hs, y, -e], t), bend(-e, -e, y, 4 * Q, 5 * Q),
+    ];
+
+    const parts = [...plate(gap), ...chevron(0), ...chevron(-gap)];
+    return rotate(rotate(build(n, rnd, parts), 0, Q), 0.5, 0);
 }
 
 function wave(n, W, H) {
@@ -408,7 +428,7 @@ function wave(n, W, H) {
     return rotate(out, 0.55, 0);
 }
 
-const FORMATIONS = [dust, core, burst, name, codeMark, gallery, trajectory, gradCap, atom, wave];
+const FORMATIONS = [dust, core, burst, name, codeMark, gallery, trajectory, gradCap, layers, wave];
 const DUST_FORMATION = 0;
 const NAME_FORMATION = 3;
 // Formation shown at the top of the page, where the intro hands over.
