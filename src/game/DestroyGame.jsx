@@ -3,6 +3,7 @@ import { useContent } from '../i18n/useLanguage';
 import { rasterizePage } from './rasterize';
 import { createGame, WEAPONS } from './engine';
 import { createSfx } from './sfx';
+import { paintIcon } from './sprites';
 import './DestroyGame.css';
 
 /**
@@ -22,6 +23,8 @@ export default function DestroyGame({ onReady, onExit }) {
     const [weapon, setWeapon] = useState(0);
     const [muted, setMuted] = useState(false);
     const [hint, setHint] = useState(true);
+    const [paused, setPaused] = useState(false);
+    const resumeRef = useRef(null);
 
     useEffect(() => {
         const level = rasterizePage(document.querySelector('.app-content'));
@@ -42,6 +45,7 @@ export default function DestroyGame({ onReady, onExit }) {
             },
             onWeapon: setWeapon,
             onMute: setMuted,
+            onPause: setPaused,
             onExit,
         });
         gameRef.current = game;
@@ -56,6 +60,12 @@ export default function DestroyGame({ onReady, onExit }) {
             gameRef.current = null;
         };
     }, [onReady, onExit]);
+
+    // The pause menu takes the keyboard while it is open, and hands it back.
+    useEffect(() => {
+        if (paused) resumeRef.current?.focus();
+        else rootRef.current?.focus();
+    }, [paused]);
 
     // HUD buttons act, then hand the keyboard back to the game.
     const act = (e, fn) => {
@@ -92,9 +102,12 @@ export default function DestroyGame({ onReady, onExit }) {
                     {muted ? t.soundOff : t.soundOn}
                     <kbd>M</kbd>
                 </button>
+                <button type="button" className="game__btn" onClick={(e) => act(e, (game) => game.pause())}>
+                    {t.pause}
+                    <kbd>ESC</kbd>
+                </button>
                 <button type="button" className="game__btn" onClick={(e) => act(e, (game) => game.exit())}>
                     {t.exit}
-                    <kbd>ESC</kbd>
                 </button>
             </div>
 
@@ -108,12 +121,37 @@ export default function DestroyGame({ onReady, onExit }) {
                         onClick={(e) => act(e, (game) => game.setWeapon(i))}
                     >
                         <span className="game__key">{i + 1}</span>
+                        <canvas className="game__icon" aria-hidden="true" ref={(el) => el && paintIcon(el, w.id)} />
                         {t.weapons[i]}
                     </button>
                 ))}
             </div>
 
-            <div className={`game__panel game__hint mono${hint ? '' : ' is-hidden'}`}>
+            {paused && (
+                <div className="game__pause" role="dialog" aria-modal="true" aria-labelledby="game-pause-title">
+                    <div className="game__panel game__pause-card mono">
+                        <p id="game-pause-title" className="game__pause-title">{t.paused}</p>
+                        <div className="game__controls">
+                            {t.controls.map(([key, label]) => (
+                                <span key={key}>
+                                    <kbd>{key}</kbd> {label}
+                                </span>
+                            ))}
+                        </div>
+                        <div className="game__pause-actions">
+                            <button ref={resumeRef} type="button" className="game__btn game__btn--primary" onClick={() => gameRef.current?.resume()}>
+                                {t.resume}
+                                <kbd>ESC</kbd>
+                            </button>
+                            <button type="button" className="game__btn" onClick={() => gameRef.current?.exit()}>
+                                {t.exit}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className={`game__panel game__hint mono${hint && !paused ? '' : ' is-hidden'}`}>
                 {t.controls.map(([key, label]) => (
                     <span key={key}>
                         <kbd>{key}</kbd> {label}

@@ -88,13 +88,24 @@
                 "Saltar · mantén para el propulsor"
             ],
             [
+                "S",
+                "Atravesar plataformas finas"
+            ],
+            [
                 "CLIC",
                 "Disparar · clic derecho: granada"
             ],
             [
-                "1–4",
+                "1–4 · Q E",
                 "Cambiar de arma (o rueda)"
+            ],
+            [
+                "ESC",
+                "Pausa"
             ]
-        ]
+        ],
+        "pause": "PAUSA",
+        "paused": "PAUSA",
+        "resume": "CONTINUAR"
     }
 }

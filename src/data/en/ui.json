@@ -88,13 +88,24 @@
                 "Jump · hold for the jetpack"
             ],
             [
+                "S",
+                "Drop through thin platforms"
+            ],
+            [
                 "CLICK",
                 "Shoot · right click: grenade"
             ],
             [
-                "1–4",
+                "1–4 · Q E",
                 "Switch weapon (or wheel)"
+            ],
+            [
+                "ESC",
+                "Pause"
             ]
-        ]
+        ],
+        "pause": "PAUSE",
+        "paused": "PAUSED",
+        "resume": "RESUME"
     }
 }

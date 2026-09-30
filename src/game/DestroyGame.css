@@ -158,8 +158,14 @@
 
 .game__slot {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
     min-width: 92px;
-    padding: 18px 12px 8px;
+    min-height: 74px;
+    padding: 16px 12px 8px;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
     background: transparent;
@@ -178,6 +184,17 @@
     border-color: var(--border-strong);
     background: rgba(255, 255, 255, 0.08);
     color: var(--white);
+}
+
+.game__icon {
+    image-rendering: pixelated;
+    opacity: 0.55;
+    transition: opacity 0.2s ease;
+}
+
+.game__slot:hover .game__icon,
+.game__slot.is-on .game__icon {
+    opacity: 1;
 }
 
 .game__key {
@@ -212,4 +229,59 @@
 
 .app--game .app-bg {
     opacity: 0.45;
+}
+
+/* Pause */
+.game__pause {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    display: grid;
+    place-items: center;
+    background: rgba(5, 5, 5, 0.55);
+    animation: game-fade 0.2s ease-out;
+}
+
+@keyframes game-fade {
+    from { opacity: 0; }
+}
+
+.game__pause-card {
+    position: relative;
+    display: grid;
+    gap: 22px;
+    width: min(420px, calc(100% - 32px));
+    padding: 24px;
+}
+
+.game__pause-title {
+    font-size: 1.1rem;
+    letter-spacing: 0.3em;
+    color: var(--white);
+}
+
+.game__controls {
+    display: grid;
+    gap: 10px;
+}
+
+.game__pause-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.game__btn--primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-ink);
+}
+
+.game__btn--primary:hover {
+    background: var(--accent-light);
+    border-color: var(--accent-light);
+}
+
+.game__btn--primary kbd {
+    border-color: rgba(0, 0, 0, 0.3);
+    color: var(--accent-ink);
 }
