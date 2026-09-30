@@ -2,7 +2,7 @@ import { motion } from 'motion/react';
 import { useContent } from '../i18n/useLanguage';
 import './StatusBar.css';
 
-export function StatusBar({ bgType, onToggleBg, isMobile, ready }) {
+export function StatusBar({ bgType, onToggleBg, isMobile, ready, onPlay, playing }) {
     const site = useContent('site');
     const ui = useContent('ui');
     const nextMode = bgType === 'dotgrid' ? ui.statusBar.field : ui.statusBar.grid;
@@ -29,6 +29,20 @@ export function StatusBar({ bgType, onToggleBg, isMobile, ready }) {
                 <span className="status-bar__toggle-icon" aria-hidden="true">◐</span>
                 {!isMobile && <span>{bgType === 'dotgrid' ? ui.statusBar.grid : ui.statusBar.field}</span>}
             </button>
+
+            {onPlay && (
+                <button
+                    type="button"
+                    onClick={onPlay}
+                    disabled={playing}
+                    className="status-bar__toggle status-bar__play mono"
+                    title={ui.game.playTitle}
+                    aria-label={ui.game.playAria}
+                >
+                    <span className="status-bar__toggle-icon" aria-hidden="true">⌖</span>
+                    <span>{ui.game.play}</span>
+                </button>
+            )}
         </motion.div>
     );
 }

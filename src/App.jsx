@@ -20,6 +20,11 @@ import { Contact } from './sections/Contact';
 // The dot grid is only the alternative background behind the toggle, so it
 // is fetched the first time someone switches to it.
 const DotGrid = lazy(() => import('./components/DotGrid'));
+// The mini-game is only fetched when someone presses play.
+const DestroyGame = lazy(() => import('./game/DestroyGame'));
+
+// The game needs a keyboard and a mouse.
+const canPlay = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
 function useIsMobile(breakpoint = 768) {
     const [isMobile, setIsMobile] = useState(() => window.innerWidth < breakpoint);
@@ -50,6 +55,8 @@ function App() {
     // animate in behind it; `showIntro` flips once the curtain has fully left.
     const [revealed, setRevealed] = useState(introMode === 'none');
     const lenisRef = useRef(null);
+    // 'off' → 'loading' (chunk + rasterising) → 'on' (page hidden under the level)
+    const [game, setGame] = useState('off');
 
     // Smooth scroll
     useEffect(() => {
@@ -103,13 +110,26 @@ function App() {
         setShowIntro(false);
     }, []);
 
+    const startGame = useCallback(() => {
+        lenisRef.current?.stop();
+        setGame('loading');
+    }, []);
+    const handleGameReady = useCallback(() => setGame('on'), []);
+    const handleGameExit = useCallback((scrollTop) => {
+        setGame('off');
+        const lenis = lenisRef.current;
+        lenis?.start();
+        // Come back wherever the camera ended up.
+        lenis?.scrollTo(scrollTop, { immediate: true, force: true });
+    }, []);
+
     const toggleBg = useCallback(
         () => setBgType((prev) => (prev === 'dotgrid' ? 'field' : 'dotgrid')),
         []
     );
 
     return (
-        <main className={`app${revealed ? '' : ' app--intro'}`}>
+        <main className={`app${revealed ? '' : ' app--intro'}${game === 'on' ? ' app--game' : ''}`}>
             {showIntro && (
                 <Intro onReveal={handleReveal} onComplete={handleIntroComplete} />
             )}
@@ -158,7 +178,15 @@ function App() {
                 onToggleBg={toggleBg}
                 isMobile={isMobile}
                 ready={revealed}
+                onPlay={!isMobile && canPlay() ? startGame : undefined}
+                playing={game !== 'off'}
             />
+
+            {game !== 'off' && (
+                <Suspense fallback={null}>
+                    <DestroyGame onReady={handleGameReady} onExit={handleGameExit} />
+                </Suspense>
+            )}
         </main>
     );
 }

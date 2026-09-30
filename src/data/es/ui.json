@@ -60,5 +60,41 @@
             "COMPILANDO SHADERS",
             "LISTO PARA LA EXPERIENCIA"
         ]
+    },
+    "game": {
+        "play": "DESTRUIR",
+        "playTitle": "Minijuego: destruye esta web",
+        "playAria": "Jugar: destruye esta web",
+        "aria": "Minijuego: destruye el portfolio",
+        "destroyed": "DESTRUCCIÓN",
+        "fuel": "PROPULSOR",
+        "exit": "SALIR",
+        "soundOn": "SONIDO",
+        "soundOff": "SILENCIO",
+        "weaponsAria": "Armas",
+        "weapons": [
+            "BLÁSTER",
+            "COHETE",
+            "GRANADA",
+            "LÁSER"
+        ],
+        "controls": [
+            [
+                "A D",
+                "Moverse"
+            ],
+            [
+                "ESPACIO",
+                "Saltar · mantén para el propulsor"
+            ],
+            [
+                "CLIC",
+                "Disparar · clic derecho: granada"
+            ],
+            [
+                "1–4",
+                "Cambiar de arma (o rueda)"
+            ]
+        ]
     }
 }

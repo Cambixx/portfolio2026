@@ -77,3 +77,13 @@
         font-size: 0.55rem;
     }
 }
+
+/* Sits next to the background toggle; it shares its look. */
+.status-bar__play {
+    margin-left: -8px;
+}
+
+.status-bar__play:disabled {
+    opacity: 0.5;
+    cursor: progress;
+}

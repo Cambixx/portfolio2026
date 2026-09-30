@@ -60,5 +60,41 @@
             "COMPOSING SHADERS",
             "READY FOR EXPERIENCE"
         ]
+    },
+    "game": {
+        "play": "DESTROY",
+        "playTitle": "Mini-game: destroy this site",
+        "playAria": "Play: destroy this site",
+        "aria": "Mini-game: destroy the portfolio",
+        "destroyed": "DESTRUCTION",
+        "fuel": "JETPACK",
+        "exit": "EXIT",
+        "soundOn": "SOUND",
+        "soundOff": "MUTED",
+        "weaponsAria": "Weapons",
+        "weapons": [
+            "BLASTER",
+            "ROCKET",
+            "GRENADE",
+            "LASER"
+        ],
+        "controls": [
+            [
+                "A D",
+                "Move"
+            ],
+            [
+                "SPACE",
+                "Jump · hold for the jetpack"
+            ],
+            [
+                "CLICK",
+                "Shoot · right click: grenade"
+            ],
+            [
+                "1–4",
+                "Switch weapon (or wheel)"
+            ]
+        ]
     }
 }
